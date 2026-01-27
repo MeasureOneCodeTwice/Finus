@@ -1,4 +1,4 @@
-# COMP-4350-PROJECT_NAME Team 6
+# COMP-4350-Finus Team 6
 
 #### Members:
 Roman Tebel, Jackie Mei, Deep Patel, Hoang Huy Truong, Logan Decock, Dylan Prabagaran 
