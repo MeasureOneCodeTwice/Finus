@@ -1,1 +1,1 @@
-# COMP-4350-PROJECT_NAME
+# Finus
