@@ -1,28 +1,49 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+/*
+This is to be used as a rerouter to various website pages.
+*/
 
-// broadcast to the API gate endpoint - should receive responses from all services that are set up
-async function testAPI() {
-  const response = await fetch('http://localhost:3000/api/test').then(res => res.text())
-  return response
-}
+import { Suspense, useState, lazy} from 'react'
+import './App.css'
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
+import LoadingSpinner from './components/ui/LoadingSpinner.tsx'
 
 function App() {
+  return (
+    <Router>
+      <Main />
+    </Router>
+  )
+}
+
+
+
+function Main() {
+  const location = useLocation()
+
+  return (
+    <div className="App min-h-screen bg-background">
+      {/* Conditionally render Navbar - adjust logic as needed */}
+      {location.pathname !== '/' && location.pathname !== '/login'}
+      
+      <Suspense fallback={<LoadingSpinner />}>
+        <Routes>
+          {/* <Route path="/" element={<LoginPage />} />
+          <Route path="/login" element={<LoginPage />} /> */}
+          {/* Add a 404 page */}
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </Suspense>
+    </div>
+  )
+}
+
+//default page for 404 - this can test the APIs for now
+function NotFoundPage() {
   const [count, setCount] = useState(0)
   const [response, setResponse] = useState('')
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
       <h1>Vite + React</h1>
       <div className="card">
         <button onClick={() => setCount((count) => count + 1)}>
@@ -41,6 +62,14 @@ function App() {
       </p>
     </>
   )
+}
+
+
+
+// broadcast to the API gate endpoint - should receive responses from all services that are set up
+async function testAPI() {
+  const response = await fetch('http://localhost:3000/api/test').then(res => res.text())
+  return response
 }
 
 export default App
