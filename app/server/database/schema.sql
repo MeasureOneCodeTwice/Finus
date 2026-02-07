@@ -102,23 +102,22 @@ CREATE TABLE finus.asset (
     PRIMARY KEY (id)
 );
 
+CREATE TABLE finus.investmentType(
+    type VARCHAR(50) NOT NULL,
+    PRIMARY KEY (type)
+);
+
 CREATE TABLE finus.investment (
     id           INTEGER      NOT NULL AUTO_INCREMENT,
     account_id   INTEGER      NOT NULL,
+    type         VARCHAR(50)  NOT NULL,
     name         VARCHAR(50)  NOT NULL,
     description  VARCHAR(500) NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (account_id) REFERENCES finus.financialAccount(id) ON DELETE CASCADE
+    FOREIGN KEY (account_id) REFERENCES finus.financialAccount(id) ON DELETE CASCADE,
+    FOREIGN KEY (type)       REFERENCES finus.investmentType(type)
 );
 
-CREATE TABLE finus.investmentInterestRate (
-    investment_id    INTEGER NOT NULL,
-    rate             DOUBLE  NOT NULL,
-    frequency_years  INTEGER NOT NULL,
-    frequency_months INTEGER NOT NULL,
-    PRIMARY KEY (investment_id),
-    FOREIGN KEY (investment_id) REFERENCES finus.investment(id) ON DELETE CASCADE
-);
 
 CREATE TABLE finus.investmentState (
     investment_id INTEGER NOT NULL,
@@ -129,7 +128,26 @@ CREATE TABLE finus.investmentState (
     FOREIGN KEY (investment_id) REFERENCES finus.investment(id) ON DELETE CASCADE
 );
 
+
+## Example of adding extra data
+CREATE TABLE finus.stockInvestment(
+    investment_id INTEGER     NOT NULL, 
+    symbol        VARCHAR(50) NOT NULL,
+    PRIMARY KEY (investment_id),
+    FOREIGN KEY (investment_id) REFERENCES finus.investment(id)
+);
+
+CREATE TABLE finus.fixedInterestInvestment(
+    investment_id    INTEGER NOT NULL,
+    rate             DOUBLE  NOT NULL,
+    frequency_years  INTEGER NOT NULL,
+    frequency_months INTEGER NOT NULL,
+    PRIMARY KEY (investment_id),
+    FOREIGN KEY (investment_id) REFERENCES finus.investment(id) ON DELETE CASCADE
+);
+
 #Populate lookup tables
 #INSERT INTO finus.financialAccountType    (type) VALUES ();
 #INSERT INTO finus.financialAccountSubtype (type) VALUES ();
- INSERT INTO finus.goalType                (type) VALUES ('money'), ('debt');
+INSERT  INTO finus.investmentType          (type) VALUES ('fixedInterest'), ('stock'); #These have to match table names
+INSERT  INTO finus.goalType                (type) VALUES ('money'), ('debt');
