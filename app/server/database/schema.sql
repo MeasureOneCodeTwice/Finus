@@ -103,19 +103,33 @@ CREATE TABLE finus.asset (
 );
 
 CREATE TABLE finus.investment (
-    account_id   INTEGER     NOT NULL,
-    asset_id     INTEGER     NOT NULL,
-    name         VARCHAR(50) NOT NULL,
-    quantity     INTEGER     NOT NULL  DEFAULT 1,
-    cost         INTEGER     NOT NULL,
-    last_updated DATETIME              DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (account_id, asset_id),
-    FOREIGN KEY (account_id) REFERENCES finus.financialAccount(id) ON DELETE CASCADE,
-    FOREIGN KEY (asset_id)   REFERENCES finus.asset(id)            ON DELETE CASCADE
+    id           INTEGER      NOT NULL AUTO_INCREMENT,
+    account_id   INTEGER      NOT NULL,
+    name         VARCHAR(50)  NOT NULL,
+    description  VARCHAR(500) NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (account_id) REFERENCES finus.financialAccount(id) ON DELETE CASCADE
 );
 
+CREATE TABLE finus.investmentInterestRate (
+    investment_id    INTEGER NOT NULL,
+    rate             DOUBLE  NOT NULL,
+    frequency_years  INTEGER NOT NULL,
+    frequency_months INTEGER NOT NULL,
+    PRIMARY KEY (investment_id),
+    FOREIGN KEY (investment_id) REFERENCES finus.investment(id) ON DELETE CASCADE
+);
+
+CREATE TABLE finus.investmentState (
+    investment_id INTEGER NOT NULL,
+    quantity      DOUBLE  NOT NULL DEFAULT 1,
+    total_cost    DOUBLE  NOT NULL,
+    at            DATETIME         DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (investment_id),
+    FOREIGN KEY (investment_id) REFERENCES finus.investment(id) ON DELETE CASCADE
+);
 
 #Populate lookup tables
 #INSERT INTO finus.financialAccountType    (type) VALUES ();
 #INSERT INTO finus.financialAccountSubtype (type) VALUES ();
-INSERT INTO finus.goalType                (type) VALUES ('money'), ('debt');
+ INSERT INTO finus.goalType                (type) VALUES ('money'), ('debt');
