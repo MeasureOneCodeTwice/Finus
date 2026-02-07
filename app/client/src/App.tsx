@@ -6,6 +6,9 @@ import { Suspense, useState, lazy} from 'react'
 import './App.css'
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import LoadingSpinner from './components/LoadingSpinner.tsx'
+import DashboardPage from './pages/DashboardPage.tsx'
+import Layout from './components/Layout.tsx'
+
 
 function App() {
   return (
@@ -21,19 +24,17 @@ function Main() {
   const location = useLocation()
 
   return (
-    <div className="App min-h-screen bg-background">
-      {/* Conditionally render Navbar - adjust logic as needed */}
-      {location.pathname !== '/' && location.pathname !== '/login'}
-      
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
           {/* <Route path="/" element={<LoginPage />} />
           <Route path="/login" element={<LoginPage />} /> */}
           {/* Add a 404 page */}
-          <Route path="*" element={<NotFoundPage />} />
+          <Route path="/" element={<Layout />}>
+            <Route index element={<DashboardPage />} />
+          </Route>
+          {/*<Route path="*" element={<NotFoundPage />} />*/}
         </Routes>
       </Suspense>
-    </div>
   )
 }
 
