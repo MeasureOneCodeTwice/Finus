@@ -1,0 +1,5 @@
+//shows relationship betwen user and their profiles/accounts
+export interface UserProfileLink {
+  profile_id: number;
+  account_id: number;
+}
