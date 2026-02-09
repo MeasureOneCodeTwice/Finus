@@ -1,5 +1,4 @@
 import React from 'react'
-import '../styles/navbar.css'
 function NavBar() {
     /*<div id="mySidenav" className="sidenav">
         <a href="javascript:void(0)" className="closebtn" onClick={() => {}}>&times;</a>
