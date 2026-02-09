@@ -1,5 +1,6 @@
+import { RowDataPacket } from "mysql2";
 //represents individual transaction events (spending, income, transfers)
-export interface Transaction {
+export interface Transaction extends RowDataPacket{
   id: number;
   financialAccount_id: number;
   amount: number;
