@@ -2,6 +2,7 @@ import React from 'react'
 import type { Transaction } from '@/types/Transaction'
 import { Chart, ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend  } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
+import AccountCard from '@/components/AccountCard';
 Chart.register(ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 function DashboardPage() {
    const data = {
@@ -53,26 +54,11 @@ function DashboardPage() {
       <h1 className="text-4xl font-bold mb-4">Welcome Username</h1>
       <p className="text-lg text-gray-700">Here you can view your recent transactions and manage your finances.</p>
       <section className="flex flex-row items-center justify-center gap-12 my-10">
-        <div className="flex-1 bg-[#6fa953] px-4 py-5 rounded-lg shadow-md">
-          <h2 className="text-xl text-white font-bold mb-4">Total Balance</h2>
-          <p className="text-3xl text-white font-semibold">$5,000</p>
-        </div>
-        <div className="flex-1 bg-[#1877f2] px-4 py-5 rounded-lg shadow-md">
-          <h2 className="text-xl text-white font-bold mb-4">Current Income</h2>
-          <p className="text-3xl text-white font-semibold">$5,000</p>
-        </div>
-         <div className="flex-1 bg-[#ff66c4] px-4 py-5 rounded-lg shadow-md">
-          <h2 className="text-xl text-white font-bold mb-4">Average Expenses</h2>
-          <p className="text-3xl text-white font-semibold">$100,000</p>
-        </div>
-         <div className="flex-1 bg-[#ff7924] px-4 py-5 rounded-lg shadow-md">
-          <h2 className="text-xl text-white font-bold mb-4">Current Debt</h2>
-          <p className="text-3xl text-white font-semibold">$50,000</p>
-        </div>
-         <div className="flex-1 bg-[#c8002a] px-4 py-5 rounded-lg shadow-md">
-          <h2 className="text-xl text-white font-bold mb-4">Total Savings</h2>
-          <p className="text-3xl text-white font-semibold">$100,000,000</p>
-        </div>
+        <AccountCard title="Total Balance" amount="$5,000" backgroundColor="#6fa953" />
+        <AccountCard title="Current Income" amount="$5,000" backgroundColor="#1877f2" />
+        <AccountCard title="Average Expenses" amount="$100,000" backgroundColor="#ff66c4" />
+        <AccountCard title="Current Debt" amount="$50,000" backgroundColor="#ff7924" />
+        <AccountCard title="Total Savings" amount="$100,000,000" backgroundColor="#c8002a" />
       </section>
       <section className="flex flex-row items-center justify-center gap-12 my-10">
         <div className="flex-2 bg-white p-4 rounded-lg shadow-md">
