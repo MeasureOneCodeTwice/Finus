@@ -237,7 +237,9 @@ type SignUpPageProps = {
 }
 
 function SignUpPage({ onSignup }: SignUpPageProps) {
-  const [name, setName] = useState('')
+  const [username, setUsername] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -248,11 +250,13 @@ function SignUpPage({ onSignup }: SignUpPageProps) {
     event.preventDefault()
     setErrorMessage('')
 
-    const cleanedName = name.trim()
+    const cleanedUsername = username.trim()
+    const cleanedFirstName = firstName.trim()
+    const cleanedLastName = lastName.trim()
     const normalizedEmail = email.trim().toLowerCase()
 
-    if (!cleanedName) {
-      setErrorMessage('Name is required.')
+    if (!cleanedUsername || !cleanedFirstName || !cleanedLastName) {
+      setErrorMessage('Username, first name, and last name are required.')
       return
     }
 
@@ -263,7 +267,9 @@ function SignUpPage({ onSignup }: SignUpPageProps) {
 
     setIsSubmitting(true)
     const result = await requestAuth('/api/auth/signup', {
-      name: cleanedName,
+      username: cleanedUsername,
+      firstName: cleanedFirstName,
+      lastName: cleanedLastName,
       email: normalizedEmail,
       password,
     })
@@ -288,13 +294,33 @@ function SignUpPage({ onSignup }: SignUpPageProps) {
         <p className="auth-copy">Set up your account in less than a minute.</p>
 
         <form className="auth-form" onSubmit={handleSubmit}>
-          <label htmlFor="signup-name">Full Name</label>
+          <label htmlFor="signup-username">Username</label>
           <input
-            id="signup-name"
+            id="signup-username"
             type="text"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            placeholder="Alex Patel"
+            value={username}
+            onChange={(event) => setUsername(event.target.value)}
+            placeholder="alexp"
+            required
+          />
+
+          <label htmlFor="signup-first-name">First Name</label>
+          <input
+            id="signup-first-name"
+            type="text"
+            value={firstName}
+            onChange={(event) => setFirstName(event.target.value)}
+            placeholder="Alex"
+            required
+          />
+
+          <label htmlFor="signup-last-name">Last Name</label>
+          <input
+            id="signup-last-name"
+            type="text"
+            value={lastName}
+            onChange={(event) => setLastName(event.target.value)}
+            placeholder="Patel"
             required
           />
 

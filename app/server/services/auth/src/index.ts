@@ -4,7 +4,9 @@ import { closeDatabase, createUser, findUserByEmail, type DbUser } from './db'
 import { hashPassword, validateEmail, validatePassword, verifyPassword } from './credentialUtils'
 
 type SignupBody = {
-  name?: string
+  username?: string
+  firstName?: string
+  lastName?: string
   email?: string
   password?: string
 }
@@ -46,12 +48,17 @@ function issueToken(user: DbUser): string {
 
 app.post('/api/auth/signup', async (req, res) => {
   const body = req.body as SignupBody
-  const name = body.name?.trim()
+  const username = body.username?.trim()
+  const firstName = body.firstName?.trim()
+  const lastName = body.lastName?.trim()
   const email = body.email?.trim().toLowerCase()
   const password = body.password ?? ''
 
-  if (!name || !email || !password) {
-    res.status(400).json({ ok: false, error: 'Name, email and password are required.' })
+  if (!username || !firstName || !lastName || !email || !password) {
+    res.status(400).json({
+      ok: false,
+      error: 'Username, first name, last name, email and password are required.',
+    })
     return
   }
 
@@ -75,7 +82,7 @@ app.post('/api/auth/signup', async (req, res) => {
   }
 
   const passwordHash = await hashPassword(password)
-  const user = await createUser(name, email, passwordHash)
+  const user = await createUser(username, firstName, lastName, email, passwordHash)
   const token = issueToken(user)
 
   res.status(201).json({
