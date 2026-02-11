@@ -7,13 +7,13 @@ The /api/test endpoint will try to reach every other stood up service and return
 
 */
 
+import { PORT } from '@/port';
 import express from 'express';
 // import { createProxyMiddleware } from 'http-proxy-middleware';
 import cors from 'cors';
 
 
 const app = express();
-const PORT = process.env.PORT || 8000;
 
 app.use(cors({
   origin: 'http://localhost:8080',  // vite dev server so that the client can access this API

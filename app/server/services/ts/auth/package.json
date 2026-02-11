@@ -1,0 +1,12 @@
+{
+  "name": "auth",
+  "main": "src/index.ts",
+  "dependencies": {
+    "jsonwebtoken": "^9.0.3"
+  },
+  "scripts": {
+    "dev": "bun --watch src/index.ts",
+    "build": "tsc",
+    "start": "bun dist/index.js"
+  }
+}

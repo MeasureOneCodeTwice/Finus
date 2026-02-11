@@ -1,6 +1,5 @@
 import { stmts } from "./db";
 
-const PORT = process.env.PORT || 8000;
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
