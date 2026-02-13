@@ -1,0 +1,20 @@
+{
+  "devDependencies": {
+    "@eslint/css": "^0.14.1",
+    "@eslint/js": "^10.0.1",
+    "@eslint/json": "^1.0.0",
+    "@types/bun": "latest",
+    "eslint": "^9",
+    "globals": "^17.3.0",
+    "jiti": "^2.6.1",
+    "minimatch": "5",
+    "typescript-eslint": "^8.55.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
+  }
+}

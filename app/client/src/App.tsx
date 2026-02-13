@@ -69,7 +69,7 @@ function NotFoundPage() {
 
 // broadcast to the API gate endpoint - should receive responses from all services that are set up
 async function testAPI() {
-  const response = await fetch('http://localhost:3000/api/test').then(res => res.text())
+  const response = await fetch('http://localhost:3000/health').then(res => res.text())
   return response
 }
 

@@ -1,0 +1,9 @@
+{
+  "name": "api-gateway",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "bun --watch src/index.ts",
+    "build": "tsc",
+    "start": "bun dist/index.js"
+  }
+}

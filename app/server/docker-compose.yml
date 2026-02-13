@@ -1,47 +1,66 @@
-version: '3.8'
 services:
-  # API gateway
-  api-gateway-s:
-    build: ./api-gateway-s
-    ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=development
-      - DOCKER_ENV=true
-    depends_on:
-      - auth-s
-      - user-s
-      - analytics-s
-      - market-s
-  
-  # auth service
-  auth-s:
-    build: ./auth-s
-    ports:
-      - "3001:3001"
-    environment:
-      - PORT=3001
-  
-  # user service
-  user-s:
-    build: ./user-s
-    ports:
-      - "3002:3002"
-    environment:
-      - PORT=3002
-  
-  # python analytics service
-  analytics-s:
-      build: ./analytics-s
-      ports:
-        - "3003:3003"
+
+    api-gateway:
+      build:
+        context: services/ts
+        dockerfile: api-gateway/Dockerfile
+      env_file: 
+      - path: ./default.env
       environment:
-        - PORT=3003
+        - NODE_ENV=development
+      ports:
+        - "3000:8000"
+      depends_on:
+        - auth
+        - user
+        - analytics
+        - market
+  
+    auth:
+      build: 
+        context: services/ts
+        dockerfile: auth/Dockerfile
+      env_file: 
+      - path: ./default.env
+        
+    user:
+      build:
+        context: services/ts
+        dockerfile: user/Dockerfile
+      env_file: 
+      - path: ./default.env
     
-  # python market service
-  market-s:
-    build: ./market-s
-    ports:
-      - "3004:3004"
-    environment:
-      - PORT=3004
+    analytics:
+        build: ./services/python/analytics
+        env_file: 
+        - path: ./default.env
+      
+    market:
+      build: ./services/python/market
+      env_file: 
+      - path: ./default.env
+  
+    #connect manually with `mysql -h 127.0.0.1 -P 3306 -u root -p`
+    database:
+      image: mysql:8.0-debian
+      volumes: 
+      - db_data:/var/lib/mysql
+      - ./services/database:/docker-entrypoint-initdb.d
+      secrets:
+        - db_root_password
+        - db_password
+      environment:
+        - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/db_root_password
+        - MYSQL_PASSWORD_FILE=/run/secrets/db_password
+      ports:
+        - "3306:3306"
+
+
+secrets: 
+  db_root_password: 
+    file: db_root_password.txt
+  db_password: 
+    file: db_password.txt
+
+volumes: 
+  db_data: 
