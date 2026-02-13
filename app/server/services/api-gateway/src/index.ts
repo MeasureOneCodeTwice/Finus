@@ -8,7 +8,7 @@ The /api/test endpoint will try to reach every other stood up service and return
 */
 
 import express from 'express';
-// import { createProxyMiddleware } from 'http-proxy-middleware';
+import { createProxyMiddleware } from 'http-proxy-middleware';
 import cors from 'cors';
 
 
@@ -44,3 +44,31 @@ process.on("SIGTERM", () =>  server.close());
      }
      res.json(result);
   });
+
+// Api Gateway routes to account, transaction and profiles
+app.use(
+  "/api/accounts",
+  createProxyMiddleware({
+    target: process.env.DATABASE_SERVICE_ADDR,
+    changeOrigin: true,
+    pathRewrite: { "^/api/accounts": "/accounts" }
+  })
+);
+
+app.use(
+  "/api/transactions",
+  createProxyMiddleware({
+    target: process.env.DATABASE_SERVICE_ADDR,
+    changeOrigin: true,
+    pathRewrite: { "^/api/transactions": "/transactions" }
+  })
+);
+
+app.use(
+  "/api/profiles",
+  createProxyMiddleware({
+    target: process.env.DATABASE_SERVICE_ADDR,
+    changeOrigin: true,
+    pathRewrite: { "^/api/profiles": "/profiles" }
+  })
+);
