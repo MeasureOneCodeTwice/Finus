@@ -52,12 +52,16 @@ CREATE TABLE finus.profile_goal (
 );
 
 CREATE TABLE finus.financialAccountType (
-    type VARCHAR(50) NOT NULL,
+    -- type VARCHAR(50) NOT NULL,
+    -- Note that there are other types of accounts such as joint, business, transmission, etc. This simplified set is good enough for now
+    type ENUM('savings', 'chequing', 'credit') DEFAULT 'unconfirmed',
     PRIMARY KEY (type)
 );
 
 CREATE TABLE finus.financialAccountSubtype(
-    type VARCHAR(50) NOT NULL,
+    -- type VARCHAR(50) NOT NULL,
+    -- These subtypes are really only needed for savings accounts as they can be taxed differently and might have weird rules about them
+    type ENUM('RRSP', 'TFSA', 'FHSA', 'RESP', 'RDSP') DEFAULT 'NA',
     PRIMARY KEY (type)
 );
 
