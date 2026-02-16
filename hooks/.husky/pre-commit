@@ -1,0 +1,4 @@
+#!/bin/bash
+echo "🔎 Checking files..."
+./hooks/format_ts_dir.sh app/server/services/ts
+./hooks/format_ts_dir.sh app/client

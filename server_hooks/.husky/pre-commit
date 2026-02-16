@@ -1,3 +1,0 @@
-#!/bin/bash
-./server_hooks/format_ts_dir.sh app/server/services/ts
-./server_hooks/format_ts_dir.sh app/client

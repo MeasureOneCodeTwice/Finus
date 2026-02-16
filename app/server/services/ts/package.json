@@ -1,7 +1,7 @@
 {
   "scripts": {
     "format": "bun prettier --write \"**/src/*.ts|**/*.ts\"",
-    "prepare": "cd ../../../../ && husky server_hooks/.husky"
+    "prepare": "cd ../../../../ && husky hooks/.husky"
   },
   "devDependencies": {
     "@eslint/css": "^0.14.1",
