@@ -6,6 +6,8 @@ import { Suspense, useState, lazy} from 'react'
 import './App.css'
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import LoadingSpinner from './components/ui/LoadingSpinner.tsx'
+import AccountPopup from './components/ui/AccountForm.tsx'
+import TransactionPopup from './components/ui/TransationForm.tsx'
 
 function App() {
   return (
@@ -42,6 +44,12 @@ function NotFoundPage() {
   const [count, setCount] = useState(0)
   const [response, setResponse] = useState('')
 
+  //Testing popups
+  const [seen, setSeen] = useState(false)
+  function togglePopup(){
+    setSeen(!seen)
+  };
+
   return (
     <>
       <h1>Vite + React</h1>
@@ -60,6 +68,10 @@ function NotFoundPage() {
       <p className="read-the-docs">
         Click on the Vite and React logos to learn more
       </p>
+
+      <button onClick={() => togglePopup()}>Forms</button>
+      {seen ? (<AccountPopup toggle={togglePopup} edit = {false} />):null}
+      {seen ? (<TransactionPopup toggle={togglePopup} edit = {false}/>):null}
     </>
   )
 }
