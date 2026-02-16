@@ -6,6 +6,7 @@ type AuthUser = {
   id: number
   email: string
   name: string
+  age: number
 }
 
 type AuthSession = {
@@ -23,6 +24,8 @@ type AuthApiResponse = {
 
 const SESSION_STORAGE_KEY = 'finus-session'
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000'
+const MIN_AGE = 1
+const MAX_AGE = 120
 
 function isValidAuthUser(value: unknown): value is AuthUser {
   if (!value || typeof value !== 'object') {
@@ -33,7 +36,8 @@ function isValidAuthUser(value: unknown): value is AuthUser {
   return (
     typeof maybeUser.id === 'number' &&
     typeof maybeUser.email === 'string' &&
-    typeof maybeUser.name === 'string'
+    typeof maybeUser.name === 'string' &&
+    typeof maybeUser.age === 'number'
   )
 }
 
@@ -63,7 +67,7 @@ function clearSession() {
   localStorage.removeItem(SESSION_STORAGE_KEY)
 }
 
-async function requestAuth(path: string, payload: Record<string, string>): Promise<AuthApiResponse> {
+async function requestAuth(path: string, payload: Record<string, unknown>): Promise<AuthApiResponse> {
   try {
     const response = await fetch(`${API_BASE_URL}${path}`, {
       method: 'POST',
@@ -240,6 +244,7 @@ function SignUpPage({ onSignup }: SignUpPageProps) {
   const [username, setUsername] = useState('')
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
+  const [age, setAge] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -253,10 +258,16 @@ function SignUpPage({ onSignup }: SignUpPageProps) {
     const cleanedUsername = username.trim()
     const cleanedFirstName = firstName.trim()
     const cleanedLastName = lastName.trim()
+    const parsedAge = Number(age)
     const normalizedEmail = email.trim().toLowerCase()
 
-    if (!cleanedUsername || !cleanedFirstName || !cleanedLastName) {
-      setErrorMessage('Username, first name, and last name are required.')
+    if (!cleanedUsername || !cleanedFirstName || !cleanedLastName || !age.trim()) {
+      setErrorMessage('Username, first name, last name, and age are required.')
+      return
+    }
+
+    if (!Number.isInteger(parsedAge) || parsedAge < MIN_AGE || parsedAge > MAX_AGE) {
+      setErrorMessage(`Age must be a whole number between ${MIN_AGE} and ${MAX_AGE}.`)
       return
     }
 
@@ -270,6 +281,7 @@ function SignUpPage({ onSignup }: SignUpPageProps) {
       username: cleanedUsername,
       firstName: cleanedFirstName,
       lastName: cleanedLastName,
+      age: parsedAge,
       email: normalizedEmail,
       password,
     })
@@ -288,71 +300,107 @@ function SignUpPage({ onSignup }: SignUpPageProps) {
 
   return (
     <section className="auth-layout">
-      <div className="auth-panel">
+      <div className="auth-panel auth-panel-signup">
         <p className="auth-tag">Finus</p>
         <h1>Create account</h1>
         <p className="auth-copy">Set up your account in less than a minute.</p>
 
-        <form className="auth-form" onSubmit={handleSubmit}>
-          <label htmlFor="signup-username">Username</label>
-          <input
-            id="signup-username"
-            type="text"
-            value={username}
-            onChange={(event) => setUsername(event.target.value)}
-            placeholder="alexp"
-            required
-          />
+        <form className="auth-form auth-signup-form" onSubmit={handleSubmit}>
+          <fieldset className="auth-group">
+            <legend>Profile</legend>
+            <div className="auth-grid">
+              <div className="auth-field auth-field-full">
+                <label htmlFor="signup-username">Username</label>
+                <input
+                  id="signup-username"
+                  type="text"
+                  value={username}
+                  onChange={(event) => setUsername(event.target.value)}
+                  placeholder="johnd"
+                  required
+                />
+              </div>
 
-          <label htmlFor="signup-first-name">First Name</label>
-          <input
-            id="signup-first-name"
-            type="text"
-            value={firstName}
-            onChange={(event) => setFirstName(event.target.value)}
-            placeholder="Alex"
-            required
-          />
+         <div className="auth-field">
+                <label htmlFor="signup-first-name">First Name</label>
+                <input
+                  id="signup-first-name"
+                  type="text"
+                  value={firstName}
+                  onChange={(event) => setFirstName(event.target.value)}
+                  placeholder="John"
+                  required
+                />
+              </div>
 
-          <label htmlFor="signup-last-name">Last Name</label>
-          <input
-            id="signup-last-name"
-            type="text"
-            value={lastName}
-            onChange={(event) => setLastName(event.target.value)}
-            placeholder="Patel"
-            required
-          />
+          <div className="auth-field">
+                <label htmlFor="signup-last-name">Last Name</label>
+                <input
+                  id="signup-last-name"
+                  type="text"
+                  value={lastName}
+                  onChange={(event) => setLastName(event.target.value)}
+                  placeholder="Doe"
+                  required
+                />
+              </div>
 
-          <label htmlFor="signup-email">Email</label>
-          <input
-            id="signup-email"
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="you@example.com"
-            required
-          />
+          <div className="auth-field auth-field-full">
+                <label htmlFor="signup-age">Age</label>
+                <input
+                  id="signup-age"
+                  type="number"
+                  min={MIN_AGE}
+                  max={MAX_AGE}
+                  value={age}
+                  onChange={(event) => setAge(event.target.value)}
+                  placeholder="21"
+                  required
+                />
+              </div>
+            </div>
+          </fieldset>
 
-          <label htmlFor="signup-password">Password</label>
-          <input
-            id="signup-password"
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            placeholder="At least 8 characters"
-            required
-          />
+          <fieldset className="auth-group">
+            <legend>Account</legend>
+            <div className="auth-grid">
+              <div className="auth-field auth-field-full">
+                <label htmlFor="signup-email">Email</label>
+                <input
+                  id="signup-email"
+                  type="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder="you@example.com"
+                  required
+                />
+              </div>
 
-          <label htmlFor="signup-confirm-password">Confirm Password</label>
-          <input
-            id="signup-confirm-password"
-            type="password"
-            value={confirmPassword}
-            onChange={(event) => setConfirmPassword(event.target.value)}
-            placeholder="Repeat password"
-            required
-          />
+          <div className="auth-field">
+                <label htmlFor="signup-password">Password</label>
+                <input
+                  id="signup-password"
+                  type="password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  placeholder="At least 8 characters"
+                  required
+                />
+              </div>
+
+          <div className="auth-field">
+                <label htmlFor="signup-confirm-password">Confirm Password</label>
+                <input
+                  id="signup-confirm-password"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                  placeholder="Repeat password"
+                  required
+                />
+              </div>
+            </div>
+          </fieldset>
 
           {errorMessage ? <p className="auth-error">{errorMessage}</p> : null}
 
@@ -381,7 +429,8 @@ function DashboardPage({ session, onLogout }: DashboardPageProps) {
         <p className="auth-tag">Finus</p>
         <h1>Signed in</h1>
         <p className="auth-copy">
-          Hello {session.user.name}. You are logged in as <strong>{session.user.email}</strong>.
+          Hello {session.user.name}. You are logged in as{' '}
+          <strong>{session.user.email}</strong>.
         </p>
         <button type="button" className="auth-button" onClick={onLogout}>
           Log Out
