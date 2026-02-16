@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "format": "bun prettier --write \"**/src/*.ts|**/*.ts\""
+    "format": "bun prettier --write \"**/src/*.ts|**/*.ts\"",
+    "prepare": "cd ../../../../ && husky server_hooks/.husky"
   },
   "devDependencies": {
     "@eslint/css": "^0.14.1",
@@ -9,6 +10,7 @@
     "@types/bun": "latest",
     "eslint": "^9",
     "globals": "^17.3.0",
+    "husky": "^9.1.7",
     "jiti": "^2.6.1",
     "minimatch": "5",
     "prettier": "3.8.1",

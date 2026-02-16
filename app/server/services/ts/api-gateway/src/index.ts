@@ -1,9 +1,8 @@
-import { PORT } from '@/port';
-import { buildCorsConfig } from '@/corsUtil';
-import { onExit } from '@/hooks';
-import express from 'express';
+import { PORT } from "@/port";
+import { buildCorsConfig } from "@/corsUtil";
+import { onExit } from "@/hooks";
+import express from "express";
 // import { createProxyMiddleware } from 'http-proxy-middleware';
-
 
 /*
 This service should have express, cors and http-proxy-middleware installed as dependencies.
@@ -23,17 +22,18 @@ const server = app.listen(PORT, () => {
 });
 onExit(() => server.close());
 
-
 //test endpoint
- app.get('/health', async (req: express.Request, res: express.Response) => {
-     const result: { [string]: string} = {};
-     const services: string[] = Object.keys(process.env).filter((x) => /^.*_SERVICE_ADDR$/.test(x));
+app.get("/health", async (req: express.Request, res: express.Response) => {
+  const result: { [string]: string } = {};
+  const services: string[] = Object.keys(process.env).filter((x) =>
+    /^.*_SERVICE_ADDR$/.test(x),
+  );
 
-     for(const service of services) {
-       const serviceName = service.split('_')[0];
-       result[serviceName] = await fetch(`${process.env[service]}/health`)
-         .then((res) => res.text())
-         .catch((err) => err.message);
-     }
-     res.json(result);
-  });
+  for (const service of services) {
+    const serviceName = service.split("_")[0];
+    result[serviceName] = await fetch(`${process.env[service]}/health`)
+      .then((res) => res.text())
+      .catch((err) => err.message);
+  }
+  res.json(result);
+});

@@ -1,6 +1,5 @@
 import { stmts } from "./db";
 
-
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -13,21 +12,19 @@ function json(body: unknown, status = 200) {
   });
 }
 
-
 function badRequest(message: string) {
   return json({ ok: false, error: message }, 400);
 }
 
-
 function getOptions() {
   return {
-      status: 204,
-      headers: {
-        "Access-Control-Allow-Origin": "http://localhost.*",
-        "Access-Control-Allow-Headers": "Content-Type",
-        "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-      },
-    }
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Origin": "http://localhost.*",
+      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+    },
+  };
 }
 
 // ---- server ----
@@ -37,40 +34,42 @@ Bun.serve({
     const url = new URL(req.url);
 
     if (req.method === "OPTIONS") {
-      return new Response(null, getOptions())
-    };
+      return new Response(null, getOptions());
+    }
 
-    if(url.pathname === '/api/auth/token' && req.method === "POST") {
+    if (url.pathname === "/api/auth/token" && req.method === "POST") {
       let body;
       try {
         body = await req.json();
-        if(!body.email || !body.password) { throw new Error() }
-      } catch { 
-        return badRequest("Body must be JSON containing username and password.");
+        if (!body.email || !body.password) {
+          throw new Error();
+        }
+      } catch {
+        return badRequest(
+          "Body must be JSON containing username and password.",
+        );
       }
 
-      if(!validateEmail(body.email)) {
-        return 
+      if (!validateEmail(body.email)) {
+        return;
       }
-      if(!validatePassword(body.password)) {
-
+      if (!validatePassword(body.password)) {
       }
-
-
-
     }
 
     // ---- SIGNUP ----
     if (req.method === "POST" && url.pathname === "/api/auth/signup") {
-    
       const email = body.email.trim().toLowerCase();
       const password = body.password;
 
-      if (!isValidEmail(email)) return badRequest("Please enter a valid email address.");
-      if (password.length < 8) return badRequest("Password must be at least 8 characters.");
+      if (!isValidEmail(email))
+        return badRequest("Please enter a valid email address.");
+      if (password.length < 8)
+        return badRequest("Password must be at least 8 characters.");
 
       const existing = stmts.findByEmail.get(email) as any;
-      if (existing) return json({ ok: false, error: "Email already exists." }, 409);
+      if (existing)
+        return json({ ok: false, error: "Email already exists." }, 409);
 
       const passwordHash = await hashPassword(password);
       stmts.createUser.run(email, passwordHash);
@@ -92,13 +91,16 @@ Bun.serve({
       const email = body.email.trim().toLowerCase();
       const password = body.password;
 
-      if (!isValidEmail(email)) return badRequest("Please enter a valid email address.");
+      if (!isValidEmail(email))
+        return badRequest("Please enter a valid email address.");
 
       const user = stmts.findByEmail.get(email) as any;
-      if (!user) return json({ ok: false, error: "Invalid email or password." }, 401);
+      if (!user)
+        return json({ ok: false, error: "Invalid email or password." }, 401);
 
       const valid = await verifyPassword(password, user.password_hash);
-      if (!valid) return json({ ok: false, error: "Invalid email or password." }, 401);
+      if (!valid)
+        return json({ ok: false, error: "Invalid email or password." }, 401);
 
       return json({
         ok: true,
