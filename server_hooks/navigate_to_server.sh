@@ -1,1 +1,0 @@
-cd server/services/ts
