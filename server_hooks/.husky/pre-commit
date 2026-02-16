@@ -1,0 +1,8 @@
+#!/bin/bash
+ts_services_directory=app/server/services/ts
+changed_files=$(git diff --cached --name-only --diff-filter=ACMR)
+changed_server_files=$(echo $changed_files | grep -E $ts_services_directory | sed "s|$ts_services_directory/||g")
+cd $ts_services_directory
+bun prettier $(echo $changed_server_files | sed 's| |\\ |g') --write --ignore-unknown
+git update-index --again
+
