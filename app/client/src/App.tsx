@@ -2,7 +2,7 @@
 This is to be used as a rerouter to various website pages.
 */
 
-import { Suspense, useState, lazy} from 'react'
+import { Suspense, useState } from 'react'
 import './App.css'
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import LoadingSpinner from './components/ui/LoadingSpinner.tsx'

@@ -24,7 +24,7 @@ onExit(() => server.close());
 
 //test endpoint
 app.get("/health", async (req: express.Request, res: express.Response) => {
-  const result: { [string]: string } = {};
+  const result: { [service: string]: string } = {};
   const services: string[] = Object.keys(process.env).filter((x) =>
     /^.*_SERVICE_ADDR$/.test(x),
   );
