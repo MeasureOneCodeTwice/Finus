@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import CsvUpload from "../csvread/CsvUpload";
 
 interface popupProp{
     toggle: () => void;
@@ -61,7 +62,7 @@ export default function popupForm({toggle, edit}:popupProp,){
             <input type = "number" min = "0" step ="0.01" name = "balance" onChange={handleChange}/>
             <br></br>
 
-            <label htmlFor="statement">Upload Bank Statement(.csv)</label>
+            <label htmlFor="statement">Upload Bank Statement(.csv)</label><CsvUpload />
             <input name = "statement" type = "file" accept =".csv" id = "statement" onChange={handleFile}/>
             <br></br>
 
