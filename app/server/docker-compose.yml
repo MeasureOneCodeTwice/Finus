@@ -1,11 +1,11 @@
 services:
-
     api-gateway:
       build:
         context: services/ts
         dockerfile: api-gateway/Dockerfile
+      image: $DOCKER_HUB_USERNAME/finus-api-gateway:$RELEASE_VERSION
       env_file: 
-      - path: ./default.env
+      - path: ./default_container.env
       environment:
         - NODE_ENV=development
       ports:
@@ -20,25 +20,33 @@ services:
       build: 
         context: services/ts
         dockerfile: auth/Dockerfile
+      image: $DOCKER_HUB_USERNAME/finus-auth:$RELEASE_VERSION
       env_file: 
-      - path: ./default.env
+      - path: ./default_container.env
         
     user:
       build:
         context: services/ts
         dockerfile: user/Dockerfile
+      image: $DOCKER_HUB_USERNAME/finus-user:$RELEASE_VERSION
       env_file: 
-      - path: ./default.env
+      - path: ./default_container.env
     
     analytics:
-        build: ./services/python/analytics
+        build:
+          context: services/python/analytics
+          dockerfile: Dockerfile
+        image: $DOCKER_HUB_USERNAME/finus-analytics:$RELEASE_VERSION
         env_file: 
-        - path: ./default.env
+        - path: ./default_container.env
       
     market:
-      build: ./services/python/market
+      build: 
+        context: services/python/market
+        dockerfile: Dockerfile
+      image: $DOCKER_HUB_USERNAME/finus-market:$RELEASE_VERSION
       env_file: 
-      - path: ./default.env
+      - path: ./default_container.env
   
     #connect manually with `mysql -h 127.0.0.1 -P 3306 -u root -p`
     database:
