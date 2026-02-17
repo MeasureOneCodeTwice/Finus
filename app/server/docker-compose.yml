@@ -23,13 +23,9 @@ services:
       env_file: 
       - path: ./default.env
       environment:
-        - DB_HOST=database
-        - DB_PORT=3306
-        - DB_NAME=finus
-        - DB_USER=finus_app
-        - DB_PASSWORD=password
+      - DB_PASSWORD=password
       depends_on:
-        - database
+      - database
         
     user:
       build:
