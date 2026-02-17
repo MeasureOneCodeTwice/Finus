@@ -23,6 +23,9 @@ services:
       image: $DOCKER_HUB_USERNAME/finus-auth:$RELEASE_VERSION
       env_file: 
       - path: ./default_container.env
+      environment: 
+        - DB_PASSWORD
+
         
     user:
       build:
@@ -31,14 +34,18 @@ services:
       image: $DOCKER_HUB_USERNAME/finus-user:$RELEASE_VERSION
       env_file: 
       - path: ./default_container.env
+      environment: 
+        - DB_PASSWORD
     
     analytics:
-        build:
-          context: services/python/analytics
-          dockerfile: Dockerfile
-        image: $DOCKER_HUB_USERNAME/finus-analytics:$RELEASE_VERSION
-        env_file: 
-        - path: ./default_container.env
+      build:
+        context: services/python/analytics
+        dockerfile: Dockerfile
+      image: $DOCKER_HUB_USERNAME/finus-analytics:$RELEASE_VERSION
+      env_file: 
+      - path: ./default_container.env
+      environment: 
+      - DB_PASSWORD
       
     market:
       build: 
@@ -54,21 +61,11 @@ services:
       volumes: 
       - db_data:/var/lib/mysql
       - ./services/database:/docker-entrypoint-initdb.d
-      secrets:
-        - db_root_password
-        - db_password
       environment:
-        - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/db_root_password
-        - MYSQL_PASSWORD_FILE=/run/secrets/db_password
+        - MYSQL_ROOT_PASSWORD=$(DB_ROOT_PASSWORD)
+        - MYSQL_PASSWORD=$(DB_PASSWORD)
       ports:
         - "3306:3306"
-
-
-secrets: 
-  db_root_password: 
-    file: db_root_password.txt
-  db_password: 
-    file: db_password.txt
 
 volumes: 
   db_data: 
