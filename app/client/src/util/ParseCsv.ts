@@ -1,24 +1,32 @@
 //this utility parses csv files using papaparse 
-import Papa from "papaparse";
+// Parses CSV, normalizes rows, validates them, and returns TransactionDraft[]
 
-export interface ParsedRow {
-  [key: string]: string | number | null;
-}
-//function takes a file object and returns an array of parsed rows using promise and papaparse lib.
-export function parseCsvFile(file: File): Promise<ParsedRow[]> {
-  return new Promise((resolve, reject) => {
+import Papa from "papaparse";
+import { normalizeRow } from "./NormalizeRow";
+import { convertDraft, type TransactionDraft } from "./ConvertTransaction";
+
+export function parseCsvFile(file: File): Promise<TransactionDraft[]> {   //uses promises to handle async parsing
+  return new Promise((resolve, reject) => {       
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
       dynamicTyping: true,
-      complete: (results) => {
-        if (results.errors.length > 0) {
-          reject(results.errors[0].message);
-        } else {
-          resolve(results.data as ParsedRow[]);
+
+      complete: ({ data, errors }) => {         // handle parsing errors
+        if (errors.length > 0) {
+          reject(errors[0].message);
+          return;
         }
+
+        const drafts: TransactionDraft[] = data.map((raw: unknown) => {     // normalize and convert each row to a transaction draft
+          const normalized = normalizeRow(raw);
+          return convertDraft(normalized);
+        });
+
+        resolve(drafts);                    // resolve with array of transaction drafts, each containing validation errors if any
       },
-      error: (err) => reject(err.message),
+
+      error: (err) => reject(err.message),  // handle file read errors
     });
   });
 }
