@@ -15,4 +15,4 @@ COPY common ./common
 WORKDIR /project/app
 COPY auth/src ./src
 
-CMD ["bun", "src/index.ts"]
+CMD ["bun", "--no-env-file", "src/index.ts"]
