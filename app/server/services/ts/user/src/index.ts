@@ -10,7 +10,7 @@ app.use(buildCorsConfig());
 const server = app.listen(PORT, () => {
   console.log(`User Service running on port ${PORT}`);
 });
-onExit(() => server.close());
+onExit(async () => await server.close());
 
 //test endpoint
 app.get("/health", (req: express.Request, res: express.Response) => {

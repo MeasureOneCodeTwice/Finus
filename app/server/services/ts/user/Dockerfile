@@ -5,7 +5,7 @@ COPY package.json .
 RUN bun install
 
 WORKDIR /project/app
-COPY auth/package.json .
+COPY user/package.json .
 RUN bun install
 
 WORKDIR /project
@@ -13,6 +13,6 @@ COPY tsconfig.json .
 COPY common ./common
 
 WORKDIR /project/app
-COPY auth/src ./src
+COPY user/src ./src
 
 CMD ["bun", "--no-env-file", "src/index.ts"]

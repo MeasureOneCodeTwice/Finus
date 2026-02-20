@@ -5,7 +5,7 @@ import { onExit } from "@/hooks";
 import { buildCorsConfig } from "@/corsUtil";
 import { signup, login } from "./logic";
 import type { LoginBody, SignupBody } from "./types";
-import { parseLoginBody, parseSignupBody } from "./dto";
+import { parseLoginBody, parseSignupBody } from "./parsing";
 
 const pool = mysql.createPool({
   host: process.env.MYSQL_HOST,
@@ -21,7 +21,7 @@ const app = express();
 app.use(express.json());
 app.use(buildCorsConfig(undefined));
 
-app.post("/api/auth/signup", async (req, res) => {
+app.post("/signup", async (req, res) => {
   let body: SignupBody;
   try {
     body = parseSignupBody(req.body);
@@ -33,7 +33,7 @@ app.post("/api/auth/signup", async (req, res) => {
   signup(body, res, pool);
 });
 
-app.post("/api/auth/login", async (req, res) => {
+app.post("/login", async (req, res) => {
   let body: LoginBody;
   try {
     body = parseLoginBody(req.body);
@@ -45,19 +45,16 @@ app.post("/api/auth/login", async (req, res) => {
   login(body, res, pool);
 });
 
-app.get("/health", (_req, res) => {
-  res.send("ok");
-});
-
-app.get("/api/health", (_req, res) => {
-  res.json({ ok: true, status: "up" });
+app.get("/health", (_, res) => {
+  res.send({ok: true});
 });
 
 const server = app.listen(PORT, () => {
   console.log(`Auth Service running on port ${PORT}`);
 });
 
-onExit(() => {
-  server.close();
-  pool.end();
+onExit(async () => {
+  await new Promise((res) => server.close(res));
+  await pool.end();
+  process.exit(0);
 });

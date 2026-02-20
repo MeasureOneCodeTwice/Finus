@@ -171,7 +171,7 @@ function LoginPage({ onLogin }: LoginPageProps) {
     setErrorMessage('')
     setIsSubmitting(true)
 
-    const result = await requestAuth('/api/auth/login', {
+    const result = await requestAuth('/api/login', {
       email: email.trim(),
       password,
     })
@@ -266,7 +266,7 @@ function SignUpPage({ onSignup }: SignUpPageProps) {
       email: normalizedEmail,
     }
 
-    const result = await requestAuth('/api/auth/signup', { ...cleanedUser, password })
+    const result = await requestAuth('/api/signup', { ...cleanedUser, password })
     setIsSubmitting(false)
 
     if (result.status >= 400) {
@@ -274,7 +274,7 @@ function SignUpPage({ onSignup }: SignUpPageProps) {
       return
     }
 
-    const tokenReq = await requestAuth('/api/auth/login', {
+    const tokenReq = await requestAuth('/api/login', {
       email: normalizedEmail,
       password,
     })

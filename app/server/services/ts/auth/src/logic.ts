@@ -70,8 +70,7 @@ export async function login(body: LoginBody, res, pool): void {
   let user: User;
   try {
     user = await getUserWithPasswordByEmail(body.email, pool);
-  } catch (e) {
-    console.error(e);
+  } catch {
     res.status(401).json({ error: "Invalid email or password." });
     return;
   }

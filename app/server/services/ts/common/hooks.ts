@@ -1,3 +1,3 @@
-export function onExit(callback: () => void) {
+export function onExit(callback: () => Promise<void>) {
   process.on("SIGTERM", callback);
 }
