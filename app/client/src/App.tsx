@@ -82,18 +82,14 @@ async function requestAuth(path: string, payload: Record<string, unknown>): Prom
       return { ok: false, error: 'Invalid response from auth server.' }
     }
 
-    if (!response.ok || !data.ok) {
+    if (response.status >= 400) {
       return {
         ok: false,
         error: data.error ?? 'Authentication failed.',
       }
     }
 
-    if (!data.token || !isValidAuthUser(data.user)) {
-      return { ok: false, error: 'Auth response is missing required fields.' }
-    }
-
-    return data
+    return { ...data, ok: true };
   } catch {
     return { ok: false, error: 'Unable to connect to auth server.' }
   }
@@ -182,7 +178,7 @@ function LoginPage({ onLogin }: LoginPageProps) {
 
     setIsSubmitting(false)
 
-    if (!result.ok || !result.user || !result.token) {
+    if (!result.token) {
       setErrorMessage(result.error ?? 'Login failed.')
       return
     }
@@ -261,40 +257,32 @@ function SignUpPage({ onSignup }: SignUpPageProps) {
     const parsedAge = Number(age)
     const normalizedEmail = email.trim().toLowerCase()
 
-    if (!cleanedUsername || !cleanedFirstName || !cleanedLastName || !age.trim()) {
-      setErrorMessage('Username, first name, last name, and age are required.')
-      return
-    }
-
-    if (!Number.isInteger(parsedAge) || parsedAge < MIN_AGE || parsedAge > MAX_AGE) {
-      setErrorMessage(`Age must be a whole number between ${MIN_AGE} and ${MAX_AGE}.`)
-      return
-    }
-
-    if (password !== confirmPassword) {
-      setErrorMessage('Passwords do not match.')
-      return
-    }
-
     setIsSubmitting(true)
-    const result = await requestAuth('/api/auth/signup', {
+    const cleanedUser = {
       username: cleanedUsername,
-      firstName: cleanedFirstName,
-      lastName: cleanedLastName,
+      first_name: cleanedFirstName,
+      last_name: cleanedLastName,
       age: parsedAge,
       email: normalizedEmail,
-      password,
-    })
+    }
+
+    const result = await requestAuth('/api/auth/signup', { ...cleanedUser, password })
     setIsSubmitting(false)
 
-    if (!result.ok || !result.user || !result.token) {
+    if (result.status >= 400) {
       setErrorMessage(result.error ?? 'Signup failed.')
       return
     }
 
+    const tokenReq = await requestAuth('/api/auth/login', {
+      email: normalizedEmail,
+      password,
+    })
+
+
     onSignup({
-      token: result.token,
-      user: result.user,
+      token: tokenReq.token,
+      user: cleanedUser,
     })
   }
 
@@ -429,7 +417,7 @@ function DashboardPage({ session, onLogout }: DashboardPageProps) {
         <p className="auth-tag">Finus</p>
         <h1>Signed in</h1>
         <p className="auth-copy">
-          Hello {session.user.name}. You are logged in as{' '}
+          Hello {session.user.first_name}. You are logged in as{' '}
           <strong>{session.user.email}</strong>.
         </p>
         <button type="button" className="auth-button" onClick={onLogout}>

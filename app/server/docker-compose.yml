@@ -1,11 +1,11 @@
 services:
-
     api-gateway:
       build:
         context: services/ts
         dockerfile: api-gateway/Dockerfile
+      image: $DOCKER_HUB_USERNAME/finus-api-gateway:$RELEASE_VERSION
       env_file: 
-      - path: ./default.env
+      - path: ./default_container.env
       environment:
         - NODE_ENV=development
       ports:
@@ -20,53 +20,65 @@ services:
       build: 
         context: services/ts
         dockerfile: auth/Dockerfile
+      image: $DOCKER_HUB_USERNAME/finus-auth:$RELEASE_VERSION
       env_file: 
-      - path: ./default.env
-      environment:
-      - DB_PASSWORD=password
+      - path: ./default_container.env
+      environment: 
+      - MYSQL_USER
+      - MYSQL_PASSWORD
+      - JWT_SECRET
       depends_on:
       - database
+
         
     user:
       build:
         context: services/ts
         dockerfile: user/Dockerfile
+      image: $DOCKER_HUB_USERNAME/finus-user:$RELEASE_VERSION
       env_file: 
-      - path: ./default.env
+      - path: ./default_container.env
+      environment: 
+      - MYSQL_USER
+      - MYSQL_PASSWORD
+      depends_on:
+      - database
     
     analytics:
-        build: ./services/python/analytics
-        env_file: 
-        - path: ./default.env
+      build:
+        context: services/python/analytics
+        dockerfile: Dockerfile
+      image: $DOCKER_HUB_USERNAME/finus-analytics:$RELEASE_VERSION
+      env_file: 
+      - path: ./default_container.env
+      environment: 
+      - MYSQL_USER
+      - MYSQL_PASSWORD
+      depends_on:
+      - database
       
     market:
-      build: ./services/python/market
+      build: 
+        context: services/python/market
+        dockerfile: Dockerfile
+      image: $DOCKER_HUB_USERNAME/finus-market:$RELEASE_VERSION
       env_file: 
-      - path: ./default.env
+      - path: ./default_container.env
   
     #connect manually with `mysql -h 127.0.0.1 -P 3306 -u root -p`
     database:
       image: mysql:8.0-debian
       volumes: 
       - db_data:/var/lib/mysql
-      - ./services/database/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
-      secrets:
-        - db_root_password
-        - db_password
+      #startup scripts are executed in alphabetical order
+      - ./services/database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./services/database/grantPrivileges.sh:/docker-entrypoint-initdb.d/02-grantPrivileges.sh
       environment:
-        - MYSQL_DATABASE=finus
-        - MYSQL_USER=finus_app
-        - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/db_root_password
-        - MYSQL_PASSWORD_FILE=/run/secrets/db_password
+        - MYSQL_ROOT_PASSWORD
+        - MYSQL_USER
+        - MYSQL_PASSWORD
       ports:
         - "3306:3306"
-
-
-secrets: 
-  db_root_password: 
-    file: db_root_password.txt
-  db_password: 
-    file: db_password.txt
 
 volumes: 
   db_data: 

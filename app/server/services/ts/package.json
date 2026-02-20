@@ -7,7 +7,6 @@
     "@eslint/css": "^0.14.1",
     "@eslint/js": "^10.0.1",
     "@eslint/json": "^1.0.0",
-    "@types/bun": "latest",
     "eslint": "^9",
     "globals": "^17.3.0",
     "husky": "^9.1.7",

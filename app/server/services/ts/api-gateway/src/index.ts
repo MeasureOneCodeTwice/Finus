@@ -55,6 +55,7 @@ const server = app.listen(PORT, () => {
 onExit(() => server.close());
 
 app.get("/health", async (_req: express.Request, res: express.Response) => {
+//test endpoint
   const result: { [service: string]: string } = {};
   const services: string[] = Object.keys(process.env).filter((x) =>
     /^.*_SERVICE_ADDR$/.test(x),
@@ -62,9 +63,6 @@ app.get("/health", async (_req: express.Request, res: express.Response) => {
 
   for (const service of services) {
     const serviceAddress = process.env[service];
-    if (!serviceAddress) {
-      continue;
-    }
 
     const [serviceName = service] = service.split("_");
     result[serviceName] = await fetch(`${serviceAddress}/health`)
