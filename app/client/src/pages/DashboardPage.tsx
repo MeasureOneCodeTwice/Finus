@@ -4,7 +4,6 @@ import { Chart,  PointElement, LineElement,ArcElement, CategoryScale, LinearScal
 import { Pie, Line, Bar } from 'react-chartjs-2';
 import AccountCard from '@/components/AccountCard';
 import TransactionTable from '@/components/TransactionTable';
-//import {Button} from '@/components/Button';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import SankeyChart from '@/components/SankeyChart';
 import { getExpensesChartData, getSavingsContribChartData, getIncomeFlowChartData } from '@/api/ManagerAPI';

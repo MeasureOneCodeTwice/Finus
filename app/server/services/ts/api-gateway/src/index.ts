@@ -51,3 +51,32 @@ app.get('/charts/expenses', async (req: express.Request, res: express.Response) 
       });
   res.json(response);
 });
+
+
+
+app.get('/charts/savings', async (req: express.Request, res: express.Response) => {
+  console.log("Received request for savings chart data with query:", req.query);
+  const period = req.query.period as string;
+  const response = await fetch(`${process.env.ANALYTICS_SERVICE_ADDR}/charts/savings?period=${period}`)
+      .then((res) => res.json())
+      .catch((err) => {
+          console.error("Error fetching savings chart data:", err);
+          res.status(500).json({ error: "Failed to fetch savings chart data" });
+      });
+  res.json(response);
+});
+
+
+
+
+app.get('/charts/incomeflow', async (req: express.Request, res: express.Response) => {
+  console.log("Received request for income chart data with query:", req.query);
+  const period = req.query.period as string;
+  const response = await fetch(`${process.env.ANALYTICS_SERVICE_ADDR}/charts/incomeflow?period=${period}`)
+      .then((res) => res.json())
+      .catch((err) => {
+          console.error("Error fetching income chart data:", err);
+          res.status(500).json({ error: "Failed to fetch income chart data" });
+      });
+  res.json(response);
+});
