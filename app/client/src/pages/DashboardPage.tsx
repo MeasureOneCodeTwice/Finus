@@ -4,9 +4,11 @@ import { Chart,  PointElement, LineElement,ArcElement, CategoryScale, LinearScal
 import { Pie, Line, Bar } from 'react-chartjs-2';
 import AccountCard from '@/components/AccountCard';
 import TransactionTable from '@/components/TransactionTable';
-import {Button} from '@/components/button';
+import {Button} from '@/components/Button';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import SankeyChart from '@/components/SankeyChart';
 import { getExpensesChartData, getSavingsContribChartData, getIncomeFlowChartData } from '@/api/ManagerAPI';
+import type { SankeyData } from 'recharts/types/chart/Sankey';
 Chart.register(PointElement, LineElement, ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 
@@ -20,6 +22,8 @@ function DashboardPage() {
 
   //Chart data state - this is used to determine whether to put a spinner in place of a chart while data is being fetched from API
   const [expensesData, setExpensesData] = useState<ChartData<"bar"> | null>(null);
+  const [savingsData, setsavingsData] = useState<ChartData<"line"> | null>(null);
+  const [incomeData, setIncomeData] = useState<SankeyData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
    const data = {
@@ -67,22 +71,59 @@ function DashboardPage() {
     },
   };
 
-  useEffect(() => {
-    const fetchExpensesData = async () => {
-      if (activeChart !== 'expenses') return;
-      
-      setIsLoading(true);
-      try {
-        const data = await getTestExpensesData(selectedPeriod);
-        setExpensesData(data);
-      } catch (error) {
-        console.error("Failed to fetch expenses data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
 
-    fetchExpensesData();
+  const fetchExpensesData = async () => {
+    setIsLoading(true);
+    try {
+      const data = await getTestExpensesData(selectedPeriod);
+      setExpensesData(data);
+    } catch (error) {
+      console.error("Failed to fetch expenses data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchSavingsData = async () => {
+    setIsLoading(true);
+    try {
+      const data = await getTestSavingsContribData(selectedPeriod);
+      setsavingsData(data);
+    } catch (error) {
+      console.error("Failed to fetch savings data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchIncomeData = async () => {
+    setIsLoading(true);
+    try {
+      const data = await getTestIncomeFlowData(selectedPeriod);
+      //console.log("Fetched income flow data:", data);
+      setIncomeData(data);
+    } catch (error) {
+      console.error("Failed to fetch income data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
+  useEffect(() => {
+    switch(activeChart) {
+      case 'expenses':
+        fetchExpensesData();
+        break;
+      case 'savings':
+        fetchSavingsData();
+        break;
+      case 'income':
+        fetchIncomeData();
+        break;
+      default:
+      fetchExpensesData();
+    }    
   }, [activeChart, selectedPeriod]);
 
 
@@ -104,46 +145,42 @@ function DashboardPage() {
         backgroundColor: 'rgba(53, 162, 235, 0.5)',
       }]
     };
-    // switch(period) {
-    //   case 'w':
-    //     return {
-    //       labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-    //       datasets: [{
-    //         label: 'Weekly Expenses',
-    //         data: [125, 89, 210, 45, 167, 92, 78],
-    //         borderColor: 'rgb(53, 162, 235)',
-    //         backgroundColor: 'rgba(53, 162, 235, 0.5)',
-    //       }]
-    //     };
-      
-    //   case 'm':
-    //     return {
-    //       labels: ['1 Jan', '2 Jan', '3 Jan', '4 Jan', '5 Jan', '6 Jan', '7 Jan', '8 Jan', '9 Jan', '10 Jan', '11 Jan', '12 Jan',
-    //               '13 Jan', '14 Jan', '15 Jan', '16 Jan', '17 Jan', '18 Jan', '19 Jan', '20 Jan', '21 Jan', '22 Jan', '23 Jan', '24 Jan',
-    //               '25 Jan', '26 Jan', '27 Jan', '28 Jan', '29 Jan', '30 Jan', '31 Jan'
-    //               ],
-    //       datasets: [{
-    //         label: 'Monthly Expenses',
-    //         data: [125, 89, 210, 45, 167, 92, 78, 123, 98, 134, 56, 189, 76, 143, 87, 65, 190, 120,
-    //               134, 98, 76, 143, 87, 65, 190, 120, 134, 98, 76, 143, 87
-    //               ],
-    //         borderColor: 'rgb(53, 162, 235)',
-    //         backgroundColor: 'rgba(53, 162, 235, 0.5)',
-    //       }]
-    //     };
-      
-    //   case 'y':
-    //     return {
-    //       labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    //       datasets: [{
-    //         label: 'Yearly Expenses',
-    //         data: [3245, 2987, 3456, 3789, 4123, 3876, 4234, 3987, 3678, 4012, 3789, 4123],
-    //         borderColor: 'rgb(53, 162, 235)',
-    //         backgroundColor: 'rgba(53, 162, 235, 0.5)',
-    //       }]
-    //     };
-    // }
   };
+
+
+  const getTestSavingsContribData = async (period: 'w' | 'm' | 'y'): Promise<ChartData<"line">> => {
+    try{
+      const response = await getSavingsContribChartData(period);
+      return response;
+    }catch(error) {
+      console.error("Error fetching savings contribution chart data:", error);
+    }
+    return {
+      labels: ['Mon'],
+      datasets: [{
+        label: 'Placeholder Savings Contribution',
+        data: [125],
+        borderColor: 'rgb(53, 162, 235)',
+        backgroundColor: 'rgba(53, 162, 235, 0.5)',
+      }]
+    };
+  }
+
+  const getTestIncomeFlowData = async (period: 'w' | 'm' | 'y'): Promise<SankeyData> => {
+    try{
+      const response = await getIncomeFlowChartData(period);
+      //console.log("Received income flow chart data:", response);
+      return response;
+    }catch(error) {
+      console.error("Error fetching income flow chart data:", error);
+    }
+    console.log("Using placeholder income flow chart data");
+    return {
+      nodes: [],
+      links: [],
+      };
+  }
+
 
 const expensesBarOptions = {
   responsive: true,
@@ -179,23 +216,6 @@ const savingsLineOptions = {
   },
 };
 
-const incomeSankeyOptions = {
-  responsive: true,
-  plugins: {
-    legend: {
-      position: 'top' as const,
-    },
-    title: {
-      display: true,
-      text: 'Expenses Over Time',
-      font: {
-        size: 24,
-        weight: 'bold' as const
-      }
-    }
-  },
-};
-
 
 //Renders a chart based on activeChart - puts a spinner in place while data is being fetched or if no data is available for any reason
   const renderChart = () => {
@@ -214,17 +234,29 @@ const incomeSankeyOptions = {
           </div>
         );
       case 'savings':
+        if (isLoading || !savingsData) {
+          return (
+            <div className="flex-2 bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
+              < LoadingSpinner />
+            </div>
+          );
+        }
         return (
           <div className="flex-2 bg-white p-4 rounded-lg shadow-md">
-            {/* savingsLineOptions */}
-            <p className="text-center text-gray-500 mt-2">Savings Chart (Coming Soon)</p>
+            <Line options={savingsLineOptions} data={savingsData} />
           </div>
         );
       case 'income':
+        if (isLoading || !incomeData) {
+          return (
+            <div className="flex-2 bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
+              < LoadingSpinner />
+            </div>
+          );
+        }
         return (
           <div className="flex-2 bg-white p-4 rounded-lg shadow-md">
-            
-            <p className="text-center text-gray-500 mt-2">Income Flow Chart (Coming Soon)</p>
+            <SankeyChart data={incomeData} />
           </div>
         );
       default:
@@ -236,6 +268,8 @@ const incomeSankeyOptions = {
         );
     }
   };
+
+
 
   return (
     <section className="p-10 bg-gray-100">
