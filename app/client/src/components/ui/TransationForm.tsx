@@ -1,5 +1,6 @@
-import { useState } from "react";
+import React, { useState, type ReactHTMLElement } from "react";
 import CsvUpload from "../csvread/CsvUpload";
+import './userForm.css'
 
 interface popupProp{
     toggle: () => void;
@@ -24,55 +25,84 @@ export default function popupForm({toggle, edit}:popupProp){
     //Handles the submiting the form
     const handleSubmit = () =>{
         toggle()
-        //Determine if the input is valid
-        if(selectedType && amount != 0) {
-            //Insert function that handles api communication between client and server
+
+    }
+
+    //Handles state when currency is changed
+    const handleCurrencyChange = (event:React.ChangeEvent<HTMLInputElement>) => {
+
+        let input = event.target.value
+        const pattern = /^\d*\.?\d{0,2}$/
+
+        console.log(input)
+        console.log(pattern.test(input))
+        //Determine if the input follows the format/pattern
+        if(pattern.test(input) || input === ""){
+            input = input.replace(/^0+(?=\d)/,"")
+            setAmount(input)
+
         }
     }
 
-    const handleFile = () =>{
+    const handleCurrencyBlur = (event:React.ChangeEvent<HTMLInputElement>) => {
+        if(event.target.value !== "") {
+            setAmount(parseFloat(amount).toFixed(2))
+        }
+
+    }
+
+    const handleFile = (event:React.ChangeEvent<HTMLInputElement>) =>{
+
+        if(event.target && event.target.files && event.target.files[0]){
+            setFile(event.target.files[0])
+        } else {
+            setFile(undefined)
+        }
+    
+        //Insert cvs parsing function
         
     }
 
     //Holds state of user input
     const [selectedType, setSelectedType] = useState<typeOfTransfers| undefined>(undefined)
-    const [amount, setAmount] = useState(0)
-    const [file, setFile] = useState(null)
+    const [amount, setAmount] = useState<string>("")
+    const [file, setFile] = useState<File | undefined>(undefined)
 
     //Holds the types of transfers
     const transCat: typeOfTransfers [] = Object.keys(transferCategory) as typeOfTransfers[];
 
     return(
         <>
-        <div>
-            {edit ? (<h2>Edit Transaction</h2>):(<h2>Create Transaction</h2>)}
+        <div className="popup">
             <form onSubmit={handleSubmit}>
-
-                <label>Account</label>
+                {edit ? (<h2>Edit Transaction</h2>):(<h2>Create Transaction</h2>)}
+                
+                <label>User Account:</label>
                 <select>
-                    <option></option>
+                    {}
                 </select>
                 
                 <br></br>
 
-                <label>"Type"</label>
+                <label>Type</label>
                 <select id = "transferType" value = {selectedType} onChange={event => setSelectedType(event.target.value as typeOfTransfers)}>
-                    <option value="">Select Type</option>
+                    <option value="">Select Type: </option>
                     {transCat.map(category => (<option key = {category} value = {category}>{transferCategory[category]}</option>))}
                 </select>
                 <br></br>
 
-                <label htmlFor="amount">"Ammount"</label>
-                <input type = "number" id = "amount" onChange ={(event) => setAmount(Number(event.target.value))}/>
+                <label htmlFor="amount">Amount: $</label>
+                <input className="moneyInput" min="0" step={"0.01"} type = "text" id = "amount" value={amount} onChange={handleCurrencyChange} onBlur={handleCurrencyBlur} placeholder="0.00"/>
                 <br></br>
 
                 <label htmlFor="statement">Bank statement(CVS)</label> <CsvUpload />
                 <input type = "file" name = "statement" accept=".cvs" onChange={handleFile}/>
                 <br></br>
 
-
-                <button onClick={toggle}>Close</button>
-                {edit ?(<button type="submit">Edit</button>):(<button type="submit">Submit</button>)}
+                <div className="bottomButtons">
+                    <button onClick={toggle}>Close</button>
+                    {edit ?(<button type="submit">Edit</button>):(<button type="submit">Submit</button>)}
+                </div>
             </form>
         </div>
         </>
