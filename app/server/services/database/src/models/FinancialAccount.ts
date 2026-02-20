@@ -1,4 +1,4 @@
-import { RowDataPacket } from "mysql2";
+import type { RowDataPacket } from "mysql2";
 // shows account types (chequing, savings, or investment accounts)
 export interface FinancialAccount extends RowDataPacket {
   id: number;

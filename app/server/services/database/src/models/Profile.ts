@@ -1,4 +1,4 @@
-import { RowDataPacket } from "mysql2";
+import type { RowDataPacket } from "mysql2";
 // users view of  accounts and goals
 export interface Profile extends RowDataPacket {
   id: number;

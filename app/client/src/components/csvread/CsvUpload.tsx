@@ -5,6 +5,7 @@ import CsvDrop from "./CsvDrop";
 import CsvFile from "./CsvFile";
 import CsvError from "./CsvError";
 import CsvPreviewTable from "./CsvPreview";
+import CsvConfirmation from "./CsvConfirm";
 import { parseCsvFile } from "../../util/ParseCsv";
 import type { TransactionDraft } from "../../util/ConvertTransaction";
 
@@ -13,6 +14,8 @@ export default function CsvUpload() {
   const [error, setError] = useState<string | null>(null);      // validation errors
   const [parsedData, setParsedData] = useState<TransactionDraft[] | null>(null);   // state for parsed and validated data
   const [isParsing, setIsParsing] = useState(false);              // track if parsing is in progress
+  const [showConfirmation, setShowConfirmation] = useState(false);
+
 
 
   // File Validation 
@@ -42,13 +45,14 @@ export default function CsvUpload() {
     setError(null);
     setFile(selected);
     setParsedData(null);
+    setShowConfirmation(false);
   };
 
   const clearFile = () => {
     setFile(null);
     setError(null);
     setParsedData(null);
-    
+    setShowConfirmation(false);
   };
 
   const handlePreview = async () => {     // parses the file and updates state with results
@@ -74,24 +78,77 @@ export default function CsvUpload() {
     setIsParsing(false);
   };
 
+//handle import sends valid transactions to backend for insertion into database
+const handleImport = async () => {
+  if (!parsedData) return;
+
+  try {
+    const response = await fetch("/api/transactions/csvTransaction", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        financialAccount_id: 1,     // TODO: replace with real account ID
+        transactions: parsedData
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      setError(result.error || "Import failed");
+      return;
+    }
+
+    console.log("Import success:", result);
+    // TODO: show success UI or redirect
+  } catch (err) {
+    setError("Network error during import");
+  }
+};
+
+
+
   return (
-    <div style={{ marginTop: "1rem" }}>
-      <CsvDrop onFileSelect={handleFileSelect} />
+  <div style={{ marginTop: "1rem" }}>
+    <CsvDrop onFileSelect={handleFileSelect} />
 
-      {error && <CsvError message={error} />}
+    {error && <CsvError message={error} />}
 
-      {file && <CsvFile file={file} onRemove={clearFile} />}
+    {file && <CsvFile file={file} onRemove={clearFile} />}
+
+    {/* only show preview button if we have a file and we're not already in confirmation step */}
+    {!showConfirmation && (
       <button
         disabled={!file || isParsing}
         onClick={handlePreview}
         style={{ marginTop: "0.5rem" }}
       >
-        {isParsing ? "Parsing..." : "Preview"}
+        {isParsing ? "Currently parsing" : "Preview"}
       </button>
+    )}
 
-      {parsedData && parsedData.length > 0 && (
+    {/* show preview table and continue button if we have parsed data and we're not in confirmation step */}
+    {parsedData && parsedData.length > 0 && !showConfirmation && (
+      <>
         <CsvPreviewTable rows={parsedData} />
-      )}
-    </div>
-  );
+
+        <button
+          style={{ marginTop: "1rem" }}
+          onClick={() => setShowConfirmation(true)}
+        >
+          Continue
+        </button>
+      </>
+    )}
+
+    {/* show confirmation step */}
+    {parsedData && parsedData.length > 0 && showConfirmation && (
+      <CsvConfirmation
+        rows={parsedData}
+        onBack={() => setShowConfirmation(false)}
+        onConfirm={handleImport}   // send to backend
+      />
+    )}
+  </div>
+);
 }
