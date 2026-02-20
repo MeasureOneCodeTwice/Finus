@@ -4,7 +4,7 @@ import { Chart,  PointElement, LineElement,ArcElement, CategoryScale, LinearScal
 import { Pie, Line, Bar } from 'react-chartjs-2';
 import AccountCard from '@/components/AccountCard';
 import TransactionTable from '@/components/TransactionTable';
-import {Button} from '@/components/Button';
+//import {Button} from '@/components/Button';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import SankeyChart from '@/components/SankeyChart';
 import { getExpensesChartData, getSavingsContribChartData, getIncomeFlowChartData } from '@/api/ManagerAPI';
@@ -283,16 +283,16 @@ const savingsLineOptions = {
         <AccountCard title="Total Savings" amount="$100,000,000" backgroundColor="#c8002a" />
       </section>
       <section className="flex flex-row items-center justify-center gap-12 my-10">
-        <Button variant={activeChart === 'expenses' ? 'default' : 'secondary'} onClick={() => setActiveChart('expenses')}>Expenses Chart</Button>
-        <Button variant={activeChart === 'savings' ? 'default' : 'secondary'} onClick={() => setActiveChart('savings')}>Savings Chart</Button>
-        <Button variant={activeChart === 'income' ? 'default' : 'secondary'} onClick={() => setActiveChart('income')}>Income Flow Chart</Button>
+        <button onClick={() => setActiveChart('expenses')} className="bg-blue-500 text-white p-2 rounded">Expenses Chart</button>
+        <button onClick={() => setActiveChart('savings')} className="bg-blue-500 text-white p-2 rounded">Savings Chart</button>
+        <button onClick={() => setActiveChart('income')} className="bg-blue-500 text-white p-2 rounded">Income Flow Chart</button>
       </section>
       <section className="flex flex-row items-center justify-center gap-12 my-10">
         <div className="flex-2 bg-white p-4 rounded-lg shadow-md">
           {/* This chart is here just to test all the graph components */}
-          <Button variant={selectedPeriod === 'w' ? 'default' : 'secondary'} onClick={() => setSelectedPeriod('w')}>Week</Button>
-          <Button variant={selectedPeriod === 'm' ? 'default' : 'secondary'} onClick={() => setSelectedPeriod('m')}>Month</Button>
-          <Button variant={selectedPeriod === 'y' ? 'default' : 'secondary'} onClick={() => setSelectedPeriod('y')}>Year</Button>
+          <button className={selectedPeriod === 'w' ? 'bg-blue-500 text-white p-2 rounded' : 'bg-gray-200 p-2 rounded'} onClick={() => setSelectedPeriod('w')}>Week</button>
+          <button className={selectedPeriod === 'm' ? 'bg-blue-500 text-white p-2 rounded' : 'bg-gray-200 p-2 rounded'} onClick={() => setSelectedPeriod('m')}>Month</button>
+          <button className={selectedPeriod === 'y' ? 'bg-blue-500 text-white p-2 rounded' : 'bg-gray-200 p-2 rounded'} onClick={() => setSelectedPeriod('y')}>Year</button>
           {renderChart()}
         </div>
         <div className="flex-1 bg-white p-6 rounded-lg shadow-md">
