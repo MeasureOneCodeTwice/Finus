@@ -95,45 +95,54 @@ function DashboardPage() {
     }catch(error) {
       console.error("Error fetching expenses chart data:", error);
     }
-    switch(period) {
-      case 'w':
-        return {
-          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-          datasets: [{
-            label: 'Weekly Expenses',
-            data: [125, 89, 210, 45, 167, 92, 78],
-            borderColor: 'rgb(53, 162, 235)',
-            backgroundColor: 'rgba(53, 162, 235, 0.5)',
-          }]
-        };
+    return {
+      labels: ['Mon'],
+      datasets: [{
+        label: 'Placeholder Expenses',
+        data: [125],
+        borderColor: 'rgb(53, 162, 235)',
+        backgroundColor: 'rgba(53, 162, 235, 0.5)',
+      }]
+    };
+    // switch(period) {
+    //   case 'w':
+    //     return {
+    //       labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    //       datasets: [{
+    //         label: 'Weekly Expenses',
+    //         data: [125, 89, 210, 45, 167, 92, 78],
+    //         borderColor: 'rgb(53, 162, 235)',
+    //         backgroundColor: 'rgba(53, 162, 235, 0.5)',
+    //       }]
+    //     };
       
-      case 'm':
-        return {
-          labels: ['1 Jan', '2 Jan', '3 Jan', '4 Jan', '5 Jan', '6 Jan', '7 Jan', '8 Jan', '9 Jan', '10 Jan', '11 Jan', '12 Jan',
-                  '13 Jan', '14 Jan', '15 Jan', '16 Jan', '17 Jan', '18 Jan', '19 Jan', '20 Jan', '21 Jan', '22 Jan', '23 Jan', '24 Jan',
-                  '25 Jan', '26 Jan', '27 Jan', '28 Jan', '29 Jan', '30 Jan', '31 Jan'
-                  ],
-          datasets: [{
-            label: 'Monthly Expenses',
-            data: [125, 89, 210, 45, 167, 92, 78, 123, 98, 134, 56, 189, 76, 143, 87, 65, 190, 120,
-                  134, 98, 76, 143, 87, 65, 190, 120, 134, 98, 76, 143, 87
-                  ],
-            borderColor: 'rgb(53, 162, 235)',
-            backgroundColor: 'rgba(53, 162, 235, 0.5)',
-          }]
-        };
+    //   case 'm':
+    //     return {
+    //       labels: ['1 Jan', '2 Jan', '3 Jan', '4 Jan', '5 Jan', '6 Jan', '7 Jan', '8 Jan', '9 Jan', '10 Jan', '11 Jan', '12 Jan',
+    //               '13 Jan', '14 Jan', '15 Jan', '16 Jan', '17 Jan', '18 Jan', '19 Jan', '20 Jan', '21 Jan', '22 Jan', '23 Jan', '24 Jan',
+    //               '25 Jan', '26 Jan', '27 Jan', '28 Jan', '29 Jan', '30 Jan', '31 Jan'
+    //               ],
+    //       datasets: [{
+    //         label: 'Monthly Expenses',
+    //         data: [125, 89, 210, 45, 167, 92, 78, 123, 98, 134, 56, 189, 76, 143, 87, 65, 190, 120,
+    //               134, 98, 76, 143, 87, 65, 190, 120, 134, 98, 76, 143, 87
+    //               ],
+    //         borderColor: 'rgb(53, 162, 235)',
+    //         backgroundColor: 'rgba(53, 162, 235, 0.5)',
+    //       }]
+    //     };
       
-      case 'y':
-        return {
-          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-          datasets: [{
-            label: 'Yearly Expenses',
-            data: [3245, 2987, 3456, 3789, 4123, 3876, 4234, 3987, 3678, 4012, 3789, 4123],
-            borderColor: 'rgb(53, 162, 235)',
-            backgroundColor: 'rgba(53, 162, 235, 0.5)',
-          }]
-        };
-    }
+    //   case 'y':
+    //     return {
+    //       labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    //       datasets: [{
+    //         label: 'Yearly Expenses',
+    //         data: [3245, 2987, 3456, 3789, 4123, 3876, 4234, 3987, 3678, 4012, 3789, 4123],
+    //         borderColor: 'rgb(53, 162, 235)',
+    //         backgroundColor: 'rgba(53, 162, 235, 0.5)',
+    //       }]
+    //     };
+    // }
   };
 
 const expensesBarOptions = {
@@ -229,10 +238,9 @@ const incomeSankeyOptions = {
   };
 
   return (
-    <section className="p-10">
-    {/*p-10 bg-gray-100  */}
-      <h1 className="text-4xl font-bold mb-4">Welcome Username</h1>
-      <p className="text-lg te  xt-gray-700">Here you can view your recent transactions and manage your finances.</p>
+    <section className="p-10 bg-gray-100">
+      <h1 className=" text-4xl font-bold mb-4 ">Welcome Username</h1>
+      <p className=" text-lg te  xt-gray-700 ">Here you can view your recent transactions and manage your finances.</p>
       <section className="flex flex-row items-center justify-center gap-12 my-10">
         <AccountCard title="Total Balance" amount="$5,000" backgroundColor="#6fa953" />
         <AccountCard title="Current Income" amount="$5,000" backgroundColor="#1877f2" />

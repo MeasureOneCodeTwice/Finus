@@ -28,12 +28,21 @@ async function getExpensesChartData(period: string): Promise<ChartData<"bar">> {
         if (!["w", "m", "y"].includes(period)) {
             throw new Error("Invalid period. Must be 'weekly', 'monthly', or 'yearly'.");
         }
-        const response = await axios.get(`${BASE_URL}/api/charts/expenses?period=${period}`);
+        const response = await axios.get(`${BASE_URL}/charts/expenses?period=${period}`);
         if (response.status !== 200) {
             throw new Error(`Failed to fetch expenses chart data: ${response.statusText}`);
         }
         
-        return response.data;
+        return {
+          labels: response.data["labels"],
+          datasets: [{
+            label: response.data["datasets"][0]["label"],
+            data: response.data["datasets"][0]["data"],
+            borderColor: 'rgb(254, 103, 48)',
+            backgroundColor: 'rgba(255, 47, 47, 0.5)',
+          }]
+        };
+
     } catch (error) {
         console.error("Error fetching expenses chart data:", error);
         throw error;
