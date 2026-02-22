@@ -36,17 +36,18 @@ export async function signup(body: SignupBody, res, pool) {
       return;
     }
   } catch {
-    res.status(500);
+    res.status(500).json({ error: "Could not validate account state." });
+    return;
   }
 
   const passwordHash = await Bun.password.hash(body.password, {
     algorithm: "bcrypt",
   });
-  console.error(passwordHash);
   try {
     await insertUser({ ...body, pw_hash: passwordHash }, pool);
   } catch (error) {
     res.status(500).json({ error: error.message });
+    return;
   }
 
   res.status(201).json({});

@@ -54,7 +54,7 @@ export async function insertUser(user: UserWithPassword, pool): void {
 
     await connection.execute(
       `
-        INSERT INTO credentials (finus_account_id, pw_hash, salt)
+        INSERT INTO credentials (finus_account_id, pw_hash)
         VALUES (?, ?)
      `,
       [accountInsert.insertId, user.pw_hash],

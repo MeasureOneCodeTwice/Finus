@@ -1,111 +1,151 @@
-import { useState, type FormEvent } from 'react'
-import { BrowserRouter as Router, Link, Navigate, Route, Routes } from 'react-router-dom'
-import './App.css'
+import { useState } from "react";
+import {
+  BrowserRouter as Router,
+  Navigate,
+  Route,
+  Routes,
+} from "react-router-dom";
+import "./App.css";
+import LoginPage from "./pages/LoginPage";
+import SignUpPage from "./pages/SignUpPage";
+import type { AuthApiResponse, AuthSession, AuthUser } from "./pages/authTypes";
 
-type AuthUser = {
-  id: number
-  email: string
-  name: string
-  age: number
-}
-
-type AuthSession = {
-  token: string
-  user: AuthUser
-}
-
-type AuthApiResponse = {
-  ok: boolean
-  token?: string
-  user?: AuthUser
-  error?: string
-  message?: string
-}
-
-const SESSION_STORAGE_KEY = 'finus-session'
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000'
-const MIN_AGE = 1
-const MAX_AGE = 120
+const SESSION_STORAGE_KEY = "finus-session";
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000";
 
 function isValidAuthUser(value: unknown): value is AuthUser {
-  if (!value || typeof value !== 'object') {
-    return false
+  if (!value || typeof value !== "object") {
+    return false;
   }
 
-  const maybeUser = value as AuthUser
-  return (
-    typeof maybeUser.id === 'number' &&
-    typeof maybeUser.email === 'string' &&
-    typeof maybeUser.name === 'string' &&
-    typeof maybeUser.age === 'number'
-  )
+  return typeof (value as { email?: unknown }).email === "string";
 }
 
 function loadSession(): AuthSession | null {
-  const raw = localStorage.getItem(SESSION_STORAGE_KEY)
+  const raw = localStorage.getItem(SESSION_STORAGE_KEY);
   if (!raw) {
-    return null
+    return null;
   }
 
   try {
-    const parsed = JSON.parse(raw) as AuthSession
+    const parsed = JSON.parse(raw) as AuthSession;
     if (!parsed.token || !isValidAuthUser(parsed.user)) {
-      return null
+      return null;
     }
 
-    return parsed
+    return parsed;
   } catch {
-    return null
+    return null;
   }
 }
 
 function saveSession(session: AuthSession) {
-  localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session))
+  localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
 }
 
 function clearSession() {
-  localStorage.removeItem(SESSION_STORAGE_KEY)
+  localStorage.removeItem(SESSION_STORAGE_KEY);
 }
 
-async function requestAuth(path: string, payload: Record<string, unknown>): Promise<AuthApiResponse> {
+function decodeTokenClaims(token: string): Record<string, unknown> | null {
+  const parts = token.split(".");
+  if (parts.length < 2) {
+    return null;
+  }
+
+  try {
+    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const json = atob(base64);
+    const parsed = JSON.parse(json) as Record<string, unknown>;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function resolveUserFromToken(
+  token: string,
+  fallbackUser: Partial<AuthUser>,
+): AuthUser {
+  const claims = decodeTokenClaims(token);
+
+  const emailFromToken =
+    claims && typeof claims.email === "string" ? claims.email : undefined;
+  const nameFromToken =
+    claims && typeof claims.name === "string" ? claims.name : undefined;
+  const firstNameFromToken =
+    claims && typeof claims.first_name === "string"
+      ? claims.first_name
+      : undefined;
+  const lastNameFromToken =
+    claims && typeof claims.last_name === "string"
+      ? claims.last_name
+      : undefined;
+  const subFromToken =
+    claims && typeof claims.sub === "string" ? Number(claims.sub) : undefined;
+
+  return {
+    id: Number.isFinite(subFromToken) ? subFromToken : fallbackUser.id,
+    email: emailFromToken ?? fallbackUser.email ?? "",
+    name: nameFromToken ?? fallbackUser.name,
+    first_name: firstNameFromToken ?? fallbackUser.first_name,
+    last_name: lastNameFromToken ?? fallbackUser.last_name,
+    age: fallbackUser.age,
+  };
+}
+
+async function requestAuth(
+  path: string,
+  payload: Record<string, unknown>,
+): Promise<AuthApiResponse> {
   try {
     const response = await fetch(`${API_BASE_URL}${path}`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(payload),
-    })
+    });
 
-    const data = (await response.json().catch(() => null)) as AuthApiResponse | null
+    const data = (await response
+      .json()
+      .catch(() => null)) as AuthApiResponse | null;
     if (!data) {
-      return { ok: false, error: 'Invalid response from auth server.' }
+      return { ok: false, error: "Invalid response from auth server." };
     }
 
     if (response.status >= 400) {
       return {
         ok: false,
-        error: data.error ?? 'Authentication failed.',
-      }
+        error: data.error ?? "Authentication failed.",
+      };
     }
 
     return { ...data, ok: true };
   } catch {
-    return { ok: false, error: 'Unable to connect to auth server.' }
+    return { ok: false, error: "Unable to connect to auth server." };
   }
 }
 
 function App() {
-  const [session, setSession] = useState<AuthSession | null>(() => loadSession())
+  const [session, setSession] = useState<AuthSession | null>(() =>
+    loadSession(),
+  );
 
-  function handleAuthSuccess(nextSession: AuthSession) {
-    saveSession(nextSession)
-    setSession(nextSession)
+  function handleAuthSuccess(token: string, fallbackUser: Partial<AuthUser>) {
+    const nextSession: AuthSession = {
+      token,
+      user: resolveUserFromToken(token, fallbackUser),
+    };
+
+    saveSession(nextSession);
+    setSession(nextSession);
   }
 
   function handleLogout() {
-    clearSession()
-    setSession(null)
+    clearSession();
+    setSession(null);
   }
 
   return (
@@ -117,7 +157,9 @@ function App() {
         <Routes>
           <Route
             path="/"
-            element={<Navigate to={session ? '/dashboard' : '/login'} replace />}
+            element={
+              <Navigate to={session ? "/dashboard" : "/login"} replace />
+            }
           />
           <Route
             path="/login"
@@ -125,7 +167,10 @@ function App() {
               session ? (
                 <Navigate to="/dashboard" replace />
               ) : (
-                <LoginPage onLogin={handleAuthSuccess} />
+                <LoginPage
+                  onLogin={handleAuthSuccess}
+                  requestAuth={requestAuth}
+                />
               )
             }
           />
@@ -135,7 +180,10 @@ function App() {
               session ? (
                 <Navigate to="/dashboard" replace />
               ) : (
-                <SignUpPage onSignup={handleAuthSuccess} />
+                <SignUpPage
+                  onSignup={handleAuthSuccess}
+                  requestAuth={requestAuth}
+                />
               )
             }
           />
@@ -153,262 +201,13 @@ function App() {
         </Routes>
       </div>
     </Router>
-  )
-}
-
-type LoginPageProps = {
-  onLogin: (session: AuthSession) => void
-}
-
-function LoginPage({ onLogin }: LoginPageProps) {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [errorMessage, setErrorMessage] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setErrorMessage('')
-    setIsSubmitting(true)
-
-    const result = await requestAuth('/api/login', {
-      email: email.trim(),
-      password,
-    })
-
-    setIsSubmitting(false)
-
-    if (!result.token) {
-      setErrorMessage(result.error ?? 'Login failed.')
-      return
-    }
-
-    onLogin({
-      token: result.token,
-      user: result.user,
-    })
-  }
-
-  return (
-    <section className="auth-layout">
-      <div className="auth-panel">
-        <p className="auth-tag">Finus</p>
-        <h1>Welcome back</h1>
-        <p className="auth-copy">Log in to continue managing your finances.</p>
-
-        <form className="auth-form" onSubmit={handleSubmit}>
-          <label htmlFor="login-email">Email</label>
-          <input
-            id="login-email"
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="you@example.com"
-            required
-          />
-
-          <label htmlFor="login-password">Password</label>
-          <input
-            id="login-password"
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            placeholder="Your password"
-            required
-          />
-
-          {errorMessage ? <p className="auth-error">{errorMessage}</p> : null}
-
-          <button type="submit" className="auth-button" disabled={isSubmitting}>
-            {isSubmitting ? 'Logging In...' : 'Log In'}
-          </button>
-        </form>
-
-        <p className="auth-switch">
-          New here? <Link to="/signup">Create an account</Link>
-        </p>
-      </div>
-    </section>
-  )
-}
-
-type SignUpPageProps = {
-  onSignup: (session: AuthSession) => void
-}
-
-function SignUpPage({ onSignup }: SignUpPageProps) {
-  const [username, setUsername] = useState('')
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName] = useState('')
-  const [age, setAge] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [errorMessage, setErrorMessage] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setErrorMessage('')
-
-    const cleanedUsername = username.trim()
-    const cleanedFirstName = firstName.trim()
-    const cleanedLastName = lastName.trim()
-    const parsedAge = Number(age)
-    const normalizedEmail = email.trim().toLowerCase()
-
-    setIsSubmitting(true)
-    const cleanedUser = {
-      username: cleanedUsername,
-      first_name: cleanedFirstName,
-      last_name: cleanedLastName,
-      age: parsedAge,
-      email: normalizedEmail,
-    }
-
-    const result = await requestAuth('/api/signup', { ...cleanedUser, password })
-    setIsSubmitting(false)
-
-    if (result.status >= 400) {
-      setErrorMessage(result.error ?? 'Signup failed.')
-      return
-    }
-
-    const tokenReq = await requestAuth('/api/login', {
-      email: normalizedEmail,
-      password,
-    })
-
-
-    onSignup({
-      token: tokenReq.token,
-      user: cleanedUser,
-    })
-  }
-
-  return (
-    <section className="auth-layout">
-      <div className="auth-panel auth-panel-signup">
-        <p className="auth-tag">Finus</p>
-        <h1>Create account</h1>
-        <p className="auth-copy">Set up your account in less than a minute.</p>
-
-        <form className="auth-form auth-signup-form" onSubmit={handleSubmit}>
-          <fieldset className="auth-group">
-            <legend>Profile</legend>
-            <div className="auth-grid">
-              <div className="auth-field auth-field-full">
-                <label htmlFor="signup-username">Username</label>
-                <input
-                  id="signup-username"
-                  type="text"
-                  value={username}
-                  onChange={(event) => setUsername(event.target.value)}
-                  placeholder="johnd"
-                  required
-                />
-              </div>
-
-         <div className="auth-field">
-                <label htmlFor="signup-first-name">First Name</label>
-                <input
-                  id="signup-first-name"
-                  type="text"
-                  value={firstName}
-                  onChange={(event) => setFirstName(event.target.value)}
-                  placeholder="John"
-                  required
-                />
-              </div>
-
-          <div className="auth-field">
-                <label htmlFor="signup-last-name">Last Name</label>
-                <input
-                  id="signup-last-name"
-                  type="text"
-                  value={lastName}
-                  onChange={(event) => setLastName(event.target.value)}
-                  placeholder="Doe"
-                  required
-                />
-              </div>
-
-          <div className="auth-field auth-field-full">
-                <label htmlFor="signup-age">Age</label>
-                <input
-                  id="signup-age"
-                  type="number"
-                  min={MIN_AGE}
-                  max={MAX_AGE}
-                  value={age}
-                  onChange={(event) => setAge(event.target.value)}
-                  placeholder="21"
-                  required
-                />
-              </div>
-            </div>
-          </fieldset>
-
-          <fieldset className="auth-group">
-            <legend>Account</legend>
-            <div className="auth-grid">
-              <div className="auth-field auth-field-full">
-                <label htmlFor="signup-email">Email</label>
-                <input
-                  id="signup-email"
-                  type="email"
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  placeholder="you@example.com"
-                  required
-                />
-              </div>
-
-          <div className="auth-field">
-                <label htmlFor="signup-password">Password</label>
-                <input
-                  id="signup-password"
-                  type="password"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  placeholder="At least 8 characters"
-                  required
-                />
-              </div>
-
-          <div className="auth-field">
-                <label htmlFor="signup-confirm-password">Confirm Password</label>
-                <input
-                  id="signup-confirm-password"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(event) => setConfirmPassword(event.target.value)}
-                  placeholder="Repeat password"
-                  required
-                />
-              </div>
-            </div>
-          </fieldset>
-
-          {errorMessage ? <p className="auth-error">{errorMessage}</p> : null}
-
-          <button type="submit" className="auth-button" disabled={isSubmitting}>
-            {isSubmitting ? 'Creating Account...' : 'Sign Up'}
-          </button>
-        </form>
-
-        <p className="auth-switch">
-          Already have an account? <Link to="/login">Log in</Link>
-        </p>
-      </div>
-    </section>
-  )
+  );
 }
 
 type DashboardPageProps = {
-  session: AuthSession
-  onLogout: () => void
-}
+  session: AuthSession;
+  onLogout: () => void;
+};
 
 function DashboardPage({ session, onLogout }: DashboardPageProps) {
   return (
@@ -417,15 +216,15 @@ function DashboardPage({ session, onLogout }: DashboardPageProps) {
         <p className="auth-tag">Finus</p>
         <h1>Signed in</h1>
         <p className="auth-copy">
-          Hello {session.user.first_name}. You are logged in as{' '}
-          <strong>{session.user.email}</strong>.
+          Hello {session.user.first_name ?? session.user.name ?? "there"}. You
+          are logged in as <strong>{session.user.email}</strong>.
         </p>
         <button type="button" className="auth-button" onClick={onLogout}>
           Log Out
         </button>
       </div>
     </section>
-  )
+  );
 }
 
-export default App
+export default App;
