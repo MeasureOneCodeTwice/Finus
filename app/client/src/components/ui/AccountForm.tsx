@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import CsvUpload from "../csvread/CsvUpload";
-import './userForm.css'
-
+import './UserForm.css'
+import {postUserAccount, type Account} from '../../api/account.ts'
+import { validateAccountForm } from "../../util/ValidateForms.ts";
 interface popupProp{
     toggle: () => void;
     edit: boolean
 }
 
-const accountCategory = {
+export const accountCategory = {
     SAVING:"Saving",
     CHEQUING: "Chequing",
     INVESTMENT: "Investment",
@@ -19,8 +20,32 @@ type typeofAccount = keyof typeof accountCategory
 export default function popupForm({toggle, edit}:popupProp,){
 
     //Submits the account data
+    
     const handleSubmit = () => {
-        toggle()
+        let subtype = undefined
+        let interest = undefined
+        const accountBalence = Number(balence)
+
+        if(accountType === accountCategory.SAVING) {
+            subtype = formInput.subType
+        }
+
+        if(accountType === accountCategory.SAVING || accountType === accountCategory.DEBT){
+            interest = formInput.interest
+        }
+        
+        //Check account before validating b/c account can be undefined
+        //Determine if form input for an account is valid
+        if(accountType && validateAccountForm(formInput.name, accountCategory[accountType], accountBalence,file,subtype,interest)) {
+            //Create a new account type and post it 
+            const newAccount: Account = {id: 0, name:formInput.name, type: accountType, balance: accountBalence, subtype:"", value:0, last_updated: new Date()}
+            console.log(newAccount)
+            postUserAccount(newAccount)
+            alert("Account " + formInput.name + " has been created")
+            toggle()
+        } else {
+            alert("Please fill out the form")
+        }
     }
     
 
@@ -53,12 +78,15 @@ export default function popupForm({toggle, edit}:popupProp,){
             setFile(undefined)
         }
     }
+    
+    const handleCurrencyBlur = (event:React.ChangeEvent<HTMLInputElement>) => {
+        if(event.target.value !== "") {
+            setBalence(parseFloat(balence).toFixed(2))
+        }
 
+    }
 
-    //Add when getUserAccounts is implemented
-    //const userAccounts = getUserAccounts()
-
-    const [formInput, setFormInput] = useState({name: '', type:'', subType:''})
+    const [formInput, setFormInput] = useState({name: '', subType:'', interest: 0})
     const [file, setFile] = useState<File|undefined>(undefined)
     const[balence, setBalence] = useState("")
     const[accountType, setAccountType] = useState<typeofAccount|undefined>(undefined)
@@ -69,7 +97,7 @@ export default function popupForm({toggle, edit}:popupProp,){
     <>
       <div className="popup">
 
-        <form onSubmit={() => handleSubmit() }>
+        <div className="popupForm">
 
             {edit ? (<h2>Edit Account</h2>):(<h2>Create Account</h2>)}
 
@@ -85,7 +113,7 @@ export default function popupForm({toggle, edit}:popupProp,){
             <br></br>
 
             <label>Balence: $</label>
-            <input  type = "text" min = "0" step ="0.01" name = "balance" value={balence} onChange={handleCurrencyChange} placeholder="0.00"/>
+            <input  type = "text" min = "0" step ="0.01" name = "balance" value={balence} onChange={handleCurrencyChange} onBlur ={handleCurrencyBlur} placeholder="0.00"/>
             <br></br>
 
             <label htmlFor="statement">Upload Bank Statement(.csv)</label><CsvUpload />
@@ -99,13 +127,13 @@ export default function popupForm({toggle, edit}:popupProp,){
               <input id = "interest" name = "interest"type = "number" min = "0" max = "100" onChange={handleChange}/>
               <br></br>
               </>
-            ): null
+            ): null 
             }
 
             {(accountType === "SAVING") ? (
               <>
               <label htmlFor="subType">Type of saving account</label>
-              <select id  ="subType" name = "subType">
+              <select id  ="subType" name = "subType" onChange={handleChange}>
                   <option value ="">Select saving type</option>
                   <option value = "TFSA">TFSA</option>
                   <option value = "RRSP">RRSP</option>
@@ -118,9 +146,9 @@ export default function popupForm({toggle, edit}:popupProp,){
 
             <div className="bottomButtons">
                 <button onClick={toggle}>Close</button>
-                <button type = "submit">Submit</button>
+                {edit? (<button onClick={handleSubmit}>Edit</button>): (<button onClick={handleSubmit}>Submit</button>)}
             </div>
-        </form>
+        </div>
 
       </div>
     </>  

@@ -70,7 +70,7 @@ function NotFoundPage() {
       </p>
 
       <button onClick={() => togglePopup()}>Forms</button>
-      {seen ? (<AccountPopup toggle={togglePopup} edit = {false} />):null}
+      {seen ? (<TransactionPopup toggle={togglePopup} edit = {false} />):null}
      
     </>
   )

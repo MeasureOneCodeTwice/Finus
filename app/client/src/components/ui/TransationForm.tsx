@@ -1,6 +1,8 @@
 import React, { useState, type ReactHTMLElement } from "react";
 import CsvUpload from "../csvread/CsvUpload";
-import './userForm.css'
+import './UserForm.css'
+import { getUserAccounts, type Account } from "../../api/account";
+import { validateTransactionForm } from "../../util/ValidateForms";
 
 interface popupProp{
     toggle: () => void;
@@ -8,7 +10,7 @@ interface popupProp{
 }
 
 
-const transferCategory = {
+export const transactionCategory = {
     FOOD: 'Food',
     HOUSING: "Housing",
     UTIL: "Utilzities",
@@ -17,14 +19,28 @@ const transferCategory = {
 };
 
 //Gets the keys of the enum
-type typeOfTransfers = keyof typeof transferCategory
+type typeOfTransaction = keyof typeof transactionCategory
 
 //Returns a form of for the user to enter their info
 export default function popupForm({toggle, edit}:popupProp){
 
     //Handles the submiting the form
     const handleSubmit = () =>{
-        toggle()
+
+        const transferAmount = Number(amount)
+
+        if(selectedType && validateTransactionForm(Number(selectedAccount), selectedType, transferAmount, file)){
+            
+            if(edit){
+                alert("Transaction has been edited")
+            } else {
+                alert("Transaction has been created")
+            }
+
+            toggle()
+        } else {
+            alert("Please fill out the transaction form")
+        }
 
     }
 
@@ -63,31 +79,51 @@ export default function popupForm({toggle, edit}:popupProp){
         
     }
 
+    //Gets user accounts
+    let userAccounts: Account[] = []
+
+    //Add when getUserAccounts is implemented
+    getUserAccounts().then(accounts => {
+        console.log(accounts)
+
+        //Detemrine accounts exist
+        if(accounts) {
+            setAccount(accounts)
+        }
+    })
+
+    //State of the user's account
+    const [account, setAccount] = useState<Account[] | []>()
+
     //Holds state of user input
-    const [selectedType, setSelectedType] = useState<typeOfTransfers| undefined>(undefined)
+    const [selectedAccount, setSelectedAccount] = useState("")
+    const [selectedType, setSelectedType] = useState("")
     const [amount, setAmount] = useState<string>("")
     const [file, setFile] = useState<File | undefined>(undefined)
 
     //Holds the types of transfers
-    const transCat: typeOfTransfers [] = Object.keys(transferCategory) as typeOfTransfers[];
+    const transCat: typeOfTransaction [] = Object.keys(transactionCategory) as typeOfTransaction[];
+
+
 
     return(
         <>
         <div className="popup">
-            <form onSubmit={handleSubmit}>
+            <div className="popupForm">
                 {edit ? (<h2>Edit Transaction</h2>):(<h2>Create Transaction</h2>)}
                 
                 <label>User Account:</label>
-                <select>
-                    {}
+                <select onChange={event => setSelectedAccount(event.target.value)}>
+                    <option value = "">Select Account</option>
+                    {userAccounts.map(account => <option key = {account.id} value = {account.id}>account.name (account.type)</option>)}
                 </select>
                 
                 <br></br>
 
                 <label>Type</label>
-                <select id = "transferType" value = {selectedType} onChange={event => setSelectedType(event.target.value as typeOfTransfers)}>
+                <select id = "transferType" value = {selectedType} onChange={event => setSelectedType(event.target.value as typeOfTransaction)}>
                     <option value="">Select Type: </option>
-                    {transCat.map(category => (<option key = {category} value = {category}>{transferCategory[category]}</option>))}
+                    {transCat.map(category => (<option key = {category} value = {transactionCategory[category]}>{transactionCategory[category]}</option>))}
                 </select>
                 <br></br>
 
@@ -101,9 +137,9 @@ export default function popupForm({toggle, edit}:popupProp){
 
                 <div className="bottomButtons">
                     <button onClick={toggle}>Close</button>
-                    {edit ?(<button type="submit">Edit</button>):(<button type="submit">Submit</button>)}
+                    {edit ?(<button onClick={handleSubmit}>Edit</button>):(<button onClick={handleSubmit}>Submit</button>)}
                 </div>
-            </form>
+            </div>
         </div>
         </>
     )
