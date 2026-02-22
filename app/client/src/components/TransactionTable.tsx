@@ -95,11 +95,6 @@ const transactions: Transaction[] = [
 ];
 function TransactionTable() {
   return (
-    <Grid />
-  )
-}
-function Grid() {
-  return (
     <div className="my-10 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
       {/* Header */}
       <div className="grid grid-cols-[1fr_2fr_1fr_1fr_1fr_1fr] bg-gray-50 px-6 py-4 text-sm font-semibold text-gray-600 uppercase tracking-wide border-b gap-x-2">
@@ -153,7 +148,6 @@ function Grid() {
         ))}
       </div>
     </div>
-
   )
 }
 export default TransactionTable
