@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import CsvUpload from "../csvread/CsvUpload";
 import './UserForm.css'
-import {postUserAccount, type Account} from '../../api/account.ts'
+import {postUserAccount, type Account} from '../../api/Account.ts'
 import { validateAccountForm } from "../../util/ValidateForms.ts";
 interface popupProp{
     toggle: () => void;
@@ -37,11 +37,19 @@ export default function popupForm({toggle, edit}:popupProp,){
         //Check account before validating b/c account can be undefined
         //Determine if form input for an account is valid
         if(accountType && validateAccountForm(formInput.name, accountCategory[accountType], accountBalence,file,subtype,interest)) {
-            //Create a new account type and post it 
+           
             const newAccount: Account = {id: 0, name:formInput.name, type: accountType, balance: accountBalence, subtype:"", value:0, last_updated: new Date()}
             console.log(newAccount)
-            postUserAccount(newAccount)
-            alert("Account " + formInput.name + " has been created")
+
+            postUserAccount(newAccount).then((data)=>{
+                if(data && data["id"])
+                    newAccount["id"] = data["id"]
+
+                    //Can't check both fields on same if statement, so another one is need to check
+                    if(data["lastUpdated"])
+                        newAccount["last_updated"] = data["lastUpdated"]
+            })
+                    
             toggle()
         } else {
             alert("Please fill out the form")

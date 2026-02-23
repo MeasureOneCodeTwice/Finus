@@ -1,12 +1,14 @@
 import React, { useState, type ReactHTMLElement } from "react";
 import CsvUpload from "../csvread/CsvUpload";
 import './UserForm.css'
-import { getUserAccounts, type Account } from "../../api/account";
+import { getUserAccounts, type Account } from "../../api/Account";
 import { validateTransactionForm } from "../../util/ValidateForms";
+import { pushTranscations, type Transaction } from "../../api/Transaction";
 
 interface popupProp{
     toggle: () => void;
     edit: boolean
+    selectedTransaction?: Transaction
 }
 
 
@@ -22,20 +24,33 @@ export const transactionCategory = {
 type typeOfTransaction = keyof typeof transactionCategory
 
 //Returns a form of for the user to enter their info
-export default function popupForm({toggle, edit}:popupProp){
+export default function popupForm({toggle, edit, selectedTransaction}:popupProp){
 
     //Handles the submiting the form
     const handleSubmit = () =>{
 
+        const accountId = Number(selectedAccount)
         const transferAmount = Number(amount)
+        let userTransaction: Transaction
 
-        if(selectedType && validateTransactionForm(Number(selectedAccount), selectedType, transferAmount, file)){
-            
-            if(edit){
-                alert("Transaction has been edited")
-            } else {
-                alert("Transaction has been created")
-            }
+        if(selectedType && validateTransactionForm(accountId, selectedType, transferAmount, file)){
+
+            userTransaction = {id: 0, financialAccount_id:accountId, amount:transferAmount, type: selectedType, date: new Date()}
+
+            if(edit && selectedTransaction) {
+
+                userTransaction["id"] = selectedTransaction["id"]
+            } 
+
+            pushTranscations([userTransaction]).then((data) => {data[0]
+
+                //Successful push if data is returned
+                if(data && data[0]["id"]) {
+                    userTransaction["id"] = data[0]["id"] 
+                }
+            })
+
+            //Need to insert function that sets the state in parent component
 
             toggle()
         } else {
@@ -79,8 +94,6 @@ export default function popupForm({toggle, edit}:popupProp){
         
     }
 
-    //Gets user accounts
-    let userAccounts: Account[] = []
 
     //Add when getUserAccounts is implemented
     getUserAccounts().then(accounts => {
@@ -104,6 +117,11 @@ export default function popupForm({toggle, edit}:popupProp){
     //Holds the types of transfers
     const transCat: typeOfTransaction [] = Object.keys(transactionCategory) as typeOfTransaction[];
 
+    if(edit && selectedTransaction){
+        setSelectedAccount(selectedTransaction.id.toString())
+        setSelectedType(selectedTransaction.type)
+        setAmount(selectedTransaction.amount.toString())
+    }
 
 
     return(
@@ -115,7 +133,7 @@ export default function popupForm({toggle, edit}:popupProp){
                 <label>User Account:</label>
                 <select onChange={event => setSelectedAccount(event.target.value)}>
                     <option value = "">Select Account</option>
-                    {userAccounts.map(account => <option key = {account.id} value = {account.id}>account.name (account.type)</option>)}
+                    {account && account.map(account => <option key = {account.id} value = {account.id}>account.name (account.type)</option>)}
                 </select>
                 
                 <br></br>
@@ -131,7 +149,12 @@ export default function popupForm({toggle, edit}:popupProp){
                 <input className="moneyInput" min="0" step={"0.01"} type = "text" id = "amount" value={amount} onChange={handleCurrencyChange} onBlur={handleCurrencyBlur} placeholder="0.00"/>
                 <br></br>
 
-                <label htmlFor="statement">Bank statement(CVS)</label> <CsvUpload />
+                {edit ? (null):(
+                    <>
+                    <label htmlFor="statement">Bank statement(CVS)</label> <CsvUpload />
+                    </>
+                )} 
+
                 <input type = "file" name = "statement" accept=".cvs" onChange={handleFile}/>
                 <br></br>
 
