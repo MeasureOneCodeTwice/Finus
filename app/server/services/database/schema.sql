@@ -91,6 +91,7 @@ CREATE TABLE finus.transaction (
     id                  INTEGER       NOT NULL AUTO_INCREMENT,
     financialAccount_id INTEGER       NOT NULL,
     amount              INTEGER       NOT NULL,
+    category            VARCHAR(50)   NOT NULL, -- Had to add this for analytics
     description         VARCHAR(500),
     sender              VARCHAR(50),
     recipient           VARCHAR(50),
@@ -151,7 +152,7 @@ CREATE TABLE finus.fixedInterestInvestment(
 );
 
 #Populate lookup tables
-#INSERT INTO finus.financialAccountType    (type) VALUES ();
-#INSERT INTO finus.financialAccountSubtype (type) VALUES ();
+INSERT INTO finus.financialAccountType    (type) VALUES ('chequing'), ('savings'), ('credit_card'), ('investment');
+INSERT INTO finus.financialAccountSubtype (type) VALUES ('RRSP'), ('TFSA'), ('FHSA'), ('RESP'), ('RDSP');
 INSERT  INTO finus.investmentType          (type) VALUES ('fixedInterest'), ('stock'); #These have to match table names
 INSERT  INTO finus.goalType                (type) VALUES ('money'), ('debt');
