@@ -1,0 +1,23 @@
+name: publishBackendImages
+
+on:
+  push:
+    branches: [ "release/**" ]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v4
+    - name: setup
+      run: |
+        cd app/server
+        rm .env
+        BRANCH_NAME=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
+        RELEASE_VERSION=echo $BRANCH_NAME | sed "s|release\/||g"
+    - name: build
+      run: docker compose build
+    - name: publish
+      run: docker compose push
