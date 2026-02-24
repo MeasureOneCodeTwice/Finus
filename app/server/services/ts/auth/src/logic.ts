@@ -27,15 +27,18 @@ export async function signup(body: SignupBody, res, pool) {
     return;
   }
 
+  console.log("Passed email, pwd and age checks, going to check for existing email in db");
+
   try {
-    const existingUser = await emailExists(body.email, pool);
+    //const existingUser = await emailExists(body.email, pool);
+    const existingUser = false;//debugging email check for now
     if (existingUser) {
       res.status(409).json({
         error: "An account with this email already exists.",
       });
       return;
     }
-  } catch {
+  } catch (error) {
     res.status(500).json({ error: "Could not validate account state." });
     return;
   }
@@ -44,6 +47,7 @@ export async function signup(body: SignupBody, res, pool) {
     algorithm: "bcrypt",
   });
   try {
+    console.log("Inserting user into database...");
     await insertUser({ ...body, pw_hash: passwordHash }, pool);
   } catch (error) {
     res.status(500).json({ error: error.message });

@@ -52,6 +52,8 @@ export async function insertUser(user: UserWithPassword, pool): void {
       [user.username, user.email, user.first_name, user.last_name, user.age],
     );
 
+    console.log("Executed insert into finus account");
+
     await connection.execute(
       `
         INSERT INTO credentials (finus_account_id, pw_hash)
@@ -59,6 +61,8 @@ export async function insertUser(user: UserWithPassword, pool): void {
      `,
       [accountInsert.insertId, user.pw_hash],
     );
+
+    console.log("User created with ID:", accountInsert.insertId);
 
     await connection.commit();
     connection.release();

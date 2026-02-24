@@ -10,12 +10,13 @@ import { parseLoginBody, parseSignupBody } from "./parsing";
 const pool = mysql.createPool({
   host: process.env.MYSQL_HOST,
   port: Number(process.env.MYSQL_PORT),
-  user: process.env.MYSQL_USER,
+  user: 'root',//process.env.MYSQL_USER, // ------------------------------------ Needs fixing, finus_app gets denied access, this might be an issue of accessing the db from outside its container
   password: process.env.MYSQL_PASSWORD,
   database: process.env.DB_NAME,
   waitForConnections: true,
   connectionLimit: 10,
 });
+
 
 const app = express();
 app.use(express.json());
@@ -30,6 +31,7 @@ app.post("/signup", async (req, res) => {
     return;
   }
 
+  console.log("In Index, calling for signup function");
   signup(body, res, pool);
 });
 

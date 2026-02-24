@@ -18,7 +18,7 @@ import subprocess
 DB_CONFIG = {
     'host': '127.0.0.1',
     'port': 3306,
-    'user': 'root',
+    'user': 'finus_app',#'root',
     'password': 'dummypw', #very unsafe, yes, but this file should not be accessible in prod 
     'database': 'finus'
 }
