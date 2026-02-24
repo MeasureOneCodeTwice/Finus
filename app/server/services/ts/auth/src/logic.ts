@@ -1,5 +1,6 @@
 import { type LoginBody, type SignupBody, type AuthTokenClaims } from "./types";
-import { emailExists, insertUser, getUserWithPasswordByEmail } from "./queries";
+import { insertUser, getUserWithPasswordByEmail } from "./queries";
+// import { emailExists } from "./queries";
 import { type User } from "@/types";
 import jwt from "jsonwebtoken";
 
@@ -38,7 +39,7 @@ export async function signup(body: SignupBody, res, pool) {
       });
       return;
     }
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: "Could not validate account state." });
     return;
   }

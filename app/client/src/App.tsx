@@ -4,15 +4,12 @@ import {
   Navigate,
   Route,
   Routes,
-  useLocation
 } from "react-router-dom";
 import "./App.css";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
 import type { AuthApiResponse, AuthSession, AuthUser } from "./pages/authTypes";
-import LoadingSpinner from './components/LoadingSpinner.tsx'
 import DashboardPage from './pages/DashboardPage.tsx'
-import Layout from './components/Layout.tsx'
 
 const SESSION_STORAGE_KEY = "finus-session";
 const API_BASE_URL =

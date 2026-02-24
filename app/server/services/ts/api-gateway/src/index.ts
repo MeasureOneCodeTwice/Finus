@@ -55,7 +55,7 @@ onExit(async () => await server.close());
 
 //API gateway sits on port 3000 and is accessible from there. Go to browser and type http://localhost:3000/health and you should see which services are up.
 app.get('/health', async (req: express.Request, res: express.Response) => {
-    const result: { [string]: string} = {};
+    const result: { [key: string]: string} = {};
     const services: string[] = Object.keys(process.env).filter((x) => /^.*_SERVICE_ADDR$/.test(x));
 
     for(const service of services) {
