@@ -1,4 +1,4 @@
-CREATE DATABASE finus;
+CREATE DATABASE IF NOT EXISTS finus;
 
 CREATE TABLE finus.finusAccount (
     id         INTEGER      NOT NULL AUTO_INCREMENT,
@@ -12,9 +12,9 @@ CREATE TABLE finus.finusAccount (
 );
 
 CREATE TABLE finus.credentials (
+    #We use a hash algorithm which includes the salt in the hash.
     finus_account_id INTEGER     NOT NULL AUTO_INCREMENT,
     pw_hash          BLOB(256)   NOT NULL,
-    salt             CHAR(8)     NOT NULL,
     PRIMARY KEY (finus_account_id),
     FOREIGN KEY (finus_account_id) REFERENCES finus.finusAccount(id) ON DELETE CASCADE
 );

@@ -1,7 +1,7 @@
-import { PORT } from '@/port';
-import { onExit } from '@/hooks';
-import { buildCorsConfig } from '@/corsUtil';
-import express from 'express';
+import { PORT } from "@/port";
+import { onExit } from "@/hooks";
+import { buildCorsConfig } from "@/corsUtil";
+import express from "express";
 
 const app = express();
 app.use(express.json());
@@ -10,11 +10,11 @@ app.use(buildCorsConfig());
 const server = app.listen(PORT, () => {
   console.log(`User Service running on port ${PORT}`);
 });
-onExit(() => server.close());
+onExit(async () => await server.close());
 
 //test endpoint
-app.get('/health', (req: express.Request, res: express.Response) => {
-    res.send('ok');
+app.get("/health", (req: express.Request, res: express.Response) => {
+  res.send("ok");
 });
 
 app.get('/charts/expenses', (req: express.Request, res: express.Response) => {

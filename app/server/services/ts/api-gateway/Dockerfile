@@ -2,14 +2,17 @@ FROM oven/bun:1.0-slim
 
 WORKDIR /project
 COPY package.json .
-COPY tsconfig.json .
-COPY common ./common
 RUN bun install
 
 WORKDIR /project/app
 COPY api-gateway/package.json .
-COPY api-gateway/src ./src
 RUN bun install
 
+WORKDIR /project
+COPY tsconfig.json .
+COPY common ./common
 
-CMD ["bun", "src/index.ts"]
+WORKDIR /project/app
+COPY api-gateway/src ./src
+
+CMD ["bun", "--no-env-file", "src/index.ts"]
