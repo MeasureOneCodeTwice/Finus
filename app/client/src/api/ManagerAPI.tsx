@@ -3,20 +3,116 @@ import { BASE_URL } from "@/utils/constants";
 import type { ChartData } from "chart.js";
 import type { SankeyData } from 'recharts/types/chart/Sankey';
 import type React from "react";
-// import type { Transaction } from "@/types/Transaction";
+import type { Transaction } from "@/types/Transaction";
 
-// async function getTransactions(): Promise<Transaction[]> {
-//     try {
-//         const response = await axios.get(`${BASE_URL}/api/transactions`);
-//         if (response.status !== 200) {
-//             throw new Error(`Failed to fetch transactions: ${response.statusText}`);
-//         }
-//         return response.data;
-//     } catch (error) {
-//         console.error("Error fetching transactions:", error);
-//         throw error;
-//     }
-// }
+async function getTransactions(): Promise<Transaction[]> {
+    /* Uncomment this block once backend is ready to test fetching transactions */
+    // try {
+    //     const response = await axios.get(`${BASE_URL}/api/transactions`);
+    //     if (response.status !== 200) {
+    //         throw new Error(`Failed to fetch transactions: ${response.statusText}`);
+    //     }
+    //     return response.data;
+    // } catch (error) {
+    //     console.error("Error fetching transactions:", error);
+    //     throw error;
+    // }
+
+    //Assume doing api call here and getting transactions back, but for now just simulate with timeout
+     const transactions: Transaction[] = [
+          {
+            id: "tx001",
+            amount: 1200,
+            category: "Income",
+            date: "2026-02-01",
+            from: "Tech Corp Inc.",
+            to: "Huy Truong",
+            description: "Monthly salary payment"
+          },
+          {
+            id: "tx002",
+            amount: -75.5,
+            category: "Expenses",
+            date: "2026-02-02",
+            from: "Huy Truong",
+            to: "Walmart",
+            description: "Weekly grocery shopping"
+          },
+          {
+            id: "tx003",
+            amount: -45,
+            category: "Expenses",
+            date: "2026-02-03",
+            from: "Huy Truong",
+            to: "City Bus Service",
+            description: "Monthly bus pass"
+          },
+          {
+            id: "tx004",
+            amount: -120,
+            category: "Expenses",
+            date: "2026-02-04",
+            from: "Huy Truong",
+            to: "Hydro Company",
+            description: "Electricity bill"
+          },
+          {
+            id: "tx005",
+            amount: -60,
+            category: "Expenses",
+            date: "2026-02-05",
+            from: "Huy Truong",
+            to: "Rogers",
+            description: "Home internet bill"
+          },
+          {
+            id: "tx006",
+            amount: -35.75,
+            category: "Expenses",
+            date: "2026-02-06",
+            from: "Huy Truong",
+            to: "Tim Hortons",
+            description: "Lunch with friends"
+          },
+          {
+            id: "tx007",
+            amount: -15.99,
+            category: "Expenses",
+            date: "2026-02-07",
+            from: "Huy Truong",
+            to: "Netflix",
+            description: "Monthly subscription"
+          },
+          {
+            id: "tx008",
+            amount: -200,
+            category: "Expenses",
+            date: "2026-02-08",
+            from: "Huy Truong",
+            to: "Amazon",
+            description: "Electronics purchase"
+          },
+          {
+            id: "tx009",
+            amount: 150,
+            category: "Expenses",
+            date: "2026-02-09",
+            from: "Client ABC",
+            to: "Huy Truong",
+            description: "Website development payment"
+          },
+          {
+            id: "tx010",
+            amount: -500,
+            category: "Expenses",
+            date: "2026-02-01",
+            from: "Huy Truong",
+            to: "Landlord",
+            description: "Monthly rent"
+          }
+        ];
+    return new Promise(resolve => setTimeout(() => resolve(transactions), 1000));
+}
 
 
 
@@ -114,7 +210,7 @@ async function getIncomeFlowChartData(period: string): Promise<SankeyData> {
 
 
 export {
-    // getTransactions,    
+    getTransactions,    
     getExpensesChartData,
     getSavingsContribChartData,
     getIncomeFlowChartData

@@ -6,7 +6,7 @@ import AccountCard from '@/components/AccountCard';
 import TransactionTable from '@/components/TransactionTable';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import SankeyChart from '@/components/SankeyChart';
-import { getExpensesChartData, getSavingsContribChartData, getIncomeFlowChartData } from '@/api/ManagerAPI';
+import { getExpensesChartData, getSavingsContribChartData, getIncomeFlowChartData, getTransactions } from '@/api/ManagerAPI';
 import type { SankeyData } from 'recharts/types/chart/Sankey';
 import ChartSection from '@/components/DashboardChartSection';
 import DashboardChartSection from '@/components/DashboardChartSection';
@@ -38,7 +38,7 @@ function DashboardPage({ session, onLogout }: DashboardPageProps) {
       </section>
       <DashboardChartSection />
       <h2 className="text-2xl font-bold mb-4">Recent Transactions</h2>
-      <TransactionTable />
+      <TransactionTable  />
     </section>
   )
 }
