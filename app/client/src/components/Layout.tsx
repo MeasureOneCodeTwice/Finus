@@ -1,9 +1,9 @@
 import React from 'react'
-import { Outlet, useLocation } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
 import Header from './Header'
 
 function Layout() {
-  const location = useLocation()
+  // const location = useLocation()
   return (
     <>
       <Header />

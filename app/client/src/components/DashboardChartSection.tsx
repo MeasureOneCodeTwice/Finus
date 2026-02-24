@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import type { Transaction } from '@/types/Transaction'
-import { Pie, Line, Bar } from 'react-chartjs-2';
+import { Line, Bar } from 'react-chartjs-2';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import SankeyChart from '@/components/SankeyChart';
 import { getExpensesChartData, getSavingsContribChartData, getIncomeFlowChartData } from '@/api/ManagerAPI';
@@ -20,7 +19,7 @@ function DashboardChartSection() {
     const [isLoading, setIsLoading] = useState(false);
 
     
-     const fetchExpensesData = async () => {
+   async function fetchExpensesData() {
     setIsLoading(true);
     try {
       const data = await getTestExpensesData(selectedPeriod);
@@ -32,7 +31,7 @@ function DashboardChartSection() {
     }
   };
 
-  const fetchSavingsData = async () => {
+  async function fetchSavingsData() {
     setIsLoading(true);
     try {
       const data = await getTestSavingsContribData(selectedPeriod);
@@ -44,7 +43,7 @@ function DashboardChartSection() {
     }
   };
 
-  const fetchIncomeData = async () => {
+  async function fetchIncomeData() {
     setIsLoading(true);
     try {
       const data = await getTestIncomeFlowData(selectedPeriod);

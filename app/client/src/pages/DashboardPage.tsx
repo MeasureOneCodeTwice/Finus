@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from 'react'
-import type { Transaction } from '@/types/Transaction'
-import { Chart,  PointElement, LineElement,ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, type ChartData, type LineController } from 'chart.js';
-import { Pie, Line, Bar } from 'react-chartjs-2';
+// import React, { useEffect, useState } from 'react'
+// import type { Transaction } from '@/types/Transaction'
+// import { Chart,  PointElement, LineElement,ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, type ChartData, type LineController } from 'chart.js';
+// import { Pie, Line, Bar } from 'react-chartjs-2';
 import AccountCard from '@/components/AccountCard';
 import TransactionTable from '@/components/TransactionTable';
-import LoadingSpinner from '@/components/LoadingSpinner';
-import SankeyChart from '@/components/SankeyChart';
-import { getExpensesChartData, getSavingsContribChartData, getIncomeFlowChartData, getTransactions } from '@/api/ManagerAPI';
-import type { SankeyData } from 'recharts/types/chart/Sankey';
-import ChartSection from '@/components/DashboardChartSection';
+// import LoadingSpinner from '@/components/LoadingSpinner';
+// import SankeyChart from '@/components/SankeyChart';
+// import { getExpensesChartData, getSavingsContribChartData, getIncomeFlowChartData, getTransactions } from '@/api/ManagerAPI';
+// import type { SankeyData } from 'recharts/types/chart/Sankey';
+// import ChartSection from '@/components/DashboardChartSection';
 import DashboardChartSection from '@/components/DashboardChartSection';
 import type { AuthSession } from './authTypes';
 Chart.register(PointElement, LineElement, ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
