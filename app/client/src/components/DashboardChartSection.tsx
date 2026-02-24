@@ -19,50 +19,6 @@ function DashboardChartSection() {
     const [incomeData, setIncomeData] = useState<SankeyData | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    const data = {
-    labels: [
-      'Red',
-      'Blue',
-      'Yellow'
-    ],
-    datasets: [{
-      label: 'My First Dataset',
-      data: [300, 50, 100],
-      backgroundColor: [
-        'rgb(255, 99, 132)',
-        'rgb(54, 162, 235)',
-        'rgb(255, 205, 86)'
-      ],
-      hoverOffset: 20,
-      circumference: 360,
-    }]
-  };
-
-
-  const options = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: 'right' as const,
-      },
-      title: {
-        display: true,
-        text: 'Expenses Breakdown',
-        font: {
-          size: 24,
-          weight: 'bold' as const
-        }
-      },
-      layout: {
-        padding: 500,
-        
-      },
-      legendDistance: {
-        padding: 50
-      }
-      
-    },
-  };
     
      const fetchExpensesData = async () => {
     setIsLoading(true);
@@ -221,9 +177,9 @@ const savingsLineOptions = {
           );
         }
         return (
-          <div className="flex-2 bg-white p-4 rounded-lg shadow-md">
+         
             <Bar options={expensesBarOptions} data={expensesData} />
-          </div>
+       
         );
       case 'savings':
         if (isLoading || !savingsData) {
@@ -234,9 +190,9 @@ const savingsLineOptions = {
           );
         }
         return (
-          <div className="flex-2 bg-white p-4 rounded-lg shadow-md">
+         
             <Line options={savingsLineOptions} data={savingsData} />
-          </div>
+      
         );
       case 'income':
         if (isLoading || !incomeData) {
@@ -247,7 +203,7 @@ const savingsLineOptions = {
           );
         }
         return (
-          <div className="flex-2 bg-white p-4 rounded-lg shadow-md">
+          <div className="bg-white p-4 rounded-lg shadow-md">
             <SankeyChart data={incomeData} />
           </div>
         );
@@ -262,25 +218,72 @@ const savingsLineOptions = {
   };
   return (
     <>
-    <section className="flex flex-row items-center justify-center gap-12 my-10">
-        <button onClick={() => setActiveChart('expenses')} className="bg-blue-500 text-white p-2 rounded">Expenses Chart</button>
-        <button onClick={() => setActiveChart('savings')} className="bg-blue-500 text-white p-2 rounded">Savings Chart</button>
-        <button onClick={() => setActiveChart('income')} className="bg-blue-500 text-white p-2 rounded">Income Flow Chart</button>
+      <section className="flex flex-row items-center justify-center gap-12">
+        <button onClick={() => setActiveChart('expenses')} className="bg-blue-500 text-white p-2 rounded">Expenses</button>
+        <button onClick={() => setActiveChart('savings')} className="bg-blue-500 text-white p-2 rounded">Savings</button>
+        <button onClick={() => setActiveChart('income')} className="bg-blue-500 text-white p-2 rounded">Income Flow</button>
       </section>
-      <section className="flex flex-row items-center justify-center gap-12 my-10">
-        <div className="bg-white p-4 rounded-lg shadow-md">
+      <section className="block">
+        <div className="flex flex-col items-center bg-white p-4 rounded-lg shadow-md">
           {/* This chart is here just to test all the graph components */}
-          <button className={selectedPeriod === 'w' ? 'bg-blue-500 text-white p-2 rounded' : 'bg-gray-200 text-white p-2 rounded'} onClick={() => setSelectedPeriod('w')}>Week</button>
-          <button className={selectedPeriod === 'm' ? 'bg-blue-500 text-white p-2 rounded' : 'bg-gray-200 text-white p-2 rounded'} onClick={() => setSelectedPeriod('m')}>Month</button>
-          <button className={selectedPeriod === 'y' ? 'bg-blue-500 text-white p-2 rounded' : 'bg-gray-200 text-white p-2 rounded'} onClick={() => setSelectedPeriod('y')}>Year</button>
-          {renderChart()}
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <Pie data={data} options={options} />
+          <div className="flex flex-row gap-4 mb-4">
+             <button className={selectedPeriod === 'w' ? 'bg-blue-500 text-white p-2 rounded' : 'bg-gray-200 text-white p-2 rounded'} onClick={() => setSelectedPeriod('w')}>Week</button>
+            <button className={selectedPeriod === 'm' ? 'bg-blue-500 text-white p-2 rounded' : 'bg-gray-200 text-white p-2 rounded'} onClick={() => setSelectedPeriod('m')}>Month</button>
+            <button className={selectedPeriod === 'y' ? 'bg-blue-500 text-white p-2 rounded' : 'bg-gray-200 text-white p-2 rounded'} onClick={() => setSelectedPeriod('y')}>Year</button>
           </div>
+          {renderChart()}
+          {/*<div className="bg-white p-6 rounded-lg shadow-md">
+            <Pie data={data} options={options} />
+          </div>*/}
         </div>
       </section>
     </>
   )
 }
+
+ /*const data = {
+    labels: [
+      'Red',
+      'Blue',
+      'Yellow'
+    ],
+    datasets: [{
+      label: 'My First Dataset',
+      data: [300, 50, 100],
+      backgroundColor: [
+        'rgb(255, 99, 132)',
+        'rgb(54, 162, 235)',
+        'rgb(255, 205, 86)'
+      ],
+      hoverOffset: 20,
+      circumference: 360,
+    }]
+  };
+
+
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'right' as const,
+      },
+      title: {
+        display: true,
+        text: 'Expenses Breakdown',
+        font: {
+          size: 24,
+          weight: 'bold' as const
+        }
+      },
+      layout: {
+        padding: 500,
+        
+      },
+      legendDistance: {
+        padding: 50
+      }
+      
+    },
+  };*/
 
 export default DashboardChartSection
