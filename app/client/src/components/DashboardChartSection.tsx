@@ -20,7 +20,7 @@ function DashboardChartSection() {
     const [isLoading, setIsLoading] = useState(false);
 
     
-     const fetchExpensesData = async () => {
+    const fetchExpensesData = async () => {
     setIsLoading(true);
     try {
       const data = await getTestExpensesData(selectedPeriod);
@@ -70,8 +70,9 @@ function DashboardChartSection() {
         fetchIncomeData();
         break;
       default:
-      fetchExpensesData();
+        fetchExpensesData();
     }    
+    console.log("Log")
   }, [activeChart, selectedPeriod]);
 
 
@@ -126,7 +127,7 @@ function DashboardChartSection() {
     return {
       nodes: [],
       links: [],
-      };
+    };
   }
 
 
@@ -224,9 +225,9 @@ const savingsLineOptions = {
         <button onClick={() => setActiveChart('income')} className="bg-blue-500 text-white p-2 rounded">Income Flow</button>
       </section>
       <section className="block">
-        <div className="flex flex-col items-center bg-white p-4 rounded-lg shadow-md">
+        <div className="flex flex-col items-center bg-white py-12 p-15 rounded-lg shadow-md">
           {/* This chart is here just to test all the graph components */}
-          <div className="flex flex-row gap-4 mb-4">
+          <div className="flex flex-row gap-4 mb-10">
              <button className={selectedPeriod === 'w' ? 'bg-blue-500 text-white p-2 rounded' : 'bg-gray-200 text-white p-2 rounded'} onClick={() => setSelectedPeriod('w')}>Week</button>
             <button className={selectedPeriod === 'm' ? 'bg-blue-500 text-white p-2 rounded' : 'bg-gray-200 text-white p-2 rounded'} onClick={() => setSelectedPeriod('m')}>Month</button>
             <button className={selectedPeriod === 'y' ? 'bg-blue-500 text-white p-2 rounded' : 'bg-gray-200 text-white p-2 rounded'} onClick={() => setSelectedPeriod('y')}>Year</button>
