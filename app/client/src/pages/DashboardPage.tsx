@@ -10,17 +10,24 @@ import { getExpensesChartData, getSavingsContribChartData, getIncomeFlowChartDat
 import type { SankeyData } from 'recharts/types/chart/Sankey';
 import ChartSection from '@/components/DashboardChartSection';
 import DashboardChartSection from '@/components/DashboardChartSection';
+import type { AuthSession } from './authTypes';
 Chart.register(PointElement, LineElement, ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
+type DashboardPageProps = {
+  session: AuthSession;
+  onLogout: () => void;
+};
 
-
-function DashboardPage() {
+function DashboardPage({ session, onLogout }: DashboardPageProps) {
  
 
 
   return (
     <section className="p-10 bg-gray-100">
-      <h1 className=" text-4xl font-bold mb-4 ">Welcome Username</h1>
+      <button type="button" className="auth-button" onClick={onLogout}>
+          Log Out
+        </button>
+      <h1 className=" text-4xl font-bold mb-4 ">Hello {session.user.first_name ?? session.user.name ?? "there"}</h1>
       <p className=" text-lg te  xt-gray-700 ">Here you can view your recent transactions and manage your finances.</p>
       <section className="flex flex-row items-center justify-center gap-12 my-10">
         <AccountCard title="Total Balance" amount="$5,000" backgroundColor="#6fa953" />
