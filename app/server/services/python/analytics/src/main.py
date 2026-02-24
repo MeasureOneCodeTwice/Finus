@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import uvicorn
 import os
+import mysql.connector as mysql
 
 app = FastAPI()
 
@@ -15,6 +16,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+def get_db_connection():
+    return mysql.connect(
+        host=os.getenv("DB_HOST", "localhost"),
+        user=os.getenv("DB_USER", "root"),
+        password=os.getenv("DB_PASSWORD", "dummypw"),
+        database=os.getenv("DB_NAME", "finus")
+    )
 
 
 # test endpoint
@@ -48,6 +57,25 @@ async def get_savings(period: str):
 
 @app.get('/charts/incomeflow')
 async def get_income_flow(period: str = Query(default='w', enum=['w', 'm', 'y'])):
+    #fetch all positive and negative transactions for the user that fall within today and the start of the period (week, month, year)
+    #aggregate the transactions by category and sum the values for each category
+    #return the aggregated data as a list of dictionaries with the category as the key and the sum of the values as the value
+
+    return get_income_flow_synth(period)
+    #TODO: replace with real data from db when available
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    query = """SELECT category, SUM(value) as total_value
+                FROM transactions
+                WHERE user_id = %s AND date >= %s AND date <= %s
+                GROUP BY category"""
+    cursor.execute(query, (1, pd.Timestamp.today().strftime('%Y-%m-%d'), f'{pd.Timestamp.today().year}-{np.random.randint(1, 13):02d}-{np.random.randint(1, 29):02d}'))
+    results = cursor.fetchall()
+    connection.close()
+
+
+@app.get('/charts/incomeflow-synth')
+async def get_income_flow_synth(period: str = Query(default='w', enum=['w', 'm', 'y'])):
     NUM_R_D = 5
     NUM_R_C = 10
 
