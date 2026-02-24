@@ -122,7 +122,7 @@ function DashboardChartSection() {
     }catch(error) {
       console.error("Error fetching income flow chart data:", error);
     }
-    console.log("Using placeholder income flow chart data");
+    //console.log("Using placeholder income flow chart data");
     return {
       nodes: [],
       links: [],
@@ -203,9 +203,9 @@ const savingsLineOptions = {
           );
         }
         return (
-          <div className="bg-white p-4 rounded-lg shadow-md">
+          // <div className="bg-white p-4 rounded-lg shadow-md">
             <SankeyChart data={incomeData} />
-          </div>
+          // </div>
         );
       default:
         return (
@@ -241,49 +241,5 @@ const savingsLineOptions = {
   )
 }
 
- /*const data = {
-    labels: [
-      'Red',
-      'Blue',
-      'Yellow'
-    ],
-    datasets: [{
-      label: 'My First Dataset',
-      data: [300, 50, 100],
-      backgroundColor: [
-        'rgb(255, 99, 132)',
-        'rgb(54, 162, 235)',
-        'rgb(255, 205, 86)'
-      ],
-      hoverOffset: 20,
-      circumference: 360,
-    }]
-  };
-
-
-  const options = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: 'right' as const,
-      },
-      title: {
-        display: true,
-        text: 'Expenses Breakdown',
-        font: {
-          size: 24,
-          weight: 'bold' as const
-        }
-      },
-      layout: {
-        padding: 500,
-        
-      },
-      legendDistance: {
-        padding: 50
-      }
-      
-    },
-  };*/
 
 export default DashboardChartSection

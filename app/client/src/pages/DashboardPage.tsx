@@ -20,8 +20,6 @@ type DashboardPageProps = {
 
 function DashboardPage({ session, onLogout }: DashboardPageProps) {
  
-
-
   return (
     <section className="p-10 bg-gray-100">
       <button type="button" className="auth-button" onClick={onLogout}>

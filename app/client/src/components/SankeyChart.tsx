@@ -39,8 +39,8 @@ function CustomNode({ x, y, width, height, index, payload }: SankeyNodeProps) {
   if (containerWidth == null) {
     return null; // return null if used outside a chart context
   }
-  console.log("width of container:", containerWidth)
-  console.log("x:", x, "width of node:", width);
+  //console.log("width of container:", containerWidth)
+  //console.log("x:", x, "width of node:", width);
   const isOut = x + width + TEXT_OFFSET > containerWidth-TEXT_OFFSET*3;
   return (
     <Layer key={`CustomNode${index}`}>
