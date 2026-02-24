@@ -26,6 +26,14 @@ CREATE TABLE finus.profile (
     PRIMARY KEY (id)
 );
 
+CREATE TABLE finus.finusAccount_profile (
+    profile_id INTEGER NOT NULL,
+    account_id INTEGER NOT NULL,
+    PRIMARY KEY (profile_id, account_id),
+    FOREIGN KEY (profile_id) REFERENCES finus.profile(id), 
+    FOREIGN KEY (account_id) REFERENCES finus.finusAccount(id) ON DELETE CASCADE  -- this used to mention financialAccount, but should be mentioning finusAccount
+);
+
 CREATE TABLE finus.goalType (
     type VARCHAR(50) NOT NULL,
     PRIMARY KEY (type)
@@ -52,16 +60,16 @@ CREATE TABLE finus.profile_goal (
 );
 
 CREATE TABLE finus.financialAccountType (
-    -- type VARCHAR(50) NOT NULL,
+    type VARCHAR(50) NOT NULL,
     -- Note that there are other types of accounts such as joint, business, transmission, etc. This simplified set is good enough for now
-    type ENUM('savings', 'chequing', 'credit') DEFAULT 'unconfirmed',
+    -- type ENUM('savings', 'chequing', 'credit') DEFAULT 'unconfirmed',
     PRIMARY KEY (type)
 );
 
 CREATE TABLE finus.financialAccountSubtype(
-    -- type VARCHAR(50) NOT NULL,
+    type VARCHAR(50) NOT NULL,
     -- These subtypes are really only needed for savings accounts as they can be taxed differently and might have weird rules about them
-    type ENUM('RRSP', 'TFSA', 'FHSA', 'RESP', 'RDSP') DEFAULT 'NA',
+    -- type ENUM('RRSP', 'TFSA', 'FHSA', 'RESP', 'RDSP') DEFAULT 'NA',
     PRIMARY KEY (type)
 );
 
@@ -79,12 +87,12 @@ CREATE TABLE finus.financialAccount (
 
 );
 
-CREATE TABLE finus.finusAccount_profile (
+CREATE TABLE finus.profile_financialAccount (
     profile_id INTEGER NOT NULL,
-    account_id INTEGER NOT NULL,
-    PRIMARY KEY (profile_id, account_id),
+    financialAccount_id INTEGER NOT NULL,
+    PRIMARY KEY (profile_id, financialAccount_id),
     FOREIGN KEY (profile_id) REFERENCES finus.profile(id), 
-    FOREIGN KEY (account_id) REFERENCES finus.financialAccount(id) ON DELETE CASCADE
+    FOREIGN KEY (financialAccount_id) REFERENCES finus.financialAccount(id) ON DELETE CASCADE
 );
 
 CREATE TABLE finus.transaction (
