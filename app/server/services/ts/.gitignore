@@ -15,7 +15,6 @@ lerna-debug.log*
 .cache
 
 # Bun stuff
-bun.lockb
 **/node_modules
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
