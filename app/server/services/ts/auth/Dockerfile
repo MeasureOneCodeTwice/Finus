@@ -1,12 +1,14 @@
 FROM oven/bun:1.0-slim
 
 WORKDIR /project
-COPY package.json .
-RUN bun install
+COPY package.json bun.lockb .
+RUN --mount=type=cache,target=/root/.bun/install/cache \
+bun install
 
 WORKDIR /project/app
-COPY auth/package.json .
-RUN bun install
+COPY auth/package.json auth/bun.lockb .
+RUN --mount=type=cache,target=/root/.bun/install/cache \
+bun install
 
 WORKDIR /project
 COPY tsconfig.json .

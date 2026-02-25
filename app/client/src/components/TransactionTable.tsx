@@ -1,6 +1,6 @@
 import { getTransactions } from '@/api/ManagerAPI';
 import type { Transaction } from '@/types/Transaction';
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 
 function TransactionTable() {

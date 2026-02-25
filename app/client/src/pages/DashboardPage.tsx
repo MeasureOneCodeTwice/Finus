@@ -1,6 +1,6 @@
 // import React, { useEffect, useState } from 'react'
 // import type { Transaction } from '@/types/Transaction'
-// import { Chart,  PointElement, LineElement,ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, type ChartData, type LineController } from 'chart.js';
+import { Chart,  PointElement, LineElement,ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 // import { Pie, Line, Bar } from 'react-chartjs-2';
 import AccountCard from '@/components/AccountCard';
 import TransactionTable from '@/components/TransactionTable';

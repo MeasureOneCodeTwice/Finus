@@ -3,6 +3,10 @@ services:
       build:
         context: services/ts
         dockerfile: api-gateway/Dockerfile
+        cache_from: 
+        - type=registry,ref=$DOCKER_HUB_USERNAME/finus-api-gateway:build
+        cache_to:
+        - type=registry,ref=$DOCKER_HUB_USERNAME/finus-api-gateway:build,mode=max
       image: $DOCKER_HUB_USERNAME/finus-api-gateway:$RELEASE_VERSION
       env_file: 
       - path: ./default_container.env
@@ -20,6 +24,10 @@ services:
       build: 
         context: services/ts
         dockerfile: auth/Dockerfile
+        cache_from: 
+        - type=registry,ref=$DOCKER_HUB_USERNAME/finus-auth:build
+        cache_to:
+        - type=registry,ref=$DOCKER_HUB_USERNAME/finus-auth:build,mode=max
       image: $DOCKER_HUB_USERNAME/finus-auth:$RELEASE_VERSION
       env_file: 
       - path: ./default_container.env
@@ -35,6 +43,10 @@ services:
       build:
         context: services/ts
         dockerfile: user/Dockerfile
+        cache_from: 
+        - type=registry,ref=$DOCKER_HUB_USERNAME/finus-user:build
+        cache_to:
+        - type=registry,ref=$DOCKER_HUB_USERNAME/finus-user:build,mode=max
       image: $DOCKER_HUB_USERNAME/finus-user:$RELEASE_VERSION
       env_file: 
       - path: ./default_container.env
@@ -48,6 +60,10 @@ services:
       build:
         context: services/python/analytics
         dockerfile: Dockerfile
+        cache_from: 
+        - type=registry,ref=$DOCKER_HUB_USERNAME/finus-analytics:build
+        cache_to:
+        - type=registry,ref=$DOCKER_HUB_USERNAME/finus-analytics:build,mode=max
       image: $DOCKER_HUB_USERNAME/finus-analytics:$RELEASE_VERSION
       env_file: 
       - path: ./default_container.env
@@ -61,6 +77,10 @@ services:
       build: 
         context: services/python/market
         dockerfile: Dockerfile
+        cache_from: 
+        - type=registry,ref=$DOCKER_HUB_USERNAME/finus-market:build
+        cache_to:
+        - type=registry,ref=$DOCKER_HUB_USERNAME/finus-market:build,mode=max
       image: $DOCKER_HUB_USERNAME/finus-market:$RELEASE_VERSION
       env_file: 
       - path: ./default_container.env

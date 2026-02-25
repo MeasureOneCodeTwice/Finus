@@ -5,5 +5,8 @@
     "dev": "bun --watch src/index.ts",
     "build": "tsc",
     "start": "bun dist/index.js"
+  },
+  "dependencies": {
+    "@mysql/xdevapi": "^8.0.35"
   }
 }
