@@ -1,7 +1,10 @@
 services:
   webserver:
-
     image: $DOCKER_HUB_USERNAME/finus-webserver:$RELEASE_VERSION
-    build: .
+    build:
+      cache_from:
+      - type=registry,ref=$DOCKER_HUB_USERNAME/finus-webserver:build
+      cache_to:
+      - type=registry,ref=$DOCKER_HUB_USERNAME/finus-webserver:build,mode=max
     ports:
       - "80:80"
