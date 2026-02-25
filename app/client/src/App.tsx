@@ -159,7 +159,14 @@ function App() {
         <div className="auth-glow auth-glow-right" />
 
         <Routes>
-          <Route
+
+          {/* *********************Note*********************
+            * Following code snippets are commented for the sake of dashboard development
+            * Please ignore the authentication flow for now, 
+            * and feel free to uncomment and adjust as needed when you want to test the full flow with login/signup/logout. Thanks!
+          */}
+
+          {/*<Route
             path="/"
             element={
               <Navigate to={session ? "/dashboard" : "/login"} replace />
@@ -201,7 +208,15 @@ function App() {
               )
             }
           />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />*/}
+          
+
+
+          {/**Code below is only used for dashboard development purposes */}
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+
+          
         </Routes>
       </div>
     </Router>
