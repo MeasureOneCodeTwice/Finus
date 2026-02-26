@@ -1,6 +1,6 @@
-import type { PORT } from "@/port";
-import { buildCorsConfig } from "@/corsUtil";
-import { onExit } from "@/hooks";
+import { PORT } from "@/port.ts";
+import { buildCorsConfig } from "@/corsUtil.ts";
+import { onExit } from "@/hooks.ts";
 import express from "express";
 import { createProxyMiddleware } from 'http-proxy-middleware';
 

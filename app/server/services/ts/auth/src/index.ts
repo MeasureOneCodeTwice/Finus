@@ -1,11 +1,11 @@
 import mysql from "mysql2/promise";
 import express from "express";
-import { PORT } from "@/port";
-import { onExit } from "@/hooks";
-import { buildCorsConfig } from "@/corsUtil";
-import { signup, login } from "./logic";
+import { PORT } from "@/port.ts";
+import { onExit } from "@/hooks.ts";
+import { buildCorsConfig } from "@/corsUtil.ts";
+import { signup, login } from "./logic.ts";
 import type { LoginBody, SignupBody } from "./types.js";
-import { parseLoginBody, parseSignupBody } from "./parsing";
+import { parseLoginBody, parseSignupBody } from "./parsing.ts";
 
 const pool = mysql.createPool({
   host: process.env.MYSQL_HOST,
