@@ -1,14 +1,15 @@
-import { type LoginBody, type SignupBody, type AuthTokenClaims } from "./types";
-import { emailExists, insertUser, getUserWithPasswordByEmail } from "./queries";
-import { type User } from "@/types";
+import { type LoginBody, type SignupBody, type AuthTokenClaims } from "./types.ts";
+import { insertUser, getUserWithPasswordByEmail } from "./queries.ts";
+import { type User } from "@/types.ts";
 import jwt from "jsonwebtoken";
-
+import express from "express";
+import type { Pool } from "mysql2/promise";
 const JWT_SECRET = process.env.JWT_SECRET;
 const MIN_PASSWORD_LENGTH = 8;
 const MIN_AGE = 1;
 const MAX_AGE = 120;
 
-export async function signup(body: SignupBody, res, pool) {
+export async function signup(body: SignupBody, res: express.Response, pool: Pool): Promise<void> {
   let invalidReason: string | undefined = undefined;
 
   if (!validateEmail(body.email)) {
@@ -38,7 +39,7 @@ export async function signup(body: SignupBody, res, pool) {
       });
       return;
     }
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: "Could not validate account state." });
     return;
   }
@@ -71,7 +72,7 @@ function validatePassword(password: string): boolean {
   return password.length >= MIN_PASSWORD_LENGTH && hasLetter && hasDigit;
 }
 
-export async function login(body: LoginBody, res, pool): void {
+export async function login(body: LoginBody, res: express.Response, pool: Pool): Promise<void> {
   let user: User;
   try {
     user = await getUserWithPasswordByEmail(body.email, pool);

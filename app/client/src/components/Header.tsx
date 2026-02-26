@@ -10,7 +10,7 @@ function Header() {
   
   return (
     <>
-      {isSidebarOpen && <NavBar />}
+      {isSidebarOpen && <NavBar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />}
       <header className='flex items-center justify-between p-4 pl-10 pr-10 bg-gray-800 text-white'>
         <VscThreeBars className='text-4xl cursor-pointer' onClick={toggleSidebar}/>
         <div className='flex-1'>

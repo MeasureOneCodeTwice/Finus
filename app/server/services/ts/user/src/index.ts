@@ -1,6 +1,6 @@
-import { PORT } from "@/port";
-import { onExit } from "@/hooks";
-import { buildCorsConfig } from "@/corsUtil";
+import { PORT } from "@/port.ts";
+import { onExit } from "@/hooks.ts";
+import { buildCorsConfig } from "@/corsUtil.ts";
 import express from "express";
 
 const app = express();

@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import type { Transaction } from '@/types/Transaction'
-import { Pie, Line, Bar } from 'react-chartjs-2';
+import { useEffect, useState } from 'react'
+import { Line, Bar } from 'react-chartjs-2';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import SankeyChart from '@/components/SankeyChart';
 import { getExpensesChartData, getSavingsContribChartData, getIncomeFlowChartData } from '@/api/ManagerAPI';

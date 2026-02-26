@@ -11,12 +11,12 @@ export type User = {
 }
 
 export function validateType(obj: unknown, requiredKeys: string[]): void {
-  if(!obj) {
+  if(typeof obj !== "object" || obj === null) {
     throw new Error('null object');
   }
 
   for(const key of requiredKeys) {
-    if(!obj[key]) {
+    if(!(key in obj)) {
       throw new Error(`Missing ${key}`);
     }
   }

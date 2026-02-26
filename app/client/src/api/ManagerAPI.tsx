@@ -2,7 +2,6 @@ import axios from "axios";
 import { BASE_URL } from "@/utils/constants";
 import type { ChartData } from "chart.js";
 import type { SankeyData } from 'recharts/types/chart/Sankey';
-import type React from "react";
 import type { Transaction } from "@/types/Transaction";
 
 async function getTransactions(): Promise<Transaction[]> {
