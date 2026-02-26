@@ -5,5 +5,12 @@
     "dev": "bun --watch src/index.ts",
     "build": "tsc",
     "start": "bun dist/index.js"
+  },
+  "type": "module",
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6"
   }
 }

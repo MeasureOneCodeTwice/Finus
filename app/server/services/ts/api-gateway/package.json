@@ -1,6 +1,7 @@
 {
   "name": "api-gateway",
   "main": "src/index.ts",
+  "type": "module",
   "scripts": {
     "dev": "bun --watch src/index.ts",
     "build": "tsc",
@@ -10,5 +11,8 @@
     "express": "^5.2.1",
     "http-proxy-middleware": "^3.0.5",
     "mysql2": "^3.18.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6"
   }
 }

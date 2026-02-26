@@ -1,8 +1,7 @@
 import { Sidebar } from "react-pro-sidebar";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { CgProfile, CgHome } from "react-icons/cg";
-import { FaHistory, FaTimes, FaSignOutAlt } from "react-icons/fa";
-import { TbVaccineBottle } from "react-icons/tb";
+import { Link, useLocation } from "react-router-dom";
+import {  CgHome } from "react-icons/cg";
+import { FaTimes } from "react-icons/fa";
 import { SIDEBAR_WIDTH } from "@/utils/constants";
 type NavigationBarProps = {
   isOpen: boolean;
@@ -15,9 +14,7 @@ function NavBar({ isOpen, onClose }: NavigationBarProps) {
 
   const navItems = [
     { to: "/dashboard", label: "Dashboard", icon: <CgHome /> },
-    { to: "/vaccination-history", label: "Vaccination History", icon: <FaHistory /> },
-    { to: "/profile", label: "Update Profile", icon: <CgProfile /> },
-    { to: "/vaccination-eligibility", label: "Vaccination Eligibility", icon: <TbVaccineBottle /> },
+
   ];
 
   return (
@@ -49,7 +46,7 @@ function NavBar({ isOpen, onClose }: NavigationBarProps) {
           {/* Header */}
           <div className="flex items-center justify-between gap-2.5 px-3 py-[14px] border-b border-[rgba(15,23,42,0.06)] bg-[rgba(248,250,252,0.85)]">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="h-9 w-9 rounded-xl bg-slate-900 text-white grid place-items-center font-black shrink-0">
+              <div className="w-[36px] h-[36px] rounded-[12px] bg-slate-900 text-white grid place-items-center font-black shrink-0">
                 U
               </div>
 
@@ -58,7 +55,7 @@ function NavBar({ isOpen, onClose }: NavigationBarProps) {
                   Navigation
                 </div>
                 <div className="text-xs text-slate-500 mt-0.5">
-                  Patient Portal
+                  User Portal
                 </div>
               </div>
             </div>
@@ -70,18 +67,18 @@ function NavBar({ isOpen, onClose }: NavigationBarProps) {
               type="button"
               className="
                 w-[38px] h-[38px]
-                rounded-xl
+                rounded-[20px]
                 border border-[rgba(15,23,42,0.10)]
-                bg-white text-slate-600
-                flex items-center justify-center
+                bg-white
                 shadow-[0_1px_0_rgba(2,6,23,0.04)]
                 shrink-0
                 leading-none
                 p-0
+                flex items-center justify-center
+                shrink-0
                 hover:bg-slate-50
               "
-            >
-              <FaTimes />
+            ><span><FaTimes className="text-[18px]"/></span>
             </button>
           </div>
 
@@ -95,14 +92,8 @@ function NavBar({ isOpen, onClose }: NavigationBarProps) {
                   key={item.to}
                   to={item.to}
                   onClick={onClose}
-                  className={`
-                    flex items-center gap-2.5
-                    px-3 py-2.5
-                    rounded-[14px]
-                    font-bold
-                    no-underline
-                    border
-                    transition
+                  className={`flex items-center gap-2.5 px-3 py-2.5 rounded-[14px]
+                    font-bold no-underline border transition
                     ${
                       active
                         ? "text-slate-900 bg-[rgba(248,250,252,0.95)] border-[rgba(15,23,42,0.08)] shadow-[0_6px_18px_rgba(2,6,23,0.04)]"
@@ -112,9 +103,7 @@ function NavBar({ isOpen, onClose }: NavigationBarProps) {
                 >
                   <span
                     className={`
-                      w-[18px] h-[18px]
-                      grid place-items-center
-                      text-lg shrink-0
+                      w-[18px] h-[18px] grid place-items-center text-lg shrink-0
                       ${active ? "text-red-600" : "text-slate-500"}
                     `}
                   >

@@ -18,7 +18,9 @@
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
+  "type": "module",
   "dependencies": {
+    "@types/cors": "^2.8.19",
     "cors": "^2.8.6",
     "express": "^5.2.1"
   }

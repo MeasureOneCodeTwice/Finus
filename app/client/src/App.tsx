@@ -4,15 +4,12 @@ import {
   Navigate,
   Route,
   Routes,
-  useLocation
 } from "react-router-dom";
 import "./App.css";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
 import type { AuthApiResponse, AuthSession, AuthUser } from "./pages/authTypes";
-import LoadingSpinner from './components/LoadingSpinner.tsx'
 import DashboardPage from './pages/DashboardPage.tsx'
-import Layout from './components/Layout.tsx'
 
 const SESSION_STORAGE_KEY = "finus-session";
 const API_BASE_URL =
@@ -48,9 +45,9 @@ function saveSession(session: AuthSession) {
   localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
 }
 
-function clearSession() {
+/*function clearSession() {
   localStorage.removeItem(SESSION_STORAGE_KEY);
-}
+}*/
 
 function decodeTokenClaims(token: string): Record<string, unknown> | null {
   const parts = token.split(".");
@@ -147,10 +144,10 @@ function App() {
     setSession(nextSession);
   }
 
-  function handleLogout() {
+  /*function handleLogout() {
     clearSession();
     setSession(null);
-  }
+  }*/
 
   return (
     <Router>
@@ -166,7 +163,7 @@ function App() {
             * and feel free to uncomment and adjust as needed when you want to test the full flow with login/signup/logout. Thanks!
           */}
 
-          {/*<Route
+          <Route
             path="/"
             element={
               <Navigate to={session ? "/dashboard" : "/login"} replace />
@@ -202,19 +199,22 @@ function App() {
             path="/dashboard"
             element={
               session ? (
-                <DashboardPage session={session} onLogout={handleLogout} />
+                <DashboardPage session={session}  />
               ) : (
                 <Navigate to="/login" replace />
               )
             }
           />
-          <Route path="*" element={<Navigate to="/" replace />} />*/}
+          <Route path="*" element={<Navigate to="/" replace />} />
           
 
 
           {/**Code below is only used for dashboard development purposes */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
+          {/*<Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route element={<AppLayout />} >
+            <Route path="/dashboard" element={<DashboardPage />} />
+          </Route>*/}
+          
 
           
         </Routes>

@@ -4,7 +4,7 @@ import { PORT } from "@/port";
 import { onExit } from "@/hooks";
 import { buildCorsConfig } from "@/corsUtil";
 import { signup, login } from "./logic";
-import type { LoginBody, SignupBody } from "./types";
+import type { LoginBody, SignupBody } from "./types.js";
 import { parseLoginBody, parseSignupBody } from "./parsing";
 
 const pool = mysql.createPool({
