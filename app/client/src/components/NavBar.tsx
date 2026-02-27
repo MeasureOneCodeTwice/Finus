@@ -1,20 +1,20 @@
 import { Sidebar } from "react-pro-sidebar";
 import { Link, useLocation } from "react-router-dom";
 import {  CgHome } from "react-icons/cg";
-import { FaTimes } from "react-icons/fa";
+import { FaSignOutAlt, FaTimes } from "react-icons/fa";
 import { SIDEBAR_WIDTH } from "@/utils/constants";
 type NavigationBarProps = {
   isOpen: boolean;
   onClose: () => void;
+  onLogout: () => void;
 };
-function NavBar({ isOpen, onClose }: NavigationBarProps) {
+function NavBar({ isOpen, onClose, onLogout }: NavigationBarProps) {
   const location = useLocation();
 
   if (!isOpen) return null;
 
   const navItems = [
     { to: "/dashboard", label: "Dashboard", icon: <CgHome /> },
-
   ];
 
   return (
@@ -113,6 +113,34 @@ function NavBar({ isOpen, onClose }: NavigationBarProps) {
                 </Link>
               );
             })}
+          </div>
+
+          {/* Footer Sign Out */}
+          <div className="mt-auto p-2.5 border-t border-slate-900/5">
+            <button
+              type="button"
+              onClick={onLogout}
+              aria-label="Sign out"
+              title="Sign out"
+              className="
+                w-full flex items-center gap-2.5
+                px-3 py-2.5
+                rounded-[14px]
+                border border-[rgba(239,68,68,0.16)]
+                text-red-700
+                font-extrabold
+                text-left
+                cursor-pointer
+                hover:bg-red-100
+                transition
+              "
+              style={{backgroundColor: "#fef2f2e6"}}
+            >
+              <span className="w-[18px] h-[18px] grid place-items-center text-base shrink-0">
+                <FaSignOutAlt />
+              </span>
+              <span>Sign out</span>
+            </button>
           </div>
         </div>
       </Sidebar>

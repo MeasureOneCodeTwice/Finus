@@ -3,8 +3,10 @@ import { Outlet } from "react-router-dom";
 import { IoReorderThreeSharp } from "react-icons/io5";
 import NavBar from "./NavBar";
 import { SIDEBAR_WIDTH } from "../utils/constants";
-
-export default function AppLayout() {
+type AppLayoutProps = {
+  onLogout : () => void;
+};
+export default function AppLayout({ onLogout }: AppLayoutProps) {
   const [isNavBarOpen, setIsNavBarOpen] = useState(false);
 
   function toggleSidebar() {
@@ -48,6 +50,7 @@ export default function AppLayout() {
         <NavBar
           isOpen={isNavBarOpen}
           onClose={() => setIsNavBarOpen(false)}
+          onLogout={onLogout}
         />
       )}
 

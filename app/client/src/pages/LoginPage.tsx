@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
-import type { AuthUser, RequestAuth } from "./authTypes";
+import type { AuthUser, RequestAuth } from "../types/authTypes";
 
 type LoginPageProps = {
   onLogin: (token: string, fallbackUser: Partial<AuthUser>) => void;

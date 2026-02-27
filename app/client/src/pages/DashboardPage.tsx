@@ -2,7 +2,7 @@ import { Chart,  PointElement, LineElement,ArcElement, CategoryScale, LinearScal
 import AccountCard from '@/components/AccountCard';
 import TransactionTable from '@/components/TransactionTable';
 import DashboardChartSection from '@/components/DashboardChartSection';
-import type { AuthSession } from './authTypes';
+import type { AuthSession } from '../types/authTypes';
 Chart.register(PointElement, LineElement, ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 type DashboardPageProps = {

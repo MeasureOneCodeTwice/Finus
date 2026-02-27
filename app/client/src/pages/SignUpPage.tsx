@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
-import { MAX_AGE, MIN_AGE, type AuthUser, type RequestAuth } from "./authTypes";
+import { MAX_AGE, MIN_AGE, type AuthUser, type RequestAuth } from "../types/authTypes";
 
 type SignUpPageProps = {
   onSignup: (token: string, fallbackUser: Partial<AuthUser>) => void;
