@@ -1,22 +1,7 @@
-import axios from "axios";
-import { BASE_URL } from "@/utils/constants";
 import type { ChartData } from "chart.js";
 import type { SankeyData } from 'recharts/types/chart/Sankey';
 import type { Transaction } from "@/types/Transaction";
-import { loadSession } from "@/utils/storage";
-
-
-// Create an Axios instance with default configuration. This instance is used to request protected endpoints only.
-const instance = axios.create({
-    baseURL: BASE_URL,
-    headers: {
-        "Content-Type": "application/json",
-    },
-    withCredentials: true, // Include cookies for authentication
-});
-const session = loadSession();
-const accessToken = session ? `Bearer ${session.token}` : "";
-instance.defaults.headers.common["Authorization"] = accessToken;
+import { instance } from "./config";
 
 
 async function getTransactions(): Promise<Transaction[]> {
