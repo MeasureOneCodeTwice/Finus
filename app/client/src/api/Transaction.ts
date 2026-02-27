@@ -1,5 +1,5 @@
 import type { promises } from "dns";
-import { get } from "http";
+import { get, request } from "http";
 import { json } from "stream/consumers";
 import type { updateResponse } from "../type/responseTypes";
 
@@ -13,13 +13,16 @@ export interface Transaction{
     recipient?: string;
     date: Date;
 }
+
+const requestUrl = "http://localhost:3000/transacitons"
+
 //Sends a GET request to get the list of user transactions for the account
 export async function getTransactions(account_id: number): Promise<Transaction[]>{
 
     //Put as object to convert to json when sent in the body
     const content = {"id": account_id}
 
-    const response = await fetch("api/transactions", {
+    const response = await fetch(requestUrl, {
         method: "GET",
         headers: {
             "Cookie": document.cookie
@@ -39,7 +42,7 @@ export async function getTransactions(account_id: number): Promise<Transaction[]
 //Can send multiple transactions in a push request
 export async function pushTranscations(trans:Transaction[]):Promise<updateResponse[]>{
 
-    const response = await fetch("api/transacitons", {
+    const response = await fetch(requestUrl, {
         method: "POST",
         headers: {
             "content-type": "application/json",
@@ -61,7 +64,7 @@ export async function pushTranscations(trans:Transaction[]):Promise<updateRespon
 //Can send multiple transactions in a push request
 export async function putTranscations(trans:Transaction):Promise<updateResponse>{
 
-    const response = await fetch("api/transacitons", {
+    const response = await fetch(requestUrl, {
         method: "PUT",
         headers: {
             "content-type": "application/json",
@@ -84,7 +87,7 @@ export async function deleteTransaction(selectedTransaction:Transaction) {
 
     const content = JSON.stringify({id:selectedTransaction.id, financialAccount_id:selectedTransaction.financialAccount_id})
     //Create delete request to delete the account 
-    const response = await fetch('api/accounts',{
+    const response = await fetch(requestUrl,{
         method: "DELETE",
         headers: {
             "content-type": "/application/json",

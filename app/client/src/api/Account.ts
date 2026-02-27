@@ -1,3 +1,4 @@
+import { request } from "http";
 import type { updateResponse } from "../type/responseTypes";
 
 //Coppied from module
@@ -11,11 +12,13 @@ export interface Account{
     last_updated: Date;
 }
 
+const requestUrl = 'http://localhost:3000/accounts'
+
 //Sends a request to get different accounts the user has
 export async function getUserAccounts(): Promise<Account[]> {
 
     //Sends a http request and waits for a response
-    const response = await fetch('/api/accounts', {
+    const response = await fetch(requestUrl, {
         method: 'GET',
         headers: {
             'Cookie': document.cookie
@@ -36,7 +39,7 @@ export async function getUserAccounts(): Promise<Account[]> {
 export async function postUserAccount(newAccount:Account):Promise<updateResponse> {
     
     //Create post request and wait for response
-    const response = await fetch('/api/accounts', {
+    const response = await fetch(requestUrl, {
         method: "POST",
         headers: {
             'content-type': '/application/json',
@@ -60,7 +63,7 @@ export async function postUserAccount(newAccount:Account):Promise<updateResponse
 export async function putUserAccount(newAccount:Account):Promise<updateResponse> {
     
     //Create post request and wait for response
-    const response = await fetch('/api/accounts', {
+    const response = await fetch(requestUrl, {
         method: "PUT",
         headers: {
             'content-type': '/application/json',
@@ -86,7 +89,7 @@ export async function deleteUserAccount(userAccount:Account) {
 
     const content = JSON.stringify({id:userAccount.id})
     //Create delete request to delete the account 
-    const response = await fetch('api/accounts',{
+    const response = await fetch(requestUrl,{
         method: "DELETE",
         headers: {
             "content-type": "/application/json",
