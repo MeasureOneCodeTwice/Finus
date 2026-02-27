@@ -4,9 +4,11 @@ import './UserForm.css'
 import { getUserAccounts, type Account } from "../../api/Account";
 import { validateTransactionForm } from "../../util/ValidateForms";
 import { pushTranscations, type Transaction } from "../../api/Transaction";
+import { handleCurrencyChange } from "../../util/handleInput";
 
 interface popupProp{
     toggle: () => void;
+    setTransaction: () => void
     edit: boolean
     selectedTransaction?: Transaction
 }
@@ -57,22 +59,6 @@ export default function popupForm({toggle, edit, selectedTransaction}:popupProp)
             alert("Please fill out the transaction form")
         }
 
-    }
-
-    //Handles state when currency is changed
-    const handleCurrencyChange = (event:React.ChangeEvent<HTMLInputElement>) => {
-
-        let input = event.target.value
-        const pattern = /^\d*\.?\d{0,2}$/
-
-        console.log(input)
-        console.log(pattern.test(input))
-        //Determine if the input follows the format/pattern
-        if(pattern.test(input) || input === ""){
-            input = input.replace(/^0+(?=\d)/,"")
-            setAmount(input)
-
-        }
     }
 
     const handleCurrencyBlur = (event:React.ChangeEvent<HTMLInputElement>) => {
@@ -146,7 +132,7 @@ export default function popupForm({toggle, edit, selectedTransaction}:popupProp)
                 <br></br>
 
                 <label htmlFor="amount">Amount: $</label>
-                <input className="moneyInput" min="0" step={"0.01"} type = "text" id = "amount" value={amount} onChange={handleCurrencyChange} onBlur={handleCurrencyBlur} placeholder="0.00"/>
+                <input className="moneyInput" min="0" step={"0.01"} type = "text" id = "amount" value={amount} onChange={(event) => handleCurrencyChange(event, setAmount)} onBlur={handleCurrencyBlur} placeholder="0.00"/>
                 <br></br>
 
                 {edit ? (null):(

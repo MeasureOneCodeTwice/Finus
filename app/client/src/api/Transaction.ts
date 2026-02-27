@@ -43,17 +43,62 @@ export async function pushTranscations(trans:Transaction[]):Promise<updateRespon
         method: "POST",
         headers: {
             "content-type": "application/json",
-            "Cookie": document.cookie
+            "Cookie": document.cookie,
         },
         body: JSON.stringify(trans)
     })
 
     if(response.ok){
-        alert("Updated/Create the transaction")
+        alert("Create the transaction")
     } else {
-        alert("Failed to edit/create transaction")
+        alert("Failed to create transaction")
         console.error(response.status)
     }
 
     return response.json()
+}
+
+//Can send multiple transactions in a push request
+export async function putTranscations(trans:Transaction):Promise<updateResponse>{
+
+    const response = await fetch("api/transacitons", {
+        method: "PUT",
+        headers: {
+            "content-type": "application/json",
+            "Cookie": document.cookie,
+        },
+        body: JSON.stringify(trans)
+    })
+
+    if(response.ok){
+        alert("Updated the transaction")
+    } else {
+        alert("Failed to update transaction")
+        console.error(response.status)
+    }
+
+    return response.json()
+}
+
+export async function deleteTransaction(selectedTransaction:Transaction) {
+
+    const content = JSON.stringify({id:selectedTransaction.id, financialAccount_id:selectedTransaction.financialAccount_id})
+    //Create delete request to delete the account 
+    const response = await fetch('api/accounts',{
+        method: "DELETE",
+        headers: {
+            "content-type": "/application/json",
+            "Cookie":document.cookie
+        },
+        body: content
+    })
+
+    if(response.ok){
+        alert("Transaction has been deleted")
+    } else {
+        alert("Failed to delete transaction")
+        console.error(response.status)
+    }
+    
+    return response.ok
 }

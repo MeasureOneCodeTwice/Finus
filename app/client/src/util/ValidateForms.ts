@@ -40,3 +40,7 @@ export function validateTransactionForm(account_id:number, transactionType:strin
 
     return result
 } 
+
+export function validateIncomeForm(name:string, income:number){
+    return name && income > 0
+}

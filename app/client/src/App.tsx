@@ -8,6 +8,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import LoadingSpinner from './components/ui/LoadingSpinner.tsx'
 import AccountPopup from './components/ui/AccountForm.tsx'
 import TransactionPopup from './components/ui/TransationForm.tsx'
+import type { Account } from './api/Account.ts'
 
 function App() {
   return (
@@ -50,6 +51,10 @@ function NotFoundPage() {
     setSeen(!seen)
   };
 
+  function setAccount(account:Account){
+
+  }
+
   return (
     <>
       <h1>Vite + React</h1>
@@ -70,7 +75,7 @@ function NotFoundPage() {
       </p>
 
       <button onClick={() => togglePopup()}>Forms</button>
-      {seen ? (<TransactionPopup toggle={togglePopup} edit = {false} />):null}
+      {seen ? (<AccountPopup toggle={togglePopup} setAccount={setAccount} edit = {false} />):null}
      
     </>
   )

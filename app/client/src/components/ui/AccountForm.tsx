@@ -3,9 +3,13 @@ import CsvUpload from "../csvread/CsvUpload";
 import './UserForm.css'
 import {postUserAccount, type Account} from '../../api/Account.ts'
 import { validateAccountForm } from "../../util/ValidateForms.ts";
+import { handleCurrencyChange, handleCurrencyBlur } from "../../util/handleInput.ts";
+
 interface popupProp{
     toggle: () => void;
+    setAccount: (account:Account) => void
     edit: boolean
+    selectedAccount?: Account
 }
 
 export const accountCategory = {
@@ -17,14 +21,14 @@ export const accountCategory = {
 
 type typeofAccount = keyof typeof accountCategory
 
-export default function popupForm({toggle, edit}:popupProp,){
+export default function popupForm({toggle, setAccount, edit, selectedAccount}:popupProp){
 
     //Submits the account data
     
     const handleSubmit = () => {
         let subtype = undefined
         let interest = undefined
-        const accountBalence = Number(balence)
+        const accountBalance = Number(balance)
 
         if(accountType === accountCategory.SAVING) {
             subtype = formInput.subType
@@ -36,18 +40,21 @@ export default function popupForm({toggle, edit}:popupProp,){
         
         //Check account before validating b/c account can be undefined
         //Determine if form input for an account is valid
-        if(accountType && validateAccountForm(formInput.name, accountCategory[accountType], accountBalence,file,subtype,interest)) {
+        if(accountType && validateAccountForm(formInput.name, accountCategory[accountType], accountBalance,file,subtype,interest)) {
            
-            const newAccount: Account = {id: 0, name:formInput.name, type: accountType, balance: accountBalence, subtype:"", value:0, last_updated: new Date()}
+            const newAccount: Account = {id: 0, name:formInput.name, type: accountType, balance: accountBalance, subtype:"", value:0, last_updated: new Date()}
             console.log(newAccount)
 
+            //Send a post request to create or edit the account
             postUserAccount(newAccount).then((data)=>{
+
+                //When creating new account, id is returned for that account
                 if(data && data["id"])
                     newAccount["id"] = data["id"]
 
-                    //Can't check both fields on same if statement, so another one is need to check
-                    if(data["lastUpdated"])
-                        newAccount["last_updated"] = data["lastUpdated"]
+            
+                if(data["lastUpdated"])
+                    newAccount["last_updated"] = data["lastUpdated"]
             })
                     
             toggle()
@@ -61,22 +68,6 @@ export default function popupForm({toggle, edit}:popupProp,){
         setFormInput({...formInput, [event.target.name] : event.target.value});
     }
 
-    //Handles state when currency is changed
-    const handleCurrencyChange = (event:React.ChangeEvent<HTMLInputElement>) => {
-
-        let input = event.target.value
-        const pattern = /^\d*\.?\d{0,2}$/
-
-        console.log(input)
-        console.log(pattern.test(input))
-        //Determine if the input follows the format/pattern
-        if(pattern.test(input) || input === ""){
-            input = input.replace(/^0+(?=\d)/,"")
-            setBalence(input)
-
-        }
-    }
-
     //Handles the bank statement 
     const handleFile = (event:React.ChangeEvent<HTMLInputElement>) => {
         
@@ -87,16 +78,10 @@ export default function popupForm({toggle, edit}:popupProp,){
         }
     }
     
-    const handleCurrencyBlur = (event:React.ChangeEvent<HTMLInputElement>) => {
-        if(event.target.value !== "") {
-            setBalence(parseFloat(balence).toFixed(2))
-        }
-
-    }
 
     const [formInput, setFormInput] = useState({name: '', subType:'', interest: 0})
     const [file, setFile] = useState<File|undefined>(undefined)
-    const[balence, setBalence] = useState("")
+    const[balance, setBalance] = useState<string>("")
     const[accountType, setAccountType] = useState<typeofAccount|undefined>(undefined)
        
     const accountCat: typeofAccount[] = Object.keys(accountCategory) as typeofAccount[]
@@ -121,7 +106,7 @@ export default function popupForm({toggle, edit}:popupProp,){
             <br></br>
 
             <label>Balence: $</label>
-            <input  type = "text" min = "0" step ="0.01" name = "balance" value={balence} onChange={handleCurrencyChange} onBlur ={handleCurrencyBlur} placeholder="0.00"/>
+            <input  type = "text" min = "0" step ="0.01" name = "balance" value={balance} onChange={(event) => handleCurrencyChange(event, setBalance)} onBlur ={(event) => handleCurrencyBlur(event,balance,setBalance)} placeholder="0.00"/>
             <br></br>
 
             <label htmlFor="statement">Upload Bank Statement(.csv)</label><CsvUpload />

@@ -55,3 +55,52 @@ export async function postUserAccount(newAccount:Account):Promise<updateResponse
     
     return response.json()
 }
+
+//Updates the users account
+export async function putUserAccount(newAccount:Account):Promise<updateResponse> {
+    
+    //Create post request and wait for response
+    const response = await fetch('/api/accounts', {
+        method: "PUT",
+        headers: {
+            'content-type': '/application/json',
+            'Cookie': document.cookie
+        },
+        body: JSON.stringify(newAccount)
+    } )
+    
+    //Determine if our post was a success
+    if(response.ok){
+        alert("Account " + newAccount.name + " has been updated" )
+    } else {
+        alert("Failed to update account " + newAccount.name)
+        console.error(response.status)
+    }
+    
+    return response.json()
+}
+
+
+
+export async function deleteUserAccount(userAccount:Account) {
+
+    const content = JSON.stringify({id:userAccount.id})
+    //Create delete request to delete the account 
+    const response = await fetch('api/accounts',{
+        method: "DELETE",
+        headers: {
+            "content-type": "/application/json",
+            "Cookie":document.cookie
+        },
+        body: content
+    })
+
+    if(response.ok){
+        alert("Account " + userAccount.name + " has been deleted")
+    } else {
+        alert("Failed to delete account " + userAccount.name)
+        console.error(response.status)
+    }
+    
+    return response.ok
+}
