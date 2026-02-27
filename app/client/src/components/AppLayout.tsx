@@ -40,7 +40,7 @@ export default function AppLayout({ onLogout }: AppLayoutProps) {
               text-[26px]
               block
               leading-none
-              translate-y-[1px]
+              translate-y-px
             "
           />
         </button>
