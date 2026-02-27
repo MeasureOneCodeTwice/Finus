@@ -3,11 +3,26 @@ import { BASE_URL } from "@/utils/constants";
 import type { ChartData } from "chart.js";
 import type { SankeyData } from 'recharts/types/chart/Sankey';
 import type { Transaction } from "@/types/Transaction";
+import { loadSession } from "@/utils/storage";
+
+
+// Create an Axios instance with default configuration. This instance is used to request protected endpoints only.
+const instance = axios.create({
+    baseURL: BASE_URL,
+    headers: {
+        "Content-Type": "application/json",
+    },
+    withCredentials: true, // Include cookies for authentication
+});
+const session = loadSession();
+const accessToken = session ? `Bearer ${session.token}` : "";
+instance.defaults.headers.common["Authorization"] = accessToken;
+
 
 async function getTransactions(): Promise<Transaction[]> {
     /* Uncomment this block once backend is ready to test fetching transactions */
     // try {
-    //     const response = await axios.get(`${BASE_URL}/api/transactions`);
+    //     const response = await instance.get(`/api/transactions`);
     //     if (response.status !== 200) {
     //         throw new Error(`Failed to fetch transactions: ${response.statusText}`);
     //     }
@@ -124,7 +139,7 @@ async function getExpensesChartData(period: string): Promise<ChartData<"bar">> {
         if (!["w", "m", "y"].includes(period)) {
             throw new Error("Invalid period. Must be 'weekly', 'monthly', or 'yearly'.");
         }
-        const response = await axios.get(`${BASE_URL}/charts/expenses?period=${period}`);
+        const response = await instance.get(`/charts/expenses?period=${period}`);
         if (response.status !== 200) {
             throw new Error(`Failed to fetch expenses chart data: ${response.statusText}`);
         }
@@ -152,7 +167,7 @@ async function getSavingsContribChartData(period: string): Promise<ChartData<"li
         if (!["w", "m", "y"].includes(period)) {
             throw new Error("Invalid period. Must be 'weekly', 'monthly', or 'yearly'.");
         }
-        const response = await axios.get(`${BASE_URL}/charts/savings?period=${period}`);
+        const response = await instance.get(`/charts/savings?period=${period}`);
         if (response.status !== 200) {
             throw new Error(`Failed to fetch savings contribution chart data: ${response.statusText}`);
         }
@@ -180,7 +195,7 @@ async function getIncomeFlowChartData(period: string): Promise<SankeyData> {
         if (!["w", "m", "y"].includes(period)) {
             throw new Error("Invalid period. Must be 'weekly', 'monthly', or 'yearly'.");
         }
-        const response = await axios.get(`${BASE_URL}/charts/incomeflow?period=${period}`);
+        const response = await instance.get(`/charts/incomeflow?period=${period}`);
         if (response.status !== 200) {
             throw new Error(`Failed to fetch income flow chart data: ${response.statusText}`);
         }
