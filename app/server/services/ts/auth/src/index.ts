@@ -1,23 +1,13 @@
-import mysql from "mysql2/promise";
 import express from "express";
 import { PORT } from "@/port";
 import { onExit } from "@/hooks";
-import { buildCorsConfig } from "@/corsUtil";
+import { buildCorsConfig, handleServerError } from "@/expressUtils";
 import { signup, login } from "./logic";
 import type { LoginBody, SignupBody } from "./types";
 import { parseLoginBody, parseSignupBody } from "./parsing";
+import { getConnectionPool } from "@/sqlUtil";
 
-const pool = mysql.createPool({
-  host: process.env.MYSQL_HOST,
-  port: Number(process.env.MYSQL_PORT),
-  user: 'root',//process.env.MYSQL_USER, // ------------------------------------ Needs fixing, finus_app gets denied access, this might be an issue of accessing the db from outside its container
-  password: process.env.MYSQL_PASSWORD,
-  database: process.env.DB_NAME,
-  waitForConnections: true,
-  connectionLimit: 10,
-});
-
-
+const pool = getConnectionPool();
 const app = express();
 app.use(express.json());
 app.use(buildCorsConfig(undefined));
@@ -32,7 +22,7 @@ app.post("/signup", async (req, res) => {
   }
 
   console.log("In Index, calling for signup function");
-  signup(body, res, pool);
+  handleServerError(() => signup(body, res, pool), res);
 });
 
 app.post("/login", async (req, res) => {
@@ -44,11 +34,11 @@ app.post("/login", async (req, res) => {
     return;
   }
 
-  login(body, res, pool);
+  handleServerError(() => login(body, res, pool), res);
 });
 
 app.get("/health", (_, res) => {
-  res.send({ok: true});
+  res.send({ ok: true });
 });
 
 const server = app.listen(PORT, () => {

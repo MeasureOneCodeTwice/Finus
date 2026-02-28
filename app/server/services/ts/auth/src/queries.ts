@@ -1,5 +1,5 @@
 import type { UserWithPassword } from "./types";
-export async function getUserWithPasswordByEmail(
+export async function getUserByEmail (
   email: string,
   pool,
 ): Promise<UserWithPassword> {
@@ -29,7 +29,10 @@ export async function getUserWithPasswordByEmail(
   return rows[0];
 }
 
-export async function emailExists(email: string, pool): Promise<boolean> {
+export async function accountWithEmailExists(
+  email: string,
+  pool,
+): Promise<boolean> {
   return await pool
     .execute(`SELECT COUNT(*) as count FROM finusAccount WHERE email = ?`, [
       email,
@@ -39,7 +42,7 @@ export async function emailExists(email: string, pool): Promise<boolean> {
     });
 }
 
-export async function insertUser(user: UserWithPassword, pool): void {
+export async function createUser(user: UserWithPassword, pool): void {
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();

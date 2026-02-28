@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "format": "bun prettier --write \"**/src/*.ts|**/*.ts\"",
+    "format": "prettier --write \"**/src/*.ts|**/*.ts\"",
     "prepare": "cd ../../../../ && husky hooks/.husky"
   },
   "devDependencies": {
@@ -13,13 +13,15 @@
     "jiti": "^2.6.1",
     "minimatch": "5",
     "prettier": "3.8.1",
-    "typescript-eslint": "^8.55.0"
+    "typescript-eslint": "^8.55.0",
+    "vitest": "^4.0.18"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
     "cors": "^2.8.6",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "mysql2": "^3.18.1"
   }
 }

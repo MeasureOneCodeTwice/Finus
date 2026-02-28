@@ -1,10 +1,20 @@
 import type { LoginBody, SignupBody } from "./types";
 import { validateType } from "@/types";
 
+function normalizeEmail(email: string): boolean {
+  const normalized = email?.trim().toLowerCase(),
+    isValidFormat = /^\w+@\w+\.\w+$/.test(normalized);
+  if (!isValidFormat) {
+    throw new Error("invalid email format");
+  }
+  return normalized;
+}
+
 export function parseLoginBody(obj: unknown): LoginBody {
   validateType(obj, ["email", "password"]);
+
   return {
-    email: obj.email?.trim().toLowerCase(),
+    email: normalizeEmail(obj.email),
     password: obj.password,
   };
 }
@@ -30,7 +40,7 @@ export function parseSignupBody(obj: unknown): SignupBody {
     username: obj.username.trim(),
     password: obj.password,
     created: obj.created,
-    email: obj.email.trim(),
+    email: normalizeEmail(obj.email),
     age: idInt,
   };
 }

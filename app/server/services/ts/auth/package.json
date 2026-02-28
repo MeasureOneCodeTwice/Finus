@@ -2,8 +2,7 @@
   "name": "auth",
   "main": "src/index.ts",
   "dependencies": {
-    "jsonwebtoken": "^9.0.3",
-    "mysql2": "^3.15.3"
+    "jsonwebtoken": "^9.0.3"
   },
   "scripts": {
     "dev": "bun --watch src/index.ts",
