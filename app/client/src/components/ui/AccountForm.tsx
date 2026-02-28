@@ -7,8 +7,8 @@ import { handleCurrencyChange, handleCurrencyBlur } from "../../util/handleInput
 
 interface popupProp{
     toggle: () => void;
-    setAccount: (account:Account) => void
-    addAccount: (account:Account) => void
+    setAccount?: (account:Account) => void
+    addAccount?: (account:Account) => void
     edit: boolean
     selectedAccount?: Account
 }
@@ -55,7 +55,7 @@ export default function popupForm({toggle, setAccount, addAccount, edit, selecte
                     putUserAccount(newAccount).then((response) =>{
 
                         //Determine if sucessfully post
-                        if(response && response.lastUpdated) {
+                        if(response && response.lastUpdated && addAccount) {
                             newAccount.last_updated = response.lastUpdated
                             addAccount(newAccount)
                         }
@@ -69,15 +69,18 @@ export default function popupForm({toggle, setAccount, addAccount, edit, selecte
                     //Send a post request to create or edit the account
                     postUserAccount(newAccount).then((response)=>{
 
-                        //When creating new account, id is returned for that account
+                        //When creating new account, id and lastupdated is returned for that account
                         if(response && response.id)
                             newAccount.id = response.id
 
-                    
-                            if(response.lastUpdated)
+                            if(response.lastUpdated){
                                 newAccount.last_updated = response.lastUpdated
 
-                                setAccount(newAccount)
+                                //Check if setAccount is undefined
+                                if(setAccount){
+                                    setAccount(newAccount)
+                                }
+                            }
                     })
                 } catch(error) {
                     alert("Failed to create account " + newAccount.name)
@@ -112,6 +115,19 @@ export default function popupForm({toggle, setAccount, addAccount, edit, selecte
     const[accountType, setAccountType] = useState<typeofAccount|undefined>(undefined)
        
     const accountCat: typeofAccount[] = Object.keys(accountCategory) as typeofAccount[]
+
+    //Determine if we're editting an account
+    if(edit && selectedAccount) {
+        setFormInput({...formInput,["name"]:selectedAccount.name})
+
+        if(selectedAccount.subtype){
+            setFormInput({...formInput, ["subType"]: selectedAccount.subtype})
+        }
+
+        setBalance(selectedAccount.balance.toString())
+        setAccountType(selectedAccount.type as typeofAccount)
+    }
+
 
   return(
     <>

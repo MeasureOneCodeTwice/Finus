@@ -97,8 +97,9 @@ export default function popupForm({toggle,setTransaction,addTransaction, edit, s
         //Insert cvs parsing function/validation function        
     }
 
+    //State of the user's account
+    const [account, setAccount] = useState<Account[] | []>()
 
-    //Add when getUserAccounts is implemented
     getUserAccounts().then(accounts => {
         console.log(accounts)
 
@@ -107,9 +108,6 @@ export default function popupForm({toggle,setTransaction,addTransaction, edit, s
             setAccount(accounts)
         }
     })
-
-    //State of the user's account
-    const [account, setAccount] = useState<Account[] | []>()
 
     //Holds state of user input
     const [selectedAccount, setSelectedAccount] = useState("")
@@ -121,7 +119,7 @@ export default function popupForm({toggle,setTransaction,addTransaction, edit, s
     const transCat: typeOfTransaction [] = Object.keys(transactionCategory) as typeOfTransaction[];
 
     if(edit && selectedTransaction){
-        setSelectedAccount(selectedTransaction.id.toString())
+        setSelectedAccount(selectedTransaction.amount.toString())
         setSelectedType(selectedTransaction.type)
         setAmount(selectedTransaction.amount.toString())
     }

@@ -6,8 +6,8 @@ import { validateAccountForm, validateIncomeForm } from "../../util/ValidateForm
 
 interface popupProp{
     toggle: () => void;
-    setIncome: (income:Income) => void
-    addIncome: (income:Income) => void
+    setIncome?: (income:Income) => void
+    addIncome?: (income:Income) => void
     edit: boolean
     selectedIncome?: Income
 }  
@@ -23,7 +23,7 @@ export default function popupForm({toggle,setIncome, addIncome, edit, selectedIn
             
             if(edit) {
                 putIncome(name,inputAmount,description).then((result) =>{
-                    if(result && selectedIncome) {
+                    if(result && selectedIncome && setIncome) {
                         const updateIncome: Income = {id:selectedIncome.id, name:name, income:inputAmount, description:description}
                         setIncome(updateIncome)
                     }
@@ -38,7 +38,11 @@ export default function popupForm({toggle,setIncome, addIncome, edit, selectedIn
                     if(data && data.id) {
                 
                         newIncome.id = data.id
-                        addIncome(newIncome)
+
+                        //Check if add income is defined
+                        if(addIncome){
+                            addIncome(newIncome)
+                        }
                         
                     }
                 })
@@ -53,24 +57,30 @@ export default function popupForm({toggle,setIncome, addIncome, edit, selectedIn
     const [amount, setAmount] = useState<string>('')
     const [description, setDescription] = useState<string>('')
 
+    if(edit && selectedIncome) {
+        setName(selectedIncome.name)
+        setAmount(selectedIncome.toString())
+        setDescription(selectedIncome.description)
+    }
+
     return(
         <>
         <div className="popup">
-            
+
             <div className="popupForm">
                 {edit ? (<h2>Edit Income</h2>):(<h2>Create Income</h2>)}
                 <br></br>
 
                 <label htmlFor="income">Name: </label>
-                <input type ="string" id="name" name = "income" placeholder="Enter income" onChange={(event) => setName(event.target.value)}/>
+                <input type ="text" id="name" name = "income" placeholder="Enter name" onChange={(event) => setName(event.target.value)}/>
                 <br></br>
 
                 <label htmlFor="income">Income: $</label>
-                <input type ="string" id="income" name = "income" placeholder="0.00" onChange={(event) => handleCurrencyChange(event, setAmount)} onBlur={(event) => handleCurrencyBlur(event,amount,setAmount)}/>
+                <input type ="text" id="income" name = "income" value = {amount} placeholder="0.00" onChange={(event) => handleCurrencyChange(event, setAmount)} onBlur={(event) => handleCurrencyBlur(event,amount,setAmount)}/>
                 <br></br>
 
                 <label htmlFor="description">Description(optional): </label>
-                <input type="string" name = "description" id = "description" placeholder="Enter Description" onChange={(event)=> setDescription(event.target.value)}/>
+                <input type="text" name = "description" id = "description" placeholder="Enter Description" onChange={(event)=> setDescription(event.target.value)}/>
                 <br></br>
 
                 <div className="bottomButtons">

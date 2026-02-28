@@ -8,6 +8,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import LoadingSpinner from './components/ui/LoadingSpinner.tsx'
 import AccountPopup from './components/ui/AccountForm.tsx'
 import TransactionPopup from './components/ui/TransationForm.tsx'
+import IncomePopup from './components/ui/IncomeForm.tsx'
 import type { Account } from './api/Account.ts'
 
 function App() {
@@ -75,7 +76,7 @@ function NotFoundPage() {
       </p>
 
       <button onClick={() => togglePopup()}>Forms</button>
-      {seen ? (<AccountPopup toggle={togglePopup} setAccount={setAccount} edit = {false} />):null}
+      {seen ? (<IncomePopup toggle={togglePopup} edit = {false} />):null}
      
     </>
   )
