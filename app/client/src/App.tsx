@@ -16,8 +16,8 @@ import { requestAuth } from "./api/AuthAPI";
 import { resolveUserFromToken } from "./utils/token";
 
 function App() {
-  const [session, setSession] = useState<AuthSession | null>(() =>
-    loadSession(),
+  const [session, setSession] = useState<AuthSession | null>(
+    () => loadSession()
   );
 
   function handleAuthSuccess(token: string, fallbackUser: Partial<AuthUser>) {
@@ -38,8 +38,15 @@ function App() {
   return (
     <Router>
       <div className="auth-shell">
-        <div className="auth-glow auth-glow-left" />
-        <div className="auth-glow auth-glow-right" />
+        <div className="fixed w-[28rem] h-[28rem] rounded-full opacity-25
+            blur-[90px] pointer-events-none animate-[float_9s_ease-in-out_infinite]
+            bg-[radial-gradient(circle,_#18cc5f_0%,_#0d4d26_70%,_transparent_100%)]
+            -top-32 -left-32" 
+        />
+        <div className="fixed w-[28rem] h-[28rem] rounded-full opacity-25
+            blur-[90px] pointer-events-none animate-[float_9s_ease-in-out_infinite]
+            bg-[radial-gradient(circle,_#27a552_0%,_#0f411d_65%,_transparent_100%)]
+            -right-32 -bottom-32" />
 
         <Routes>
           <Route

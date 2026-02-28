@@ -10,7 +10,6 @@ type NavigationBarProps = {
 };
 function NavBar({ isOpen, onClose, onLogout }: NavigationBarProps) {
   const location = useLocation();
-
   if (!isOpen) return null;
 
   const navItems = [
@@ -21,7 +20,7 @@ function NavBar({ isOpen, onClose, onLogout }: NavigationBarProps) {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-[rgba(2,6,23,0.22)] z-[39]"
+        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[39]"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -36,25 +35,40 @@ function NavBar({ isOpen, onClose, onLogout }: NavigationBarProps) {
           zIndex: 40,
           display: "flex",
           flexDirection: "column",
-          borderRight: "1px solid rgba(15,23,42,0.08)",
-          background: "rgba(255,255,255,0.96)",
-          boxShadow: "0 14px 40px rgba(2,6,23,0.10)",
+          background: "transparent",
         }}
         className="!bg-transparent"
       >
-        <div className="flex flex-col h-full bg-[rgba(255,255,255,0.96)]">
+        <div
+          className="
+            flex flex-col h-full
+            bg-gradient-to-b from-[#0b1510] to-[#050806]
+            border-r border-green-500/15
+            shadow-[0_0_40px_rgba(34,197,94,0.15)]
+            backdrop-blur-xl
+          "
+        >
           {/* Header */}
-          <div className="flex items-center justify-between gap-2.5 px-3 py-[14px] border-b border-[rgba(15,23,42,0.06)] bg-[rgba(248,250,252,0.85)]">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-[36px] h-[36px] rounded-[12px] bg-slate-900 text-white grid place-items-center font-black shrink-0">
+          <div className="flex items-center justify-between px-4 py-4 border-b border-green-500/10">
+            <div className="flex items-center gap-3">
+              <div
+                className="
+                  w-9 h-9 rounded-xl
+                  bg-green-500/15
+                  text-green-400
+                  grid place-items-center
+                  font-black
+                  shadow-[0_0_20px_rgba(34,197,94,0.35)]
+                "
+              >
                 U
               </div>
 
               <div>
-                <div className="text-[15px] font-black text-slate-900 leading-tight">
+                <div className="text-sm font-bold text-white leading-tight">
                   Navigation
                 </div>
-                <div className="text-xs text-slate-500 mt-0.5">
+                <div className="text-xs text-green-400/70">
                   User Portal
                 </div>
               </div>
@@ -66,24 +80,21 @@ function NavBar({ isOpen, onClose, onLogout }: NavigationBarProps) {
               title="Close navigation"
               type="button"
               className="
-                w-[38px] h-[38px]
-                rounded-[20px]
-                border border-[rgba(15,23,42,0.10)]
-                bg-white
-                shadow-[0_1px_0_rgba(2,6,23,0.04)]
-                shrink-0
-                leading-none
-                p-0
-                flex items-center justify-center
-                shrink-0
-                hover:bg-slate-50
+                w-9 h-9 rounded-full
+                border border-green-500/20
+                bg-black/40
+                text-green-400
+                grid place-items-center
+                hover:bg-green-500/10
+                transition
               "
-            ><span><FaTimes className="text-[18px]"/></span>
+            >
+              <FaTimes className="text-sm" />
             </button>
           </div>
 
           {/* Nav links */}
-          <div className="grid gap-1.5 p-2.5 content-start">
+          <div className="grid gap-1.5 p-3 content-start">
             {navItems.map((item) => {
               const active = location.pathname === item.to;
 
@@ -92,19 +103,20 @@ function NavBar({ isOpen, onClose, onLogout }: NavigationBarProps) {
                   key={item.to}
                   to={item.to}
                   onClick={onClose}
-                  className={`flex items-center gap-2.5 px-3 py-2.5 rounded-[14px]
-                    font-bold no-underline border transition
+                  className={`
+                    flex items-center gap-3 px-4 py-2.5 rounded-xl
+                    font-semibold transition-all
                     ${
                       active
-                        ? "text-slate-900 bg-[rgba(248,250,252,0.95)] border-[rgba(15,23,42,0.08)] shadow-[0_6px_18px_rgba(2,6,23,0.04)]"
-                        : "text-slate-700 border-transparent hover:bg-slate-50"
+                        ? "bg-green-500/15 text-white border border-green-500/30 shadow-[0_0_20px_rgba(34,197,94,0.25)]"
+                        : "text-slate-300 hover:bg-green-500/10"
                     }
                   `}
                 >
                   <span
                     className={`
-                      w-[18px] h-[18px] grid place-items-center text-lg shrink-0
-                      ${active ? "text-red-600" : "text-slate-500"}
+                      w-5 h-5 grid place-items-center text-lg
+                      ${active ? "text-green-400" : "text-slate-400"}
                     `}
                   >
                     {item.icon}
@@ -116,27 +128,25 @@ function NavBar({ isOpen, onClose, onLogout }: NavigationBarProps) {
           </div>
 
           {/* Footer Sign Out */}
-          <div className="mt-auto p-2.5 border-t border-slate-900/5">
+          <div className="mt-auto p-3 border-t border-green-500/10">
             <button
               type="button"
               onClick={onLogout}
               aria-label="Sign out"
               title="Sign out"
               className="
-                w-full flex items-center gap-2.5
-                px-3 py-2.5
-                rounded-[14px]
-                border border-[rgba(239,68,68,0.16)]
-                text-red-700
-                font-extrabold
-                text-left
-                cursor-pointer
-                hover:bg-red-100
+                w-full flex items-center gap-3
+                px-4 py-2.5
+                rounded-xl
+                border border-red-500/30
+                bg-red-500/10
+                text-red-400
+                font-bold
+                hover:bg-red-500/20
                 transition
               "
-              style={{backgroundColor: "#fef2f2e6"}}
             >
-              <span className="w-[18px] h-[18px] grid place-items-center text-base shrink-0">
+              <span className="w-5 h-5 grid place-items-center">
                 <FaSignOutAlt />
               </span>
               <span>Sign out</span>

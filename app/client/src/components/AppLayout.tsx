@@ -15,15 +15,15 @@ export default function AppLayout({ onLogout }: AppLayoutProps) {
 
   return (
     <div className="relative min-h-screen bg-[#f6f7fb]">
-      {!isNavBarOpen && (
         <button
           type="button"
           onClick={toggleSidebar}
           aria-label="Open navigation"
           title="Open navigation"
-          className="
+          disabled={isNavBarOpen}
+          className={`${isNavBarOpen ? "invisible" : ""} 
             fixed top-[14px] left-[14px] z-50
-            w-[46px] h-[46px]
+            w-[45px] h-[45px]
             rounded-[14px]
             border border-[rgba(15,23,42,0.10)]
             bg-[rgba(255,255,255,0.92)]
@@ -33,7 +33,7 @@ export default function AppLayout({ onLogout }: AppLayoutProps) {
             place-items-center
             color-[#0f172a]
             p-0 leading-none
-          "        
+          `}
         >
           <IoReorderThreeSharp
             className="
@@ -44,7 +44,6 @@ export default function AppLayout({ onLogout }: AppLayoutProps) {
             "
           />
         </button>
-      )}
 
       {isNavBarOpen && (
         <NavBar
@@ -54,11 +53,8 @@ export default function AppLayout({ onLogout }: AppLayoutProps) {
         />
       )}
 
-      <div
-        className="min-h-screen bg-[#f6f7fb] transition-[margin-left] duration-250 ease-in-out"
-        style={{
-          marginLeft: isNavBarOpen ? `${SIDEBAR_WIDTH}px` : "0px",
-        }}
+      <div className="min-h-screen bg-[#f6f7fb] transition-[margin-left] duration-250 ease-in-out"
+          style={{ marginLeft: isNavBarOpen ? `${SIDEBAR_WIDTH}px` : "0px"}}
       >
         <Outlet />
       </div>

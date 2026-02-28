@@ -24,6 +24,7 @@ export function SankeyChart({data}: SankeyChartProps) {
         link={{ stroke: '#9ca3af', strokeOpacity: 0.5 }}
         nodePadding={20}
         nodeWidth={15}
+        linkCurvature={1}
         margin={{ top: 20, bottom: 20, left: 20, right: 20 }}
         align="justify"
         sort={true}
