@@ -1,3 +1,4 @@
+import { resumeAndPrerenderToNodeStream } from "react-dom/static"
 import type { updateResponse } from "../type/responseTypes"
 
 export interface Income {
@@ -9,80 +10,105 @@ export interface Income {
 
 const requestUrl = "http://localhost:3000/income"
 
-export async function getIncome() {
+export async function getIncome():Promise<Income[]> {
 
-    const response = await fetch(requestUrl, {
-        method: "GET",
-        headers: {
-            "Cookie": document.cookie
+    try {
+        const response = await fetch(requestUrl, {
+            method: "GET",
+            credentials: "include"
+        })
+        
+        if(!response.ok) {
+            console.error(response.status)
+            alert("Failed to retrieve income")
+            return []
+        } else {
+            return response.json()
         }
-    })
-    
-    if(!response.ok) {
-        console.error(response.status)
-        alert("Failed to retrieve income")
+    } catch(error) {
+        console.log(error)
+        throw error
     }
 }
 
 export async function postIncome(name:string, income:number, description:string): Promise<updateResponse>{
-    const response = await fetch(requestUrl,{
-        method: "POST",
-        headers:{
-            "Cookie":document.cookie
-        },
-        body: JSON.stringify({"name":name,"income":income,"description":description})
-    })
+    try{
+        const response = await fetch(requestUrl,{
+            method: "POST",
+            headers:{
+                "content-type": 'application/json'
+            },
+            credentials: "include",
+            body: JSON.stringify({"name":name,"income":income,"description":description})
+        })
 
-    if(response.ok){
-        alert("Created income " + name)
-    } else {
-        alert("Failed to create income " + name)
-        console.error(response.status)
+        if(response.ok){
+            alert("Created income " + name)
+        } else {
+            alert("Failed to create income " + name)
+            console.error(response.status)
+        }
+
+        return response.json()
+    } catch(error) {
+        console.error(error)
+        throw error
     }
-
-    return response.json()
 }
 
 
 export async function putIncome(name:string, income:number, description:string) {
-    const response = await fetch(requestUrl,{
-        method: "POST",
-        headers:{
-            "Cookie":document.cookie
-        },
-        body: JSON.stringify({"name":name,"income":income,"description":description})
-    })
+    
+    try {
+        const response = await fetch(requestUrl,{
+            method: "POST",
+            headers:{
+                "content-type": "applicaton/json"
+            },
+            credentials: "include",
+            body: JSON.stringify({"name":name,"income":income,"description":description})
+        })
 
-    if(response.ok){
-        alert("Created income " + name)
-    } else {
-        alert("Failed to create income " + name)
-        console.error(response.status)
+        if(response.ok){
+            alert("Created income " + name)
+        } else {
+            alert("Failed to create income " + name)
+            console.error(response.status)
+        }
+
+        return response.ok
+    } catch(error) {
+        console.log(error)
+        throw error
     }
 
-    return response.ok
 }
 
 export async function deleteIncome(selectedIncome:Income) {
 
     const content = JSON.stringify({id:selectedIncome.id})
-    
-    //Create delete request to delete the income 
-    const response = await fetch(requestUrl,{
-        method: "DELETE",
-        headers: {
-            "content-type": "/application/json",
-            "Cookie":document.cookie
-        },
-        body: content
-    })
+    try{
+        //Create delete request to delete the income 
+        const response = await fetch(requestUrl,{
+            method: "DELETE",
+            headers: {
+                "content-type": "/application/json",
+            },
+            credentials:"include",
+            body: content
+        })
 
-    if(response.ok){
-        alert("Income " + selectedIncome.name + " has been deleted")
-    } else {
-        alert("Failed to delete income " + selectedIncome.name)
-        console.error(response.status)
+        if(response.ok){
+            alert("Income " + selectedIncome.name + " has been deleted")
+        } else {
+            alert("Failed to delete income " + selectedIncome.name)
+            console.error(response.status)
+        }
+
+        return response.ok
+
+    } catch(error) {
+        console.error(error)
+        throw error
     }
-    
-    return response.ok
 }

@@ -3,12 +3,13 @@ import CsvUpload from "../csvread/CsvUpload";
 import './UserForm.css'
 import { getUserAccounts, type Account } from "../../api/Account";
 import { validateTransactionForm } from "../../util/ValidateForms";
-import { pushTranscations, type Transaction } from "../../api/Transaction";
-import { handleCurrencyChange } from "../../util/handleInput";
+import { postTranscations, putTranscations, type Transaction } from "../../api/Transaction";
+import { handleCurrencyChange, handleCurrencyBlur } from "../../util/handleInput";
 
 interface popupProp{
     toggle: () => void;
-    setTransaction: () => void
+    setTransaction: (editedTransaction:Transaction) => void
+    addTransaction: (newTransaction:Transaction) => void
     edit: boolean
     selectedTransaction?: Transaction
 }
@@ -26,7 +27,7 @@ export const transactionCategory = {
 type typeOfTransaction = keyof typeof transactionCategory
 
 //Returns a form of for the user to enter their info
-export default function popupForm({toggle, edit, selectedTransaction}:popupProp){
+export default function popupForm({toggle,setTransaction,addTransaction, edit, selectedTransaction}:popupProp){
 
     //Handles the submiting the form
     const handleSubmit = () =>{
@@ -40,17 +41,40 @@ export default function popupForm({toggle, edit, selectedTransaction}:popupProp)
             userTransaction = {id: 0, financialAccount_id:accountId, amount:transferAmount, type: selectedType, date: new Date()}
 
             if(edit && selectedTransaction) {
+                try{
+                    //Editing selected transaction
+                    userTransaction.id = selectedTransaction.id
 
-                userTransaction["id"] = selectedTransaction["id"]
-            } 
-
-            pushTranscations([userTransaction]).then((data) => {data[0]
-
-                //Successful push if data is returned
-                if(data && data[0]["id"]) {
-                    userTransaction["id"] = data[0]["id"] 
+                    //Send a request to update the transaction
+                    putTranscations(userTransaction).then((result) => {
+                        //Determine if the 
+                        if(result) {
+                            setTransaction(userTransaction)
+                        } 
+                    })
+                } catch(error){
+                    alert("Failed to edit transaction")
                 }
-            })
+            } else {
+        
+                try{
+                    //Send a request to create the transaction
+                    postTranscations([userTransaction]).then((response) => {
+
+                        //Successful put if response is returned
+                        if(response && response[0].id) {
+                            userTransaction.id = response[0].id
+                            addTransaction(userTransaction)
+                        } else {
+                            alert("Failed to create transaction")
+                        }
+                        
+                        
+                    })
+                } catch(error) {
+                    alert("Failed to create transaction")
+                }
+            }
 
             //Need to insert function that sets the state in parent component
 
@@ -61,13 +85,7 @@ export default function popupForm({toggle, edit, selectedTransaction}:popupProp)
 
     }
 
-    const handleCurrencyBlur = (event:React.ChangeEvent<HTMLInputElement>) => {
-        if(event.target.value !== "") {
-            setAmount(parseFloat(amount).toFixed(2))
-        }
-
-    }
-
+    //Handle when the user adds a file to the form
     const handleFile = (event:React.ChangeEvent<HTMLInputElement>) =>{
 
         if(event.target && event.target.files && event.target.files[0]){
@@ -76,8 +94,7 @@ export default function popupForm({toggle, edit, selectedTransaction}:popupProp)
             setFile(undefined)
         }
     
-        //Insert cvs parsing function
-        
+        //Insert cvs parsing function/validation function        
     }
 
 
@@ -132,7 +149,7 @@ export default function popupForm({toggle, edit, selectedTransaction}:popupProp)
                 <br></br>
 
                 <label htmlFor="amount">Amount: $</label>
-                <input className="moneyInput" min="0" step={"0.01"} type = "text" id = "amount" value={amount} onChange={(event) => handleCurrencyChange(event, setAmount)} onBlur={handleCurrencyBlur} placeholder="0.00"/>
+                <input className="moneyInput" min="0" step={"0.01"} type = "text" id = "amount" value={amount} onChange={(event) => handleCurrencyChange(event, setAmount)} onBlur={(event) => handleCurrencyBlur(event, amount, setAmount)} placeholder="0.00"/>
                 <br></br>
 
                 {edit ? (null):(

@@ -35,16 +35,17 @@ export default function popupForm({toggle,setIncome, addIncome, edit, selectedIn
                     const newIncome: Income = {id: 0, name:name, income:inputAmount, description:description}
 
                     //Determine if response gave back an id for the new created income
-                    if(data) {
+                    if(data && data.id) {
+                
+                        newIncome.id = data.id
+                        addIncome(newIncome)
                         
-                        if(data.id){
-                    
-                            newIncome.id = data.id
-                            addIncome(newIncome)
-                        }
                     }
                 })
             }
+            toggle()
+        } else {
+            alert("Please fillout the income form")
         }
     }
 
@@ -53,27 +54,31 @@ export default function popupForm({toggle,setIncome, addIncome, edit, selectedIn
     const [description, setDescription] = useState<string>('')
 
     return(
-        <div>
-            <h2>Income</h2>
-            <br></br>
+        <>
+        <div className="popup">
+            
+            <div className="popupForm">
+                {edit ? (<h2>Edit Income</h2>):(<h2>Create Income</h2>)}
+                <br></br>
 
-            <label htmlFor="income">Name: </label>
-            <input type ="string" id="name" name = "income" placeholder="Enter income" onChange={(event) => setName(event.target.value)}/>
-            <br></br>
+                <label htmlFor="income">Name: </label>
+                <input type ="string" id="name" name = "income" placeholder="Enter income" onChange={(event) => setName(event.target.value)}/>
+                <br></br>
 
-            <label htmlFor="income">Income: $</label>
-            <input type ="string" id="income" name = "income" placeholder="0.00" onChange={(event) => handleCurrencyChange(event, setAmount)} onBlur={(event) => handleCurrencyBlur(event,amount,setAmount)}/>
-            <br></br>
+                <label htmlFor="income">Income: $</label>
+                <input type ="string" id="income" name = "income" placeholder="0.00" onChange={(event) => handleCurrencyChange(event, setAmount)} onBlur={(event) => handleCurrencyBlur(event,amount,setAmount)}/>
+                <br></br>
 
-            <label htmlFor="description">Description(optional): </label>
-            <input type="string" name = "description" id = "description" placeholder="Enter Description" onChange={(event)=> setDescription(event.target.value)}/>
-            <br></br>
+                <label htmlFor="description">Description(optional): </label>
+                <input type="string" name = "description" id = "description" placeholder="Enter Description" onChange={(event)=> setDescription(event.target.value)}/>
+                <br></br>
 
-            <div className="bottomButtons">
-                <button onClick={toggle}>Close</button>
-                {edit? (<button onClick={handleSubmit}>Edit</button>): (<button onClick={handleSubmit}>Submit</button>)}<button className=""></button>
+                <div className="bottomButtons">
+                    <button onClick={toggle}>Close</button>
+                    {edit? (<button onClick={handleSubmit}>Edit</button>): (<button onClick={handleSubmit}>Submit</button>)}<button className=""></button>
+                </div>
             </div>
         </div>
-        
+        </>  
     )
 }

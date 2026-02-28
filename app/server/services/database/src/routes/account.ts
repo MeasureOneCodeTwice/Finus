@@ -20,8 +20,10 @@ accountsRouter.post("/", async (req: Request, res: Response) => {
 
     res.json({
       message: "Account successfully created",
-      id: result.insertId
+      id: result.insertId,
+      
     });
+    res.append("Access-Control-Allow-Origin", "http://localhost:8080/")
   } catch (err) {
     console.error("Account creation failed", err);
     res.status(500).json({ error: "Account creation failed" });

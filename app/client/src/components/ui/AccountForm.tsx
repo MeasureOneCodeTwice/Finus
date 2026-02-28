@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import CsvUpload from "../csvread/CsvUpload";
 import './UserForm.css'
-import {postUserAccount, type Account} from '../../api/Account.ts'
+import {postUserAccount, putUserAccount, type Account} from '../../api/Account.ts'
 import { validateAccountForm } from "../../util/ValidateForms.ts";
 import { handleCurrencyChange, handleCurrencyBlur } from "../../util/handleInput.ts";
 
 interface popupProp{
     toggle: () => void;
     setAccount: (account:Account) => void
+    addAccount: (account:Account) => void
     edit: boolean
     selectedAccount?: Account
 }
@@ -21,7 +22,7 @@ export const accountCategory = {
 
 type typeofAccount = keyof typeof accountCategory
 
-export default function popupForm({toggle, setAccount, edit, selectedAccount}:popupProp){
+export default function popupForm({toggle, setAccount, addAccount, edit, selectedAccount}:popupProp){
 
     //Submits the account data
     
@@ -45,18 +46,44 @@ export default function popupForm({toggle, setAccount, edit, selectedAccount}:po
             const newAccount: Account = {id: 0, name:formInput.name, type: accountType, balance: accountBalance, subtype:"", value:0, last_updated: new Date()}
             console.log(newAccount)
 
-            //Send a post request to create or edit the account
-            postUserAccount(newAccount).then((data)=>{
+            //Determine if we edding an account info
+            if(edit && selectedAccount) {
+                newAccount.id = selectedAccount.id
 
-                //When creating new account, id is returned for that account
-                if(data && data["id"])
-                    newAccount["id"] = data["id"]
+                try{
+                    //Put reques to update the account
+                    putUserAccount(newAccount).then((response) =>{
 
-            
-                if(data["lastUpdated"])
-                    newAccount["last_updated"] = data["lastUpdated"]
-            })
+                        //Determine if sucessfully post
+                        if(response && response.lastUpdated) {
+                            newAccount.last_updated = response.lastUpdated
+                            addAccount(newAccount)
+                        }
+                    })
+                } catch(error) {
                     
+                }
+
+            } else {
+                try{
+                    //Send a post request to create or edit the account
+                    postUserAccount(newAccount).then((response)=>{
+
+                        //When creating new account, id is returned for that account
+                        if(response && response.id)
+                            newAccount.id = response.id
+
+                    
+                            if(response.lastUpdated)
+                                newAccount.last_updated = response.lastUpdated
+
+                                setAccount(newAccount)
+                    })
+                } catch(error) {
+                    alert("Failed to create account " + newAccount.name)
+                }
+            }
+                        
             toggle()
         } else {
             alert("Please fill out the form")
