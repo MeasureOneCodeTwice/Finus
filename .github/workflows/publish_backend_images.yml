@@ -9,6 +9,7 @@ on:
 jobs:
   publish-images:
     uses: ./.github/workflows/docker_compose_publish.yml
+    environment: "Docker hub"
     with:
       docker-hub-username: ${{ vars.DOCKER_HUB_USERNAME }}
       dockerfile-dir: app/server
