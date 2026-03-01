@@ -2,7 +2,7 @@ import { defineConfig } from 'vitest/config'
 import path from "path"
 
 export default defineConfig({
-    resolve : {
+    resolve: {
         alias: {
             "@": path.resolve(__dirname, "./common")
         }
