@@ -1,18 +1,5 @@
-import type { promises } from "dns";
-import { get, request } from "http";
-import { json } from "stream/consumers";
 import type { updateResponse } from "../type/responseTypes";
-
-export interface Transaction{
-    id: number;
-    financialAccount_id: number;
-    amount: number;
-    type: string
-    description?: string;
-    sender?: string;
-    recipient?: string;
-    date: Date;
-}
+import { type Transaction } from "../type/TransactionType";
 
 const requestUrl = "http://localhost:3000/transacitons"
 

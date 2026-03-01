@@ -1,7 +1,9 @@
 import { useState } from "react"
-import { getUserAccounts, type Account } from "../../api/Account"
+import { getUserAccounts} from "../../api/Account"
+import { type Account } from "../../type/AccountType"
 import AccountCard from "./AccountCard"
 import AccountPopup from "./AccountForm"
+
 
 export default function accountList(){
 

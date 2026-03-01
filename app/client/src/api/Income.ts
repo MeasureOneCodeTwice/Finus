@@ -1,12 +1,6 @@
-import { resumeAndPrerenderToNodeStream } from "react-dom/static"
-import type { updateResponse } from "../type/responseTypes"
 
-export interface Income {
-    id:number,
-    name:string,
-    income: number,
-    description: string
-}
+import type { updateResponse } from "../type/responseTypes"
+import { type Income } from "../type/IncomeType"
 
 const requestUrl = "http://localhost:3000/income"
 

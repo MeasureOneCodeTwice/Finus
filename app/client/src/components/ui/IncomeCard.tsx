@@ -1,5 +1,6 @@
 import { useState } from "react"
-import { deleteIncome, type Income } from "../../api/Income"
+import { deleteIncome} from "../../api/Income"
+import { type Income } from "../../type/IncomeType"
 import IncomePopup from "./IncomeForm"
 
 interface cardProp{

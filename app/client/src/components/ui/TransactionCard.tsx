@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { deleteTransaction, type Transaction } from "../../api/Transaction";
+import { deleteTransaction} from "../../api/Transaction";
+import { type Transaction } from "../../type/TransactionType";
 import TransactionPopup from "./TransationForm"
 
 

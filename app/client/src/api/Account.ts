@@ -1,15 +1,5 @@
 import type { updateResponse } from "../type/responseTypes";
-
-//Coppied from module
-export interface Account{
-    id: number;
-    name: string;
-    type: string;
-    balance: number;
-    value: number;
-    subtype?: string;
-    last_updated: Date;
-}
+import type { Account } from "../type/AccountType";
 
 const requestUrl = 'http://localhost:3000/accounts'
 

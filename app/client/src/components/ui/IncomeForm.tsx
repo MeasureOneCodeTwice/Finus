@@ -1,8 +1,9 @@
 import { useState } from "react"
 import { handleCurrencyChange, handleCurrencyBlur } from "../../util/handleInput"
 import './UserForm.css'
-import {postIncome, putIncome, type Income } from "../../api/Income"
+import {postIncome, putIncome} from "../../api/Income"
 import { validateIncomeForm } from "../../util/ValidateForms";
+import { type Income } from "../../type/IncomeType"; 
 
 interface popupProp{
     toggle: () => void;

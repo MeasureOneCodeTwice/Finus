@@ -1,6 +1,7 @@
-import { deleteUserAccount, type Account } from "../../api/Account";
+import { deleteUserAccount } from "../../api/Account";
 import { useState } from "react";
 import AccountPopup from './AccountForm.tsx'
+import { type Account } from "../../type/AccountType.ts";
 
 interface cardProp{
     account:Account
