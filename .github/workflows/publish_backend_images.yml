@@ -10,28 +10,14 @@ jobs:
   publish-images:
     runs-on: ubuntu-24.04
     environment: "Docker hub"
-    steps: 
-     - run: |
-        BRANCH_NAME=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
-        RELEASE_VERSION=$(echo $BRANCH_NAME | sed "s|release\/||g")
-        echo RELEASE_VERSION=$RELEASE_VERSION >> $GITHUB_ENV
+    uses: ./.github/workflows/docker_compose_publish.yml
+    with:
+      docker-hub-username: ${{ vars.DOCKER_HUB_USERNAME }}
+      dockerfile-dir: app/server
+    secrets: inherit
 
-     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
-
-     - run: |
-        ls 
-        ls .github
-        ls .github/workflows
-        pwd
-
-     - uses: ./.github/workflows/docker_compose_publish
-       with: 
-        docker-hub-username: ${{ vars.DOCKER_HUB_USERNAME }}
-        release-version: 0
-        dockerfile-dir: app/server
-
-     - uses: ./.github/workflows/docker_compose_publish
-       with: 
-        docker-hub-username: ${{ vars.DOCKER_HUB_USERNAME }}
-        release-version: 0
-        dockerfile-dir: app/client
+#      - uses: ./.github/workflows/docker_compose_publish.yml
+#        with: 
+#         docker-hub-username: ${{ vars.DOCKER_HUB_USERNAME }}
+#         release-version: 0
+#         dockerfile-dir: app/client
