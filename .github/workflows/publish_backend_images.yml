@@ -21,11 +21,11 @@ jobs:
      - uses: ./.github/workflows/docker_compose_publish
        with: 
         docker_hub_username: ${{ vars.DOCKER_HUB_USERNAME }}
-        release_version: ${{ env.RELEASE_VERSION }}
+        release_version: 0
         dockerfile_dir: app/server
 
      - uses: ./.github/workflows/docker_compose_publish
        with: 
         docker_hub_username: ${{ vars.DOCKER_HUB_USERNAME }}
-        release_version: ${{ env.RELEASE_VERSION }}
+        release_version: 0
         dockerfile_dir: app/client
