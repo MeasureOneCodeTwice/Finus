@@ -7,6 +7,9 @@ on:
       release_version:
         type: string
         required: true
+      dockerfile_dir:
+        type: string
+        required: true
     secrets:
       docker_hub_password:
         type: string
@@ -16,6 +19,9 @@ on:
 jobs:
   publish_compose:
     runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: app/server
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - uses: docker/setup-buildx-action@000d75d273dec231f74115df50b6ee04c9b25e55
