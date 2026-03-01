@@ -7,7 +7,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  environment: "Docker hub"
   publish-images:
     uses: ./.github/workflows/docker_compose_publish.yml
     with:
