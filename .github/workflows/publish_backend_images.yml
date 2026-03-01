@@ -18,13 +18,13 @@ jobs:
 
      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
-     - uses: ./.github/workflows/docker_compose_publish
+     - uses: ./.github/workflows/docker_compose_publish.yml
        with: 
         docker-hub-username: ${{ vars.DOCKER_HUB_USERNAME }}
         release-version: 0
         dockerfile-dir: app/server
 
-     - uses: ./.github/workflows/docker_compose_publish
+     - uses: ./.github/workflows/docker_compose_publish.yml
        with: 
         docker-hub-username: ${{ vars.DOCKER_HUB_USERNAME }}
         release-version: 0
