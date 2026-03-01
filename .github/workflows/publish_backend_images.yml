@@ -20,6 +20,8 @@ jobs:
 
      - run: |
         ls 
+        ls .github
+        ls .github/workflows
         pwd
 
      - uses: ./.github/workflows/docker_compose_publish.yml
