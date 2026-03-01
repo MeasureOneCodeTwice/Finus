@@ -8,6 +8,7 @@ on:
 jobs:
   publish-compose:
     runs-on: ubuntu-24.04
+    environment: "Docker hub"
     defaults:
       run:
         working-directory: ${{ inputs.dockerfile-dir }}
@@ -25,10 +26,13 @@ jobs:
           echo RELEASE_VERSION=$RELEASE_VERSION         >  .env
           echo DOCKER_HUB_USERNAME=$DOCKER_HUB_USERNAME >> .env
 
+          echo $DOCKER_HUB_PASSWORD | docker login -u $DOCKER_HUB_USERNAME --password-stdin 
+
           echo "Building images..."
           docker compose build -q
           echo "Pushing images..."
           docker compose push  -q
         env:
           DOCKER_HUB_USERNAME: ${{ vars.DOCKER_HUB_USERNAME }}
+          DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
