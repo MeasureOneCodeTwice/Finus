@@ -8,8 +8,8 @@ import { handleCurrencyChange, handleCurrencyBlur } from "../../util/handleInput
 
 interface popupProp{
     toggle: () => void;
-    setTransaction: (editedTransaction:Transaction) => void
-    addTransaction: (newTransaction:Transaction) => void
+    setTransaction?: (editedTransaction:Transaction) => void
+    addTransaction?: (newTransaction:Transaction) => void
     edit: boolean
     selectedTransaction?: Transaction
 }
@@ -36,9 +36,9 @@ export default function popupForm({toggle,setTransaction,addTransaction, edit, s
         const transferAmount = Number(amount)
         let userTransaction: Transaction
 
-        if(selectedType && validateTransactionForm(accountId, selectedType, transferAmount, file)){
+        if(selectedType && validateTransactionForm(accountId, selectedType, transferAmount, selectedDate, file)){
 
-            userTransaction = {id: 0, financialAccount_id:accountId, amount:transferAmount, type: selectedType, date: new Date()}
+            userTransaction = {id: 0, financialAccount_id:accountId, amount:transferAmount, type: selectedType, date: new Date(selectedDate)}
 
             if(edit && selectedTransaction) {
                 try{
@@ -48,7 +48,7 @@ export default function popupForm({toggle,setTransaction,addTransaction, edit, s
                     //Send a request to update the transaction
                     putTranscations(userTransaction).then((result) => {
                         //Determine if the 
-                        if(result) {
+                        if(result && setTransaction) {
                             setTransaction(userTransaction)
                         } 
                     })
@@ -64,7 +64,10 @@ export default function popupForm({toggle,setTransaction,addTransaction, edit, s
                         //Successful put if response is returned
                         if(response && response[0].id) {
                             userTransaction.id = response[0].id
-                            addTransaction(userTransaction)
+
+                            if(addTransaction){
+                                addTransaction(userTransaction)
+                            }
                         } else {
                             alert("Failed to create transaction")
                         }
@@ -114,6 +117,7 @@ export default function popupForm({toggle,setTransaction,addTransaction, edit, s
     const [selectedType, setSelectedType] = useState("")
     const [amount, setAmount] = useState<string>("")
     const [file, setFile] = useState<File | undefined>(undefined)
+    const [selectedDate, setSelectedDate] = useState<string>("")
 
     //Holds the types of transfers
     const transCat: typeOfTransaction [] = Object.keys(transactionCategory) as typeOfTransaction[];
@@ -148,6 +152,10 @@ export default function popupForm({toggle,setTransaction,addTransaction, edit, s
 
                 <label htmlFor="amount">Amount: $</label>
                 <input className="moneyInput" min="0" step={"0.01"} type = "text" id = "amount" value={amount} onChange={(event) => handleCurrencyChange(event, setAmount)} onBlur={(event) => handleCurrencyBlur(event, amount, setAmount)} placeholder="0.00"/>
+                <br></br>
+
+                <label htmlFor="inputDate">Date: </label>
+                <input type="date" id="inputDate" name="inputDate" value = {selectedDate} onChange={(event) => setSelectedDate(event.target.value)}/>
                 <br></br>
 
                 {edit ? (null):(

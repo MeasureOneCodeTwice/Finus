@@ -22,7 +22,7 @@ export function validateAccountForm(name:string, accountType:string, balance: nu
     return result
 }
 
-export function validateTransactionForm(account_id:number, transactionType:string, amount:number, csvFile?:File) {
+export function validateTransactionForm(account_id:number, transactionType:string, amount:number,date:string, csvFile?:File) {
 
     let result = false
 
@@ -33,7 +33,7 @@ export function validateTransactionForm(account_id:number, transactionType:strin
         if(csvFile) {
             
             result = true
-        } else if(Object.values(transactionCategory).includes(transactionType) && amount > 0) {
+        } else if(Object.values(transactionCategory).includes(transactionType) && amount > 0 && date) {
             result = true
         }
     }
