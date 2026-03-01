@@ -8,9 +8,6 @@ on:
 
 jobs:
   publish-images:
-    environment: "Docker hub"
     uses: ./.github/workflows/docker_compose_publish.yml
     with:
-      docker-hub-username: ${{ vars.DOCKER_HUB_USERNAME }}
       dockerfile-dir: app/server
-    secrets: inherit
