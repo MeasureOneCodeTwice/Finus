@@ -18,6 +18,7 @@ on:
 jobs:
   publish-compose:
     runs-on: ubuntu-24.04
+    environment: "Docker hub"
     defaults:
       run:
         working-directory: ${{ inputs.dockerfile-dir }}
