@@ -18,6 +18,8 @@ on:
 jobs:
   publish-compose:
     runs-on: ubuntu-24.04
+    defaults:
+      working-directory: ${{ inputs.dockerfile-dir }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - uses: docker/setup-buildx-action@000d75d273dec231f74115df50b6ee04c9b25e55
@@ -25,7 +27,6 @@ jobs:
         with: 
           username: ${{ inputs.docker-hub-username }}
           password: ${{ secrets.docker-hub-password }}
-      - working-directory: ${{ inputs.dockerfile-dir }}
       - run: | 
           BRANCH_NAME=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
           RELEASE_VERSION=$(echo $BRANCH_NAME | sed "s|release\/||g")
