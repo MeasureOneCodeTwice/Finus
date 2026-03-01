@@ -8,13 +8,15 @@ import CsvPreviewTable from "./CsvPreview";
 import CsvConfirmation from "./CsvConfirm";
 import { parseCsvFile } from "../../util/ParseCsv";
 import type { TransactionDraft } from "../../util/ConvertTransaction";
+import SuccessScreen from "./csvSuccess";
 
-export default function CsvUpload() {
+export default function CsvUpload({ accountId }: { accountId: number }) {
   const [file, setFile] = useState<File | null>(null);          // selected CSV file
   const [error, setError] = useState<string | null>(null);      // validation errors
   const [parsedData, setParsedData] = useState<TransactionDraft[] | null>(null);   // state for parsed and validated data
   const [isParsing, setIsParsing] = useState(false);              // track if parsing is in progress
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [importResult, setImportResult] = useState<null | { inserted: number; skipped: number; }>(null);
 
 
 
@@ -78,6 +80,9 @@ export default function CsvUpload() {
     setIsParsing(false);
   };
 
+
+  
+
 //handle import sends valid transactions to backend for insertion into database
 const handleImport = async () => {
   if (!parsedData) return;
@@ -87,7 +92,7 @@ const handleImport = async () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        financialAccount_id: 1,     // TODO: replace with real account ID
+        financialAccount_id: accountId,
         transactions: parsedData
       }),
     });
@@ -99,10 +104,14 @@ const handleImport = async () => {
       return;
     }
 
-    console.log("Import success:", result);
-    // TODO: show success UI or redirect
-  } catch (err) {
-    setError("Network error during import");
+    setImportResult({
+      inserted: result.inserted,
+      skipped: result.skipped
+    });
+
+  } catch (error){
+    console.error("Import failed:", error);
+    setError("Error during import");
   }
 };
 
@@ -110,45 +119,60 @@ const handleImport = async () => {
 
   return (
   <div style={{ marginTop: "1rem" }}>
-    <CsvDrop onFileSelect={handleFileSelect} />
 
-    {error && <CsvError message={error} />}
-
-    {file && <CsvFile file={file} onRemove={clearFile} />}
-
-    {/* only show preview button if we have a file and we're not already in confirmation step */}
-    {!showConfirmation && (
-      <button
-        disabled={!file || isParsing}
-        onClick={handlePreview}
-        style={{ marginTop: "0.5rem" }}
-      >
-        {isParsing ? "Currently parsing" : "Preview"}
-      </button>
-    )}
-
-    {/* show preview table and continue button if we have parsed data and we're not in confirmation step */}
-    {parsedData && parsedData.length > 0 && !showConfirmation && (
-      <>
-        <CsvPreviewTable rows={parsedData} />
-
-        <button
-          style={{ marginTop: "1rem" }}
-          onClick={() => setShowConfirmation(true)}
-        >
-          Continue
-        </button>
-      </>
-    )}
-
-    {/* show confirmation step */}
-    {parsedData && parsedData.length > 0 && showConfirmation && (
-      <CsvConfirmation
-        rows={parsedData}
-        onBack={() => setShowConfirmation(false)}
-        onConfirm={handleImport}   // send to backend
+    {importResult && (
+      <SuccessScreen
+        inserted={importResult.inserted}
+        skipped={importResult.skipped}
+        onDone={() => {
+          setImportResult(null);
+          setParsedData(null);
+          setFile(null);
+          setShowConfirmation(false);
+        }}
       />
+    )}
+    {!importResult && (
+      <>
+        <CsvDrop onFileSelect={handleFileSelect} />
+
+        {error && <CsvError message={error} />}
+
+        {file && <CsvFile file={file} onRemove={clearFile} />}
+
+        {!showConfirmation && (
+          <button
+            disabled={!file || isParsing}
+            onClick={handlePreview}
+            style={{ marginTop: "0.5rem" }}
+          >
+            {isParsing ? "Currently parsing" : "Preview"}
+          </button>
+        )}
+
+        {parsedData && parsedData.length > 0 && !showConfirmation && (
+          <>
+            <CsvPreviewTable rows={parsedData} />
+
+            <button
+              style={{ marginTop: "1rem" }}
+              onClick={() => setShowConfirmation(true)}
+            >
+              Continue
+            </button>
+          </>
+        )}
+
+        {parsedData && parsedData.length > 0 && showConfirmation && (
+          <CsvConfirmation
+            rows={parsedData}
+            onBack={() => setShowConfirmation(false)}
+            onConfirm={handleImport}
+          />
+        )}
+      </>
     )}
   </div>
 );
+
 }
