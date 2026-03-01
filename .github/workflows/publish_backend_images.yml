@@ -15,6 +15,8 @@ jobs:
         BRANCH_NAME=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
         RELEASE_VERSION=$(echo $BRANCH_NAME | sed "s|release\/||g")
         echo RELEASE_VERSION=$RELEASE_VERSION >> $GITHUB_ENV
+        ls
+        pwd
 
      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
