@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  publish_images:
+  publish-images:
     runs-on: ubuntu-24.04
     environment: "Docker hub"
     steps: 
@@ -20,12 +20,12 @@ jobs:
 
      - uses: ./.github/workflows/docker_compose_publish
        with: 
-        docker_hub_username: ${{ vars.DOCKER_HUB_USERNAME }}
-        release_version: 0
-        dockerfile_dir: app/server
+        docker-hub-username: ${{ vars.DOCKER_HUB_USERNAME }}
+        release-version: 0
+        dockerfile-dir: app/server
 
      - uses: ./.github/workflows/docker_compose_publish
        with: 
-        docker_hub_username: ${{ vars.DOCKER_HUB_USERNAME }}
-        release_version: 0
-        dockerfile_dir: app/client
+        docker-hub-username: ${{ vars.DOCKER_HUB_USERNAME }}
+        release-version: 0
+        dockerfile-dir: app/client
