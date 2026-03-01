@@ -24,13 +24,13 @@ jobs:
         ls .github/workflows
         pwd
 
-     - uses: ./.github/workflows/docker_compose_publish.yml
+     - uses: ./.github/workflows/docker_compose_publish
        with: 
         docker-hub-username: ${{ vars.DOCKER_HUB_USERNAME }}
         release-version: 0
         dockerfile-dir: app/server
 
-     - uses: ./.github/workflows/docker_compose_publish.yml
+     - uses: ./.github/workflows/docker_compose_publish
        with: 
         docker-hub-username: ${{ vars.DOCKER_HUB_USERNAME }}
         release-version: 0
