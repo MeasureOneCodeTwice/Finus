@@ -12,7 +12,6 @@ on:
         required: true
     secrets:
       docker_hub_password:
-        type: string
         required: true
         
 
