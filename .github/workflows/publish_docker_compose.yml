@@ -27,13 +27,16 @@ jobs:
       - uses: docker/login-action@0d33dcdeedfe8f116d005eaa548b93b404f61fa8
         with: 
           username: ${{ inputs.docker_hub_username }}
-          password: ${{ secrets.docker_hub_password  }}
+          password: ${{ secrets.docker_hub_password }}
       - run: | 
-          echo RELEASE_VERSION=${{ inputs.release_version }}          >  .env
-          echo DOCKER_HUB_USERNAME=${{ inputs.docker_hub_username }}  >> .env
+          echo RELEASE_VERSION=$RELEASE_VERSION         >  .env
+          echo DOCKER_HUB_USERNAME=$DOCKER_HUB_USERNABE >> .env
 
           echo "Building images..."
           docker compose build -q
           echo "Pushing images..."
           docker compose push  -q
+        env:
+          RELEASE_VERSION: ${{ inputs.release_version }}
+          DOCKER_HUB_USERNAME: ${{ inputs.docker_hub_username }}
 
