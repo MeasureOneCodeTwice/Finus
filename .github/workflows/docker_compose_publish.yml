@@ -4,9 +4,6 @@ on:
       docker-hub-username:
         type: string
         required: true
-      release-version:
-        type: string
-        required: true
       dockerfile-dir:
         type: string
         required: true
@@ -29,6 +26,9 @@ jobs:
           username: ${{ inputs.docker-hub-username }}
           password: ${{ secrets.docker-hub-password }}
       - run: | 
+          BRANCH_NAME=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
+          RELEASE_VERSION=$(echo $BRANCH_NAME | sed "s|release\/||g")
+
           echo RELEASE_VERSION=$RELEASE_VERSION         >  .env
           echo DOCKER_HUB_USERNAME=$DOCKER_HUB_USERNABE >> .env
 
