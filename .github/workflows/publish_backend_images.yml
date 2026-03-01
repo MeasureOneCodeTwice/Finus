@@ -16,6 +16,10 @@ jobs:
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
     - uses: docker/setup-buildx-action@000d75d273dec231f74115df50b6ee04c9b25e55
+    - uses: docker/login-action@0d33dcdeedfe8f116d005eaa548b93b404f61fa8
+      with: 
+        username: {{ vars.DOCKER_HUB_USERNAME }}
+        password: {{ secrets.DOCKER_HUB_PASSWORD  }}
     - name: setup
       run: |
         BRANCH_NAME=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
@@ -23,26 +27,27 @@ jobs:
         echo RELEASE_VERSION=$RELEASE_VERSION                     >  .env
         echo DOCKER_HUB_USERNAME=${{ vars.DOCKER_HUB_USERNAME }}  >> .env
 
-        echo ${{ secrets.DOCKER_HUB_PASSWORD }} | docker login -u ${{ vars.DOCKER_HUB_USERNAME }} --password-stdin 
+        echo "Building images..."
         docker compose build -q
+        echo "Pushing images..."
         docker compose push  -q
 
-  publish-frontend:
-    runs-on: ubuntu-24.04
-    environment: "Docker hub"
-    defaults: 
-      run:
-        working-directory: app/client
-    steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
-    - uses: docker/setup-buildx-action@000d75d273dec231f74115df50b6ee04c9b25e55
-    - name: setup
-      run: |
-        BRANCH_NAME=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
-        RELEASE_VERSION=$(echo $BRANCH_NAME | sed "s|release\/||g")
-        echo RELEASE_VERSION=$RELEASE_VERSION                     >  .env
-        echo DOCKER_HUB_USERNAME=${{ vars.DOCKER_HUB_USERNAME }}  >> .env
+#   publish-frontend:
+#     runs-on: ubuntu-24.04
+#     environment: "Docker hub"
+#     defaults: 
+#       run:
+#         working-directory: app/client
+#     steps:
+#     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+#     - uses: docker/setup-buildx-action@000d75d273dec231f74115df50b6ee04c9b25e55
+#     - name: setup
+#       run: |
+#         BRANCH_NAME=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
+#         RELEASE_VERSION=$(echo $BRANCH_NAME | sed "s|release\/||g")
+#         echo RELEASE_VERSION=$RELEASE_VERSION                     >  .env
+#         echo DOCKER_HUB_USERNAME=${{ vars.DOCKER_HUB_USERNAME }}  >> .env
 
-        echo ${{ secrets.DOCKER_HUB_PASSWORD }} | docker login -u ${{ vars.DOCKER_HUB_USERNAME }} --password-stdin 
-        docker compose build -q
-        docker compose push  -q
+#         echo ${{ secrets.DOCKER_HUB_PASSWORD }} | docker login -u ${{ vars.DOCKER_HUB_USERNAME }} --password-stdin 
+#         docker compose build -q
+#         docker compose push  -q
