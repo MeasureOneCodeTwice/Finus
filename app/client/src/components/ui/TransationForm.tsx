@@ -140,7 +140,7 @@ export default function popupForm({toggle,setTransaction,addTransaction, edit, s
                 <label>User Account:</label>
                 <select onChange={event => setSelectedAccount(event.target.value)}>
                     <option value = "">Select Account</option>
-                    {account && account.map(account => <option key = {account.id} value = {account.id}>account.name (account.type)</option>)}
+                    {account && account.map(account => <option key = {account.id} value = {account.id}>{account.name} ({account.type})</option>)}
                 </select>
                 
                 <br></br>
@@ -162,11 +162,12 @@ export default function popupForm({toggle,setTransaction,addTransaction, edit, s
 
                 {edit ? (null):(
                     <>
-                    <label htmlFor="statement">Bank statement(CVS)</label> <CsvUpload />
+                    <label htmlFor="statement">Bank statement(CVS)</label> 
+                    {!edit && selectedAccount && 
+                    ( <CsvUpload accountId={Number(selectedAccount)} /> )
+                    }
                     </>
                 )} 
-
-                <input type = "file" name = "statement" accept=".cvs" onChange={handleFile}/>
                 <br></br>
 
                 <div className="bottomButtons">

@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import CsvUpload from "../csvread/CsvUpload";
 import './UserForm.css'
 import {postUserAccount, putUserAccount} from '../../api/Account.ts'
 import { type Account } from "../../type/AccountType.ts";
@@ -152,10 +151,6 @@ export default function popupForm({toggle, setAccount, addAccount, edit, selecte
 
             <label>Balence: $</label>
             <input  type = "text" min = "0" step ="0.01" name = "balance" value={balance} onChange={(event) => handleCurrencyChange(event, setBalance)} onBlur ={(event) => handleCurrencyBlur(event,balance,setBalance)} placeholder="0.00"/>
-            <br></br>
-
-            <label htmlFor="statement">Upload Bank Statement(.csv)</label><CsvUpload />
-            <input name = "statement" type = "file" accept =".csv" id = "statement" onChange={handleFile}/>
             <br></br>
 
             
