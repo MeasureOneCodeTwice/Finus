@@ -4,12 +4,11 @@ on:
       dockerfile-dir:
         type: string
         required: true
-      DOCKER_HUB_USERNAME:
-        type: string
-        required: true
 
     secrets:
       DOCKER_HUB_PASSWORD:
+        required: true
+      DOCKER_HUB_USERNAME:
         required: true
 
 jobs:
