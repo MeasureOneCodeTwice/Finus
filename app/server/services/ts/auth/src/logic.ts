@@ -46,6 +46,7 @@ export async function signup(body: SignupBody, res: express.Response, pool: Pool
 
   const passwordHash = await Bun.password.hash(body.password, {
     algorithm: "bcrypt",
+    cost: 10//this is needed for populator to work - Python needs to know the cost to match the algorithm
   });
   try {
     console.log("Inserting user into database...");

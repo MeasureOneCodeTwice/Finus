@@ -13,6 +13,7 @@ import hashlib
 import os
 from datetime import datetime, timedelta
 import argparse
+import bcrypt
 import subprocess
 
 
@@ -30,7 +31,12 @@ ACCOUNTS_PER_USER = 3  # Average number of financial accounts per user
 TRANSACTIONS_PER_ACCOUNT = 500
 START_DATE = datetime.now() - timedelta(days=365)
 
-
+TEST_USER_NAME = 'f'
+TEST_USER_F_NAME = 'John'
+TEST_USER_L_NAME = 'Finus'
+TEST_USER_AGE = 22
+TEST_USER_EMAIL = 'j@j.com'
+TEST_USER_PASSWORD = 'pwd'
 
 # def get_db_connection():
 #     try:
@@ -55,10 +61,11 @@ TRANSACTION_DESCRIPTIONS = [ 'regret','why did I do this', 'I deserve this']
 SENDERS_RECIPIENTS = ['Employer Inc.', 'Supermarket Co.', 'Utility Corp', 'Friend', 'Family Member']
 
 def hash_password(password):
-    salt = os.urandom(16)
-    pw_hash = hashlib.sha256((password + salt.hex()).encode()).hexdigest()
+    # salt = os.urandom(16)
+    # pw_hash = hashlib.sha256((password + salt.hex()).encode()).hexdigest()
 
-    return pw_hash
+    bcrypt_hash = bcrypt.hashpw(TEST_USER_PASSWORD.encode('utf-8'), bcrypt.gensalt(rounds=10)).decode('utf-8')
+    return bcrypt_hash
 
 
 def create_goals(cursor, profile_ids):
@@ -123,16 +130,18 @@ def create_financial_accounts(cursor, profile_ids):
     return financialAccount_ids
 
 
+#this will add just the test user that you can log in as, as well as their profiles and etc if NUM_USERS is set to 1
 def create_users_and_profiles(cursor):
     user_ids = []
     profile_ids = []
     
-    for i in range(NUM_USERS):
-        first_name = random.choice(FIRST_NAMES)
-        last_name = random.choice(LAST_NAMES)
-        username = f"{first_name.lower()}.{last_name.lower()}{random.randint(1, 99)}"
-        email = f"{username}@example.com"
-        age = random.randint(18, 75)
+    if NUM_USERS == 1:
+        print('Creating the TEST user John Finus...')
+        first_name = TEST_USER_F_NAME
+        last_name =  TEST_USER_L_NAME
+        username = TEST_USER_NAME
+        email = TEST_USER_EMAIL
+        age = TEST_USER_AGE
 
         cursor.execute("""
             INSERT INTO finus.finusAccount 
@@ -154,18 +163,56 @@ def create_users_and_profiles(cursor):
         profile_id = cursor.lastrowid
         profile_ids.append(profile_id)
         
-        pw_hash = hash_password("password123")
+        pw_hash = hash_password(TEST_USER_PASSWORD)
         cursor.execute("""
             INSERT INTO finus.credentials (finus_account_id, pw_hash)
             VALUES (%s, %s)
         """, (user_id, pw_hash))
-
-       
         
         cursor.execute("""
             INSERT INTO finus.finusAccount_profile (profile_id, account_id)
             VALUES (%s, %s)
         """, (profile_id, user_id))
+    else:
+        for i in range(NUM_USERS):
+            first_name = random.choice(FIRST_NAMES)
+            last_name = random.choice(LAST_NAMES)
+            username = f"{first_name.lower()}.{last_name.lower()}{random.randint(1, 99)}"
+            email = f"{username}@example.com"
+            age = random.randint(18, 75)
+
+            cursor.execute("""
+                INSERT INTO finus.finusAccount 
+                (username, email, first_name, last_name, age)
+                VALUES (%s, %s, %s, %s, %s)
+            """, (username, email, first_name, last_name, age))
+            
+            user_id = cursor.lastrowid
+            user_ids.append(user_id)
+
+            # profile for each user
+            profile_name = f"{first_name}'s Profile"
+            profile_desc = f"Main profile for {first_name} {last_name}"
+            cursor.execute("""
+                INSERT INTO finus.profile (name, description)
+                VALUES (%s, %s)
+            """, (profile_name, profile_desc))
+            
+            profile_id = cursor.lastrowid
+            profile_ids.append(profile_id)
+            
+            pw_hash = hash_password("password123")
+            cursor.execute("""
+                INSERT INTO finus.credentials (finus_account_id, pw_hash)
+                VALUES (%s, %s)
+            """, (user_id, pw_hash))
+
+        
+            
+            cursor.execute("""
+                INSERT INTO finus.finusAccount_profile (profile_id, account_id)
+                VALUES (%s, %s)
+            """, (profile_id, user_id))
     
     return user_ids, profile_ids
 
