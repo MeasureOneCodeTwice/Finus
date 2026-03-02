@@ -5,6 +5,10 @@ import SankeyChart from '@/components/SankeyChart';
 import { getExpensesChartData, getSavingsContribChartData, getIncomeFlowChartData } from '@/api/ManagerAPI';
 import type { SankeyData } from 'recharts/types/chart/Sankey';
 import type { ChartData, ChartOptions } from 'chart.js';
+import NoTransactionReport from './NoTransactionReport';
+import { MdOutlineSavings } from "react-icons/md";
+import { MdOutlinePayment } from "react-icons/md";
+import { TrendingDown } from "lucide-react";
 function DashboardChartSection() {
     //Active chart state - this just determines which chart is displayed in the holder - change this later to potentially load up all charts at once if latency is good
     const [activeChart, setActiveChart] = useState<'expenses' | 'savings' | 'income'>('expenses');
@@ -170,11 +174,7 @@ const savingsLineOptions : ChartOptions<"line"> = {
     switch(activeChart) {
       case 'expenses':
         if (isLoading || !expensesData) {
-          return (
-            <div className="flex-2 bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
-              < LoadingSpinner />
-            </div>
-          );
+          return < LoadingSpinner />
         }
         return (
          
@@ -183,11 +183,7 @@ const savingsLineOptions : ChartOptions<"line"> = {
         );
       case 'savings':
         if (isLoading || !savingsData) {
-          return (
-            <div className="flex-2 bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
-              < LoadingSpinner />
-            </div>
-          );
+          return <LoadingSpinner />;
         }
         return (
          
@@ -196,24 +192,15 @@ const savingsLineOptions : ChartOptions<"line"> = {
         );
       case 'income':
         if (isLoading || !incomeData) {
-          return (
-            <div className="flex-2 bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
-              < LoadingSpinner />
-            </div>
-          );
+          return < LoadingSpinner />
         }
         return (
-          // <div className="bg-white p-4 rounded-lg shadow-md">
-            <SankeyChart data={incomeData} />
-          // </div>
+          <SankeyChart data={incomeData} />
         );
       default:
-        return (
-          <div className="flex-2 bg-white p-4 rounded-lg shadow-md">
-            {/* figure out a default case in case of an error - can have a placeholder or a spinner chart (loading spinner*/}
-            < LoadingSpinner />
-          </div>
-        );
+         /* figure out a default case in case of an error - can have a placeholder or a spinner chart (loading spinner*/
+        return < LoadingSpinner />
+
     }
   };
 
@@ -252,6 +239,17 @@ const savingsLineOptions : ChartOptions<"line"> = {
       {label}
     </button>
   ))
+ 
+  let noTransactionReport = null
+  if (!isLoading) {
+    if (activeChart === 'expenses' && !expensesData) {
+      noTransactionReport = <NoTransactionReport icon={<TrendingDown />} title="No Expenses Available" description="There is no data available for the selected chart type and period." />;
+    } else if (activeChart === 'savings' && !savingsData) {
+      noTransactionReport = <NoTransactionReport icon={<MdOutlineSavings />} title="No Savings Available" description="There is no data available for the selected chart type and period." />;
+    } else if (activeChart === 'income' && !incomeData) {
+      noTransactionReport = <NoTransactionReport icon={<MdOutlinePayment />} title="No Income Available" description="There is no data available for the selected chart type and period." />;
+    }
+  }
   return (
     <>
      <section className="flex justify-center mb-6">
@@ -259,7 +257,7 @@ const savingsLineOptions : ChartOptions<"line"> = {
           {transactionButtons}
         </div>
       </section>
-      <section className="block">
+      {noTransactionReport || <section className="block">
         <div className="flex flex-col items-center py-12 p-15 rounded-[20px]
          bg-black backdrop-blur-xs backdrop-grayscale border border-green-500/15 shadow-[0_0_40px_rgba(34,197,94,0.15)]
           transition-all duration-300 hover:shadow-[0_0_60px_rgba(34,197,94,0.3)]"
@@ -270,7 +268,7 @@ const savingsLineOptions : ChartOptions<"line"> = {
           </div>
           {renderChart()}
         </div>
-      </section>
+      </section>}
     </>
   )
 }
