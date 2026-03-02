@@ -11,6 +11,6 @@ jobs:
     uses: ./.github/workflows/docker_compose_publish.yml
     with:
       dockerfile-dir: app/server
+      DOCKER_HUB_USERNAME: ${{ vars.DOCKER_HUB_USERNAME }}
     secrets:
-      DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
       DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}

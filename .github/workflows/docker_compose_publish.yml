@@ -4,11 +4,12 @@ on:
       dockerfile-dir:
         type: string
         required: true
+      DOCKER_HUB_USERNAME:
+        type: string
+        required: true
 
     secrets:
       DOCKER_HUB_PASSWORD:
-        required: true
-      DOCKER_HUB_USERNAME:
         required: true
 
 jobs:
@@ -24,11 +25,11 @@ jobs:
           echo uname len ${#DOCKER_HUB_USERNAME}
           echo pw len ${#DOCKER_HUB_PASSWORD}
         env:
-          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+          DOCKER_HUB_USERNAME: ${{ inputs.DOCKER_HUB_USERNAME }}
           DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
       - uses: docker/login-action@0d33dcdeedfe8f116d005eaa548b93b404f61fa8
         with: 
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          username: ${{ inputs.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
       - run: | 
           echo "uname: $DOCKER_HUB_USERNAME"
@@ -43,5 +44,5 @@ jobs:
           echo "Pushing images..."
           docker compose push  -q
         env:
-          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+          DOCKER_HUB_USERNAME: ${{ inputs.DOCKER_HUB_USERNAME }}
 
