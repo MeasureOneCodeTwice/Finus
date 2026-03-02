@@ -10,6 +10,7 @@ export const accountsRouter = Router();
 
 accountsRouter.post("/", async (req: Request, res: Response) => {
   try {
+    console.log(req.body)
     const { name, type, balance, value, subtype } = req.body;
 
     const [result] = await db.query<ResultSetHeader>(

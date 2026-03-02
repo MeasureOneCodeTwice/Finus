@@ -9,7 +9,7 @@ import LoadingSpinner from './components/ui/LoadingSpinner.tsx'
 import AccountPopup from './components/ui/AccountForm.tsx'
 import TransactionPopup from './components/ui/TransationForm.tsx'
 import IncomePopup from './components/ui/IncomeForm.tsx'
-import type { Account } from './api/Account.ts'
+import type { Account } from './type/AccountType.ts'
 
 function App() {
   return (
@@ -76,7 +76,7 @@ function NotFoundPage() {
       </p>
 
       <button onClick={() => togglePopup()}>Forms</button>
-      {seen ? (<IncomePopup toggle={togglePopup} edit = {false} />):null}
+      {seen ? (<AccountPopup toggle={togglePopup} edit = {false} />):null}
      
     </>
   )

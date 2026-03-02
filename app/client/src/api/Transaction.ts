@@ -1,7 +1,7 @@
 import type { updateResponse } from "../type/responseTypes";
 import { type Transaction } from "../type/TransactionType";
 
-const requestUrl = "http://localhost:3000/transacitons"
+const requestUrl = "http://localhost:3000/api/transacitons"
 
 //Sends a GET request to get the list of user transactions for the account
 export async function getTransactions(account_id: number): Promise<Transaction[]>{

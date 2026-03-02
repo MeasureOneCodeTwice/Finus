@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { getUserAccounts} from "../../api/Account"
 import { type Account } from "../../type/AccountType"
-import AccountCard from "./AccountCard"
+import AccountListCard from "./AccountListCard"
 import AccountPopup from "./AccountForm"
 
 
@@ -42,7 +42,7 @@ export default function accountList(){
         <>
         <div>
             <div>
-            {userAccounts.map(account => (<AccountCard account={account} setAccount={addAccount} removeAccount={removeAccount}/>))}
+            {userAccounts.map(account => (<AccountListCard account={account} setAccount={addAccount} removeAccount={removeAccount}/>))}
             </div>
 
             <div>

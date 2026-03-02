@@ -1,7 +1,7 @@
 import type { updateResponse } from "../type/responseTypes";
 import type { Account } from "../type/AccountType";
 
-const requestUrl = 'http://localhost:3000/accounts'
+const requestUrl = 'http://localhost:3000/api/accounts'
 
 //Sends a request to get different accounts the user has
 export async function getUserAccounts(): Promise<Account[]> {
@@ -10,9 +10,6 @@ export async function getUserAccounts(): Promise<Account[]> {
         //Sends a http request and waits for a response
         const response = await fetch(requestUrl, {
             method: 'GET',
-            headers: {
-                'Cookie': document.cookie
-            },
             credentials: "include"
         })
 
@@ -38,7 +35,7 @@ export async function postUserAccount(newAccount:Account):Promise<updateResponse
         const response = await fetch(requestUrl, {
             method: "POST",
             headers: {
-                'content-type': '/application/json'
+                'content-type': 'application/json'
             },
             credentials:"include",
             body: JSON.stringify(newAccount)

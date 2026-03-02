@@ -22,12 +22,11 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-app.use(express.json());
-const server = app.listen(PORT, () => {
-  console.log(`API Gateway running on port ${PORT}`);
-});
-process.on("SIGTERM", () =>  server.close());
-
+app.use((req,res,next)=>{
+  console.log("API-GATEWAY Incoming request: " + req.method + " " + req.url)
+  console.log(req.body)
+  next()
+})
 
 //test endpoint
  app.get('/health', async (req: express.Request, res: express.Response) => {
@@ -47,28 +46,34 @@ process.on("SIGTERM", () =>  server.close());
 
 // Api Gateway routes to account, transaction and profiles
 app.use(
-  "/api/accounts",
   createProxyMiddleware({
-    target: process.env.DATABASE_SERVICE_ADDR,
+    pathFilter: "/api/accounts",
+    target: process.env.USER_SERVICE_ADDR,
     changeOrigin: true,
-    pathRewrite: { "^/api/accounts": "/accounts" }
+    pathRewrite: { "^/api/accounts": "/accounts" },
   })
 );
 
 app.use(
-  "/api/transactions",
   createProxyMiddleware({
-    target: process.env.DATABASE_SERVICE_ADDR,
+    pathFilter: "/api/tranasctions",
+    target: process.env.USER_SERVICE_ADDR,
     changeOrigin: true,
     pathRewrite: { "^/api/transactions": "/transactions" }
   })
 );
 
 app.use(
-  "/api/profiles",
   createProxyMiddleware({
-    target: process.env.DATABASE_SERVICE_ADDR,
+    pathFilter:"/api/profiles",
+    target: process.env.USER_SERVICE_ADDR,
     changeOrigin: true,
     pathRewrite: { "^/api/profiles": "/profiles" }
   })
 );
+
+app.use(express.json());
+const server = app.listen(PORT, () => {
+  console.log(`API Gateway running on port ${PORT}`);
+});
+process.on("SIGTERM", () =>  server.close());
