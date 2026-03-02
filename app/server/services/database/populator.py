@@ -28,7 +28,7 @@ def get_db_connection():
 # Configuration for mock data generation
 NUM_USERS = 1
 ACCOUNTS_PER_USER = 3  # Average number of financial accounts per user
-TRANSACTIONS_PER_ACCOUNT = 500
+TRANSACTIONS_PER_ACCOUNT = 200
 START_DATE = datetime.now() - timedelta(days=365)
 
 TEST_USER_NAME = 'f'
@@ -222,11 +222,14 @@ def create_transactions(cursor, account_ids):
     print(f"Creating transactions (about {len(account_ids) * TRANSACTIONS_PER_ACCOUNT} total)...")
     
     for account_id in account_ids:
-        for _ in range(random.randint(10, 30)):  # variable number of transactions
-            amount = random.randint(-500, 5000)
-            # ensure amount isn't 0 as that is weird
-            while amount == 0:
-                amount = random.randint(-500, 5000)
+        for _ in range(TRANSACTIONS_PER_ACCOUNT):  # variable number of transactions
+            amount = 0
+
+            category = random.choice(TRANSACTION_CATEGORIES)
+            if category in ['salary', 'e-transfer', 'cash']:
+                amount = random.randint(10, 1000)
+            else:
+                amount = random.randint(-50, -5)
             
             description = random.choice(TRANSACTION_DESCRIPTIONS)
             sender = random.choice(SENDERS_RECIPIENTS) if amount < 0 else None
@@ -240,7 +243,9 @@ def create_transactions(cursor, account_ids):
                 INSERT INTO finus.transaction 
                 (financialAccount_id, amount, category, description, sender, recipient, date)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
-            """, (account_id, amount, random.choice(TRANSACTION_CATEGORIES), description, sender, recipient, transaction_date))
+            """, (account_id, amount, category, description, sender, recipient, transaction_date))
+
+            #print(f'Added a transaction with category: {category}, amount: {amount}')
 
 
 

@@ -189,25 +189,6 @@ async function getIncomeFlowChartData(period: string): Promise<SankeyData> {
         console.error("Error fetching income flow chart data:", error);
         throw error;
     };
-
-
-    /* Fake data used to test sankey chart since api is working*/
-    /*const dataTest = {
-      nodes: [
-          { name: 'Salary' },
-          { name: 'Pokemon Cards' },
-          { name: 'Total Income' },
-          { name: 'Food' },
-          { name: 'Mortgage' },
-      ],
-      links: [
-          { source: 0, target: 1, value: 3728.3 },
-          { source: 0, target: 2, value: 354170 },
-          { source: 2, target: 3, value: 62429 },
-          { source: 2, target: 4, value: 291741 },
-      ],
-    };
-    return new Promise(resolve => setTimeout(() => resolve(dataTest), 1000));*/
 }
 
 

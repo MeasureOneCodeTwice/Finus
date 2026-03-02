@@ -45,13 +45,13 @@ function CustomNode({ x, y, width, height, index, payload }: SankeyNodeProps) {
   const isOut = x + width + TEXT_OFFSET > containerWidth-TEXT_OFFSET*3;
   return (
     <Layer key={`CustomNode${index}`}>
-      <Rectangle x={x} y={y} width={width} height={height} fill="#5192ca" fillOpacity="1" />
+      <Rectangle x={x} y={y} width={width} height={height} fill="#00f615" fillOpacity="1" />
       <text
         textAnchor={isOut ? 'end' : 'start'}
         x={isOut ? x - TEXT_OFFSET : x + width + TEXT_OFFSET}
         y={y + height / 2}
         fontSize="14"
-        stroke="#333"
+        fill="#ffffff"
       >
         {payload.name}
       </text>
@@ -60,10 +60,10 @@ function CustomNode({ x, y, width, height, index, payload }: SankeyNodeProps) {
         x={isOut ? x - TEXT_OFFSET : x + width + TEXT_OFFSET}
         y={y + height / 2 + 13}
         fontSize="12"
-        stroke="#333"
+        fill="#ffffff"
         strokeOpacity="0.5"
       >
-        {`${payload.value}k`}
+        {`$${payload.value}`}
       </text>
     </Layer>
   );

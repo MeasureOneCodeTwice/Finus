@@ -32,26 +32,31 @@ def test_endpoint():
     return 'ok'
 
 
+
+def periodCalc(period: str, end_date: pd.Timestamp):
+    end_date = pd.Timestamp.today()
+    if period == 'w':
+        start_date = end_date - pd.Timedelta(days=7)
+        freq = 'D'
+        date_format = '%Y-%m-%d'
+        period_name = 'Weekly'
+    elif period == 'm':
+        start_date = end_date - pd.Timedelta(days=30)
+        freq = 'D'
+        date_format = '%Y-%m-%d'
+        period_name = 'Monthly'
+    else:  # 'y'
+        start_date = end_date - pd.Timedelta(days=365)
+        freq = 'M'
+        date_format = '%Y-%m'
+        period_name = 'Yearly'
+
+    return start_date, freq, date_format, period_name
+
+
+
 @app.get('/charts/savings')
 async def get_savings(period: str):
-    # out_period = ''
-    # #random dummy data
-    # if period == 'w':
-    #     dates = pd.date_range(end=pd.Timestamp.today(), periods=7).strftime('%Y-%m-%d').tolist()
-    #     savings = np.random.randint(50, 200, size=7).tolist()
-    #     out_period = 'Weekly'
-    # elif period == 'm':
-    #     dates = pd.date_range(end=pd.Timestamp.today(), periods=30).strftime('%Y-%m-%d').tolist()
-    #     savings = np.random.randint(50, 200, size=30).tolist()
-    #     out_period = 'Monthly'
-    # elif period == 'y':
-    #     dates = pd.date_range(end=pd.Timestamp.today(), periods=12, freq='M').strftime('%Y-%m').tolist()
-    #     savings = np.random.randint(1000, 5000, size=12).tolist()
-    #     out_period = 'Yearly'
-    # else:
-    #     raise HTTPException(status_code=400, detail="Invalid period. Use 'weekly', 'monthly', or 'yearly'.")
-
-    # return {'labels': dates, 'datasets': [{'label': f'{out_period} Savings', 'data': savings}]}
     try:
         connection = get_db_connection()
         if not connection:
@@ -96,21 +101,8 @@ async def get_savings(period: str):
         
         #get date range based on period - week and month preiods display data in days, year period displays data in months
         end_date = pd.Timestamp.today()
-        if period == 'w':
-            start_date = end_date - pd.Timedelta(days=7)
-            freq = 'D'
-            date_format = '%Y-%m-%d'
-            period_name = 'Weekly'
-        elif period == 'm':
-            start_date = end_date - pd.Timedelta(days=30)
-            freq = 'D'
-            date_format = '%Y-%m-%d'
-            period_name = 'Monthly'
-        else:  # 'y'
-            start_date = end_date - pd.Timedelta(days=365)
-            freq = 'M'
-            date_format = '%Y-%m'
-            period_name = 'Yearly'
+
+        start_date, freq, date_format, period_name = periodCalc(period, end_date)
         
         # discard transactiosn that are too far back in the past (depending on period)
         df = df[df['date'] >= start_date]
@@ -185,17 +177,112 @@ async def get_income_flow(period: str = Query(default='w', enum=['w', 'm', 'y'])
     #aggregate the transactions by category and sum the values for each category
     #return the aggregated data as a list of dictionaries with the category as the key and the sum of the values as the value
 
-    return get_income_flow_synth(period)
-    #TODO: replace with real data from db when available
-    connection = get_db_connection()
-    cursor = connection.cursor()
-    query = """SELECT category, SUM(value) as total_value
-                FROM transactions
-                WHERE user_id = %s AND date >= %s AND date <= %s
-                GROUP BY category"""
-    cursor.execute(query, (1, pd.Timestamp.today().strftime('%Y-%m-%d'), f'{pd.Timestamp.today().year}-{np.random.randint(1, 13):02d}-{np.random.randint(1, 29):02d}'))
-    results = cursor.fetchall()
-    connection.close()
+    try:
+        connection = get_db_connection()
+        if not connection:
+            raise HTTPException(status_code=500, detail="Database connection failed")
+        
+        cursor = connection.cursor(dictionary=True)
+        
+        #getting time ranges and formatting based on period
+        end_date = pd.Timestamp.today()
+        start_date, _, _, _= periodCalc(period, end_date)
+        
+        # get transactions for the period and group by category
+        query = """
+            SELECT 
+                t.amount,
+                t.category,
+                t.date
+            FROM finus.transaction t
+            WHERE t.date BETWEEN %s AND %s
+            ORDER BY t.date
+        """
+        
+        cursor.execute(query, (start_date, end_date))
+        transactions = cursor.fetchall()
+        
+        cursor.close()
+        connection.close()
+        
+        if not transactions:
+            #return empty sankey if no transactions are present for the preiod
+            return {
+                'nodes': [
+                    {'name': 'total income'},
+                    {'name': 'no data'}
+                ],
+                'links': []
+            }
+        df = pd.DataFrame(transactions)
+        df_agg = df.groupby('category').agg({'amount': 'sum'}).reset_index()
+
+        print(df)
+        
+        #totals are used later to figure out overflow or overspending
+        total_income = df_agg[df_agg['amount'] > 0]['amount'].sum()
+        total_expenses = abs(df_agg[df_agg['amount'] < 0]['amount'].sum())
+        
+        node_set = set()
+        node_set.add('total income')#total income is the starting node that will allways exist
+        
+        for _, row in df_agg.iterrows():
+            node_set.add(row['category'])
+        
+        #add overflow nodes based on income vs expenses - unspent and overspent
+        #in the case of overspending, the savings node is also added to represent savings being drained (doesn't matter what kind of savings account was drained, realistically this is the chequing acc: cash)
+        if total_income > total_expenses:
+            node_set.add('unspent')
+        elif total_expenses > total_income:
+            node_set.add('overspent')
+            node_set.add('savings')
+        
+        nodes_list = list(node_set)
+        node_to_index = {node: idx for idx, node in enumerate(nodes_list)}
+        
+        links = []
+        
+        #link positive transaction categories (income streams) to total income 
+        for _, row in df_agg[df_agg['amount'] > 0].iterrows():
+            links.append({
+                'source': node_to_index[row['category']],
+                'target': node_to_index['total income'],
+                'value': int(row['amount'])
+            })
+        
+        #link total income to negative transaction categories (expenses)
+        for _, row in df_agg[df_agg['amount'] < 0].iterrows():
+            links.append({
+                'source': node_to_index['total income'],
+                'target': node_to_index[row['category']],
+                'value': int(abs(row['amount']))
+            })
+        
+        #overflow/overspending
+        if total_income > total_expenses:
+            links.append({
+                'source': node_to_index['total income'],
+                'target': node_to_index['unspent'],
+                'value': int(total_income - total_expenses)
+            })
+        elif total_expenses > total_income:
+            links.append({
+                'source': node_to_index['savings'],
+                'target': node_to_index['overspent'],
+                'value': int(total_expenses - total_income)
+            })
+        
+        #print(f'Sending out sankey with {len(nodes_list)} nodes and {len(links)} links')
+
+        return {
+            'nodes': [{'name': node} for node in nodes_list],
+            'links': links
+        }
+        
+    except Exception as e:
+        print(f"Error generating income flow: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error generating income flow: {str(e)}")
+
 
 
 @app.get('/charts/incomeflow-synth')
