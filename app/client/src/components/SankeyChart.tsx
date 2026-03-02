@@ -21,7 +21,7 @@ export function SankeyChart({data}: SankeyChartProps) {
       <Sankey
         data={data}
         node= {CustomNode}
-        link={{ stroke: '#9ca3af', strokeOpacity: 0.5 }}
+        link={{ stroke: "#6bc798", strokeOpacity: 0.45 }}
         nodePadding={20}
         nodeWidth={15}
         margin={{ top: 20, bottom: 20, left: 20, right: 20 }}
@@ -39,18 +39,16 @@ function CustomNode({ x, y, width, height, index, payload }: SankeyNodeProps) {
   if (containerWidth == null) {
     return null; // return null if used outside a chart context
   }
-  //console.log("width of container:", containerWidth)
-  //console.log("x:", x, "width of node:", width);
   const isOut = x + width + TEXT_OFFSET > containerWidth-TEXT_OFFSET*3;
   return (
     <Layer key={`CustomNode${index}`}>
-      <Rectangle x={x} y={y} width={width} height={height} fill="#5192ca" fillOpacity="1" />
+      <Rectangle x={x} y={y} width={width} height={height} fill="#4dcf8a" fillOpacity="1" />
       <text
         textAnchor={isOut ? 'end' : 'start'}
         x={isOut ? x - TEXT_OFFSET : x + width + TEXT_OFFSET}
         y={y + height / 2}
         fontSize="14"
-        stroke="#333"
+        fill="#ecfff3"
       >
         {payload.name}
       </text>
@@ -59,8 +57,7 @@ function CustomNode({ x, y, width, height, index, payload }: SankeyNodeProps) {
         x={isOut ? x - TEXT_OFFSET : x + width + TEXT_OFFSET}
         y={y + height / 2 + 13}
         fontSize="12"
-        stroke="#333"
-        strokeOpacity="0.5"
+        fill="#a4d7b7"
       >
         {`${payload.value}k`}
       </text>

@@ -1,244 +1,246 @@
-import { useEffect, useState } from 'react'
-import { Line, Bar } from 'react-chartjs-2';
-import LoadingSpinner from '@/components/LoadingSpinner';
-import SankeyChart from '@/components/SankeyChart';
-import { getExpensesChartData, getSavingsContribChartData, getIncomeFlowChartData } from '@/api/ManagerAPI';
-import type { SankeyData } from 'recharts/types/chart/Sankey';
-import type { ChartData } from 'chart.js';
+import { useEffect, useState } from "react";
+import { Bar, Line } from "react-chartjs-2";
+import type { ChartData } from "chart.js";
+import type { SankeyData } from "recharts/types/chart/Sankey";
+
+import {
+  getExpensesChartData,
+  getIncomeFlowChartData,
+  getSavingsContribChartData,
+} from "@/api/ManagerAPI";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import SankeyChart from "./SankeyChart";
+import LoadingSpinner from "./LoadingSpinner";
+
+type ChartType = "expenses" | "savings" | "income";
+type ChartPeriod = "w" | "m" | "y";
+
+const chartLabels: Record<ChartType, string> = {
+  expenses: "Expenses",
+  savings: "Savings",
+  income: "Income Flow",
+};
+
+const periodLabels: Record<ChartPeriod, string> = {
+  w: "Week",
+  m: "Month",
+  y: "Year",
+};
+
+const chartHeading: Record<ChartType, string> = {
+  expenses: "Expenses over time",
+  savings: "Savings contribution over time",
+  income: "Income flow map",
+};
+
+const baseChartOptions = {
+  responsive: true,
+  plugins: {
+    legend: {
+      labels: {
+        color: "#c6e8d0",
+      },
+    },
+  },
+  scales: {
+    x: {
+      ticks: { color: "#9ec7aa" },
+      grid: { color: "rgba(156, 223, 183, 0.15)" },
+    },
+    y: {
+      ticks: { color: "#9ec7aa" },
+      grid: { color: "rgba(156, 223, 183, 0.15)" },
+    },
+  },
+};
+
 function DashboardChartSection() {
-    //Active chart state - this just determines which chart is displayed in the holder - change this later to potentially load up all charts at once if latency is good
-    const [activeChart, setActiveChart] = useState<'expenses' | 'savings' | 'income'>('expenses');
-  
-    //Active chart period state - this determines over what timeframe the chart is displayed - weekly, monthly, or yearly - default to monthly
-    const [selectedPeriod, setSelectedPeriod] = useState<'w' | 'm' | 'y'>('m');
-  
-    //Chart data state - this is used to determine whether to put a spinner in place of a chart while data is being fetched from API
-    const [expensesData, setExpensesData] = useState<ChartData<"bar"> | null>(null);
-    const [savingsData, setsavingsData] = useState<ChartData<"line"> | null>(null);
-    const [incomeData, setIncomeData] = useState<SankeyData | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
+  const [activeChart, setActiveChart] = useState<ChartType>("expenses");
+  const [selectedPeriod, setSelectedPeriod] = useState<ChartPeriod>("m");
+  const [expensesData, setExpensesData] = useState<ChartData<"bar"> | null>(null);
+  const [savingsData, setSavingsData] = useState<ChartData<"line"> | null>(null);
+  const [incomeData, setIncomeData] = useState<SankeyData | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-    
-   async function fetchExpensesData() {
-    setIsLoading(true);
+  async function loadExpenses(period: ChartPeriod) {
     try {
-      const data = await getTestExpensesData(selectedPeriod);
-      setExpensesData(data);
+      const response = await getExpensesChartData(period);
+      setExpensesData(response);
     } catch (error) {
-      console.error("Failed to fetch expenses data:", error);
-    } finally {
-      setIsLoading(false);
+      console.error("Error fetching expenses chart data:", error);
+      setExpensesData({
+        labels: ["Mon"],
+        datasets: [
+          {
+            label: "Placeholder expenses",
+            data: [125],
+            borderColor: "rgb(100, 240, 159)",
+            backgroundColor: "rgba(100, 240, 159, 0.35)",
+          },
+        ],
+      });
     }
-  };
+  }
 
-  async function fetchSavingsData() {
-    setIsLoading(true);
+  async function loadSavings(period: ChartPeriod) {
     try {
-      const data = await getTestSavingsContribData(selectedPeriod);
-      setsavingsData(data);
+      const response = await getSavingsContribChartData(period);
+      setSavingsData(response);
     } catch (error) {
-      console.error("Failed to fetch savings data:", error);
-    } finally {
-      setIsLoading(false);
+      console.error("Error fetching savings chart data:", error);
+      setSavingsData({
+        labels: ["Mon"],
+        datasets: [
+          {
+            label: "Placeholder savings",
+            data: [125],
+            borderColor: "rgb(120, 198, 255)",
+            backgroundColor: "rgba(120, 198, 255, 0.35)",
+          },
+        ],
+      });
     }
-  };
+  }
 
-  async function fetchIncomeData() {
-    setIsLoading(true);
+  async function loadIncome(period: ChartPeriod) {
     try {
-      const data = await getTestIncomeFlowData(selectedPeriod);
-      //console.log("Fetched income flow data:", data);
-      setIncomeData(data);
+      const response = await getIncomeFlowChartData(period);
+      setIncomeData(response);
     } catch (error) {
-      console.error("Failed to fetch income data:", error);
-    } finally {
-      setIsLoading(false);
+      console.error("Error fetching income flow data:", error);
+      setIncomeData({ nodes: [], links: [] });
     }
-  };
-
+  }
 
   useEffect(() => {
-    switch(activeChart) {
-      case 'expenses':
-        fetchExpensesData();
-        break;
-      case 'savings':
-        fetchSavingsData();
-        break;
-      case 'income':
-        fetchIncomeData();
-        break;
-      default:
-      fetchExpensesData();
-    }    
+    async function fetchChartData() {
+      setIsLoading(true);
+      try {
+        if (activeChart === "expenses") {
+          await loadExpenses(selectedPeriod);
+          return;
+        }
+        if (activeChart === "savings") {
+          await loadSavings(selectedPeriod);
+          return;
+        }
+        await loadIncome(selectedPeriod);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchChartData();
   }, [activeChart, selectedPeriod]);
 
-
-  //Temporary test data for expenses - delete once API works. This is just to test graph components
-  const getTestExpensesData = async (period: 'w' | 'm' | 'y'): Promise<ChartData<"bar">> => {
-    //Try to reach API first, get synthetic data if fails
-    try{
-      const response = await getExpensesChartData(period);
-      return response;
-    }catch(error) {
-      console.error("Error fetching expenses chart data:", error);
+  function renderChart() {
+    if (isLoading) {
+      return <LoadingSpinner />;
     }
-    return {
-      labels: ['Mon'],
-      datasets: [{
-        label: 'Placeholder Expenses',
-        data: [125],
-        borderColor: 'rgb(53, 162, 235)',
-        backgroundColor: 'rgba(53, 162, 235, 0.5)',
-      }]
-    };
-  };
 
+    if (activeChart === "expenses") {
+      if (!expensesData) {
+        return <LoadingSpinner />;
+      }
 
-  const getTestSavingsContribData = async (period: 'w' | 'm' | 'y'): Promise<ChartData<"line">> => {
-    try{
-      const response = await getSavingsContribChartData(period);
-      return response;
-    }catch(error) {
-      console.error("Error fetching savings contribution chart data:", error);
+      return (
+        <Bar
+          options={{
+            ...baseChartOptions,
+            plugins: {
+              ...baseChartOptions.plugins,
+              title: {
+                display: true,
+                text: chartHeading.expenses,
+                color: "#ecfff2",
+              },
+            },
+          }}
+          data={expensesData}
+        />
+      );
     }
-    return {
-      labels: ['Mon'],
-      datasets: [{
-        label: 'Placeholder Savings Contribution',
-        data: [125],
-        borderColor: 'rgb(53, 162, 235)',
-        backgroundColor: 'rgba(53, 162, 235, 0.5)',
-      }]
-    };
+
+    if (activeChart === "savings") {
+      if (!savingsData) {
+        return <LoadingSpinner />;
+      }
+
+      return (
+        <Line
+          options={{
+            ...baseChartOptions,
+            plugins: {
+              ...baseChartOptions.plugins,
+              title: {
+                display: true,
+                text: chartHeading.savings,
+                color: "#ecfff2",
+              },
+            },
+          }}
+          data={savingsData}
+        />
+      );
+    }
+
+    if (!incomeData) {
+      return <LoadingSpinner />;
+    }
+
+    return (
+      <div className="h-[420px] w-full">
+        <SankeyChart data={incomeData} />
+      </div>
+    );
   }
 
-  const getTestIncomeFlowData = async (period: 'w' | 'm' | 'y'): Promise<SankeyData> => {
-    try{
-      const response = await getIncomeFlowChartData(period);
-      //console.log("Received income flow chart data:", response);
-      return response;
-    }catch(error) {
-      console.error("Error fetching income flow chart data:", error);
-    }
-    //console.log("Using placeholder income flow chart data");
-    return {
-      nodes: [],
-      links: [],
-      };
-  }
-
-
-const expensesBarOptions = {
-  responsive: true,
-  plugins: {
-    legend: {
-      position: 'top' as const,
-    },
-    title: {
-      display: true,
-      text: 'Expenses Over Time',
-      font: {
-        size: 24,
-        weight: 'bold' as const
-      }
-    }
-  },
-};
-
-const savingsLineOptions = {
-  responsive: true,
-  plugins: {
-    legend: {
-      position: 'top' as const,
-    },
-    title: {
-      display: true,
-      text: 'Expenses Over Time',
-      font: {
-        size: 24,
-        weight: 'bold' as const
-      }
-    }
-  },
-};
-
-
-//Renders a chart based on activeChart - puts a spinner in place while data is being fetched or if no data is available for any reason
-  const renderChart = () => {
-    switch(activeChart) {
-      case 'expenses':
-        if (isLoading || !expensesData) {
-          return (
-            <div className="flex-2 bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
-              < LoadingSpinner />
-            </div>
-          );
-        }
-        return (
-         
-            <Bar options={expensesBarOptions} data={expensesData} />
-       
-        );
-      case 'savings':
-        if (isLoading || !savingsData) {
-          return (
-            <div className="flex-2 bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
-              < LoadingSpinner />
-            </div>
-          );
-        }
-        return (
-         
-            <Line options={savingsLineOptions} data={savingsData} />
-      
-        );
-      case 'income':
-        if (isLoading || !incomeData) {
-          return (
-            <div className="flex-2 bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
-              < LoadingSpinner />
-            </div>
-          );
-        }
-        return (
-          // <div className="bg-white p-4 rounded-lg shadow-md">
-            <SankeyChart data={incomeData} />
-          // </div>
-        );
-      default:
-        return (
-          <div className="flex-2 bg-white p-4 rounded-lg shadow-md">
-            {/* figure out a default case in case of an error - can have a placeholder or a spinner chart (loading spinner*/}
-            < LoadingSpinner />
-          </div>
-        );
-    }
-  };
   return (
-    <>
-      <section className="flex flex-row items-center justify-center gap-12">
-        <button onClick={() => setActiveChart('expenses')} className="bg-blue-500 text-white p-2 rounded">Expenses</button>
-        <button onClick={() => setActiveChart('savings')} className="bg-blue-500 text-white p-2 rounded">Savings</button>
-        <button onClick={() => setActiveChart('income')} className="bg-blue-500 text-white p-2 rounded">Income Flow</button>
-      </section>
-      <section className="block">
-        <div className="flex flex-col items-center bg-white p-4 rounded-lg shadow-md">
-          {/* This chart is here just to test all the graph components */}
-          <div className="flex flex-row gap-4 mb-4">
-             <button className={selectedPeriod === 'w' ? 'bg-blue-500 text-white p-2 rounded' : 'bg-gray-200 text-white p-2 rounded'} onClick={() => setSelectedPeriod('w')}>Week</button>
-            <button className={selectedPeriod === 'm' ? 'bg-blue-500 text-white p-2 rounded' : 'bg-gray-200 text-white p-2 rounded'} onClick={() => setSelectedPeriod('m')}>Month</button>
-            <button className={selectedPeriod === 'y' ? 'bg-blue-500 text-white p-2 rounded' : 'bg-gray-200 text-white p-2 rounded'} onClick={() => setSelectedPeriod('y')}>Year</button>
-          </div>
-          {renderChart()}
-          {/*<div className="bg-white p-6 rounded-lg shadow-md">
-            <Pie data={data} options={options} />
-          </div>*/}
+    <Card className="border-border/70 bg-card/90 backdrop-blur-sm">
+      <CardHeader className="space-y-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <CardTitle className="text-xl">Performance Charts</CardTitle>
+          <Badge variant="outline">{chartLabels[activeChart]}</Badge>
         </div>
-      </section>
-    </>
-  )
+
+        <div className="flex flex-wrap gap-2">
+          {(Object.keys(chartLabels) as ChartType[]).map((chart) => (
+            <Button
+              key={chart}
+              type="button"
+              variant={activeChart === chart ? "default" : "outline"}
+              size="sm"
+              onClick={() => setActiveChart(chart)}
+            >
+              {chartLabels[chart]}
+            </Button>
+          ))}
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {(Object.keys(periodLabels) as ChartPeriod[]).map((period) => (
+            <Button
+              key={period}
+              type="button"
+              variant={selectedPeriod === period ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setSelectedPeriod(period)}
+            >
+              {periodLabels[period]}
+            </Button>
+          ))}
+        </div>
+      </CardHeader>
+
+      <CardContent>
+        <div className="rounded-lg border border-border/70 bg-background/40 p-4">
+          {renderChart()}
+        </div>
+      </CardContent>
+    </Card>
+  );
 }
 
-
-export default DashboardChartSection
+export default DashboardChartSection;

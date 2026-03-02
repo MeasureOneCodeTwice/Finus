@@ -5,7 +5,6 @@ import {
   Route,
   Routes,
 } from "react-router-dom";
-import "./App.css";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
 import type { AuthApiResponse, AuthSession, AuthUser } from "./pages/authTypes";
@@ -151,10 +150,16 @@ function App() {
 
   return (
     <Router>
-      <div className="auth-shell">
-        <div className="auth-glow auth-glow-left" />
-        <div className="auth-glow auth-glow-right" />
-
+      <div className="relative min-h-screen overflow-x-hidden bg-background text-foreground">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,255,144,0.2),transparent_45%),radial-gradient(circle_at_bottom_right,rgba(31,164,99,0.2),transparent_42%)]"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-40 [background-image:linear-gradient(to_right,rgba(136,255,182,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(136,255,182,0.06)_1px,transparent_1px)] [background-size:42px_42px]"
+        />
+        <div className="relative mx-auto min-h-screen w-full max-w-7xl px-4 py-6 sm:px-6">
         <Routes>
           <Route
             path="/"
@@ -200,6 +205,7 @@ function App() {
           />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </div>
       </div>
     </Router>
   );

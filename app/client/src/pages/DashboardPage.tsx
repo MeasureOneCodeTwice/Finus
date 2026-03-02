@@ -1,17 +1,34 @@
-// import React, { useEffect, useState } from 'react'
-// import type { Transaction } from '@/types/Transaction'
-import { Chart,  PointElement, LineElement,ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
-// import { Pie, Line, Bar } from 'react-chartjs-2';
-import AccountCard from '@/components/AccountCard';
-import TransactionTable from '@/components/TransactionTable';
-// import LoadingSpinner from '@/components/LoadingSpinner';
-// import SankeyChart from '@/components/SankeyChart';
-// import { getExpensesChartData, getSavingsContribChartData, getIncomeFlowChartData, getTransactions } from '@/api/ManagerAPI';
-// import type { SankeyData } from 'recharts/types/chart/Sankey';
-// import ChartSection from '@/components/DashboardChartSection';
-import DashboardChartSection from '@/components/DashboardChartSection';
+import {
+  ArcElement,
+  BarElement,
+  CategoryScale,
+  Chart,
+  Legend,
+  LineElement,
+  LinearScale,
+  PointElement,
+  Title,
+  Tooltip,
+} from "chart.js";
+import AccountCard from "@/components/AccountCard";
+import DashboardChartSection from "@/components/DashboardChartSection";
+import TransactionTable from "@/components/TransactionTable";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { AuthSession } from './authTypes';
-Chart.register(PointElement, LineElement, ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+
+Chart.register(
+  PointElement,
+  LineElement,
+  ArcElement,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+);
 
 type DashboardPageProps = {
   session: AuthSession;
@@ -19,24 +36,36 @@ type DashboardPageProps = {
 };
 
 function DashboardPage({ session, onLogout }: DashboardPageProps) {
- 
+  const displayName = session.user.first_name ?? session.user.name ?? "there";
+
   return (
-    <section className="p-10 bg-gray-100">
-      <button type="button" className="auth-button" onClick={onLogout}>
-          Log Out
-        </button>
-      <h1 className=" text-4xl font-bold mb-4 ">Hello {session.user.first_name ?? session.user.name ?? "there"}</h1>
-      <p className=" text-lg te  xt-gray-700 ">Here you can view your recent transactions and manage your finances.</p>
-      <section className="flex flex-row items-center justify-center gap-12 my-10">
-        <AccountCard title="Total Balance" amount="$5,000" backgroundColor="#6fa953" />
-        <AccountCard title="Current Income" amount="$5,000" backgroundColor="#1877f2" />
-        <AccountCard title="Average Expenses" amount="$100,000" backgroundColor="#ff66c4" />
-        <AccountCard title="Current Debt" amount="$50,000" backgroundColor="#ff7924" />
-        <AccountCard title="Total Savings" amount="$100,000,000" backgroundColor="#c8002a" />
-      </section>
+    <section className="space-y-6 py-2">
+      <Card className="border-border/70 bg-card/90 backdrop-blur-sm">
+        <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-2">
+            <Badge variant="secondary" className="w-fit">
+              Dashboard
+            </Badge>
+            <CardTitle className="text-3xl">Hello {displayName}</CardTitle>
+            <CardDescription>
+              Here you can view recent transactions and monitor key finance metrics.
+            </CardDescription>
+          </div>
+          <Button type="button" variant="outline" onClick={onLogout}>
+            Log out
+          </Button>
+        </CardHeader>
+        <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+          <AccountCard title="Total Balance" amount="$5,000" tone="primary" />
+          <AccountCard title="Current Income" amount="$5,000" tone="success" />
+          <AccountCard title="Average Expenses" amount="$100,000" tone="warning" />
+          <AccountCard title="Current Debt" amount="$50,000" tone="danger" />
+          <AccountCard title="Total Savings" amount="$100,000,000" tone="info" />
+        </CardContent>
+      </Card>
+
       <DashboardChartSection />
-      <h2 className="text-2xl font-bold mb-4">Recent Transactions</h2>
-      <TransactionTable  />
+      <TransactionTable />
     </section>
   )
 }

@@ -1,76 +1,80 @@
 import { getTransactions } from '@/api/ManagerAPI';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Transaction } from '@/types/Transaction';
 import { useEffect, useState } from 'react'
+import LoadingSpinner from './LoadingSpinner';
 
 
 function TransactionTable() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchTransactions = async () => {
+      setIsLoading(true);
       try {
         const txs = await getTransactions();
         setTransactions(txs);
       } catch (error) {
         console.error("Error fetching transactions:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchTransactions();
   },[])
+
   return (
-    <div className="my-10 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-      {/* Header */}
-      <div className="grid grid-cols-[1fr_2fr_1fr_1fr_1fr_1fr] bg-gray-50 px-6 py-4 text-sm font-semibold text-gray-600 uppercase tracking-wide border-b gap-x-2">
-        <div>Date</div>
-        <div>Description</div>
-        <div>Category</div>
-        <div>Amount</div>
-        <div>From</div>
-        <div>To</div>
-      </div>
-
-      {/* Body */}
-      <div className="divide-y divide-gray-100">
-        {transactions.map((tx, index) => (
-          <div
-            key={tx.id}
-            className={`grid grid-cols-[1fr_2fr_1fr_1fr_1fr_1fr] px-6 py-4 items-center text-sm transition duration-150 
-            ${index % 2 === 0 ? "bg-white" : "bg-gray-50"}
-            hover:bg-blue-50 gap-x-2`}
-          >
-            <div className="text-gray-500">
-              {new Date(tx.date).toLocaleDateString()}
-            </div>
-
-            <div className="font-medium text-gray-800">
-              {tx.description || "N/A"}
-            </div>
-
-            <div className="text-gray-600">
-              {tx.category}
-            </div>
-
-            <div
-              className={`font-semibold ${
-                tx.amount < 0 ? "text-red-500" : "text-green-600"
-              }`}
-            >
-              {tx.amount < 0
-                ? `-$${Math.abs(tx.amount).toFixed(2)}`
-                : `$${tx.amount.toFixed(2)}`}
-            </div>
-
-            <div className="text-gray-600 truncate">
-              {tx.from}
-            </div>
-
-            <div className="text-gray-600 truncate">
-              {tx.to}
-            </div>
+    <Card className="border-border/70 bg-card/90 backdrop-blur-sm">
+      <CardHeader>
+        <CardTitle className="text-xl">Recent Transactions</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <LoadingSpinner />
+        ) : (
+          <div className="overflow-x-auto rounded-lg border border-border/70">
+            <table className="w-full min-w-[720px] text-left text-sm">
+              <thead className="bg-background/80 text-muted-foreground">
+                <tr>
+                  <th className="px-4 py-3 font-medium">Date</th>
+                  <th className="px-4 py-3 font-medium">Description</th>
+                  <th className="px-4 py-3 font-medium">Category</th>
+                  <th className="px-4 py-3 font-medium">Amount</th>
+                  <th className="px-4 py-3 font-medium">From</th>
+                  <th className="px-4 py-3 font-medium">To</th>
+                </tr>
+              </thead>
+              <tbody>
+                {transactions.map((tx) => (
+                  <tr key={tx.id} className="border-t border-border/60 hover:bg-accent/40">
+                    <td className="px-4 py-3 text-muted-foreground">
+                      {new Date(tx.date).toLocaleDateString()}
+                    </td>
+                    <td className="px-4 py-3 font-medium">{tx.description || "N/A"}</td>
+                    <td className="px-4 py-3">
+                      <Badge variant="outline">{tx.category}</Badge>
+                    </td>
+                    <td
+                      className={`px-4 py-3 font-semibold ${
+                        tx.amount < 0 ? "text-rose-300" : "text-emerald-300"
+                      }`}
+                    >
+                      {tx.amount < 0
+                        ? `-$${Math.abs(tx.amount).toFixed(2)}`
+                        : `$${tx.amount.toFixed(2)}`}
+                    </td>
+                    <td className="max-w-48 truncate px-4 py-3 text-muted-foreground">{tx.from}</td>
+                    <td className="max-w-48 truncate px-4 py-3 text-muted-foreground">{tx.to}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        ))}
-      </div>
-    </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }
 export default TransactionTable

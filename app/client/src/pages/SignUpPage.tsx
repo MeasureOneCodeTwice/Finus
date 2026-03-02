@@ -1,5 +1,10 @@
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { MAX_AGE, MIN_AGE, type AuthUser, type RequestAuth } from "./authTypes";
 
 type SignUpPageProps = {
@@ -83,122 +88,142 @@ function SignUpPage({ onSignup, requestAuth }: SignUpPageProps) {
   }
 
   return (
-    <section className="auth-layout">
-      <div className="auth-panel auth-panel-signup">
-        <p className="auth-tag">Finus</p>
-        <h1>Create account</h1>
-        <p className="auth-copy">Set up your account in less than a minute.</p>
+    <section className="flex min-h-[calc(100vh-3rem)] items-center justify-center py-8">
+      <Card className="w-full max-w-3xl border-border/70 bg-card/90 backdrop-blur-sm">
+        <CardHeader className="space-y-3">
+          <Badge variant="secondary" className="w-fit rounded-full px-3 py-1 uppercase tracking-[0.16em]">
+            Finus
+          </Badge>
+          <CardTitle>Create account</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Set up your account in less than a minute.
+          </p>
+        </CardHeader>
 
-        <form className="auth-form auth-signup-form" onSubmit={handleSubmit}>
-          <fieldset className="auth-group">
-            <legend>Profile</legend>
-            <div className="auth-grid">
-              <div className="auth-field auth-field-full">
-                <label htmlFor="signup-username">Username</label>
-                <input
-                  id="signup-username"
-                  type="text"
-                  value={username}
-                  onChange={(event) => setUsername(event.target.value)}
-                  placeholder="johnd"
-                  required
-                />
-              </div>
+        <CardContent>
+          <form className="space-y-5" onSubmit={handleSubmit}>
+            <div className="rounded-lg border border-border/70 bg-background/40 p-4">
+              <p className="mb-4 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                Profile
+              </p>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="signup-username">Username</Label>
+                  <Input
+                    id="signup-username"
+                    type="text"
+                    value={username}
+                    onChange={(event) => setUsername(event.target.value)}
+                    placeholder="johnd"
+                    required
+                  />
+                </div>
 
-              <div className="auth-field">
-                <label htmlFor="signup-first-name">First Name</label>
-                <input
-                  id="signup-first-name"
-                  type="text"
-                  value={firstName}
-                  onChange={(event) => setFirstName(event.target.value)}
-                  placeholder="John"
-                  required
-                />
-              </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-first-name">First name</Label>
+                  <Input
+                    id="signup-first-name"
+                    type="text"
+                    value={firstName}
+                    onChange={(event) => setFirstName(event.target.value)}
+                    placeholder="John"
+                    required
+                  />
+                </div>
 
-              <div className="auth-field">
-                <label htmlFor="signup-last-name">Last Name</label>
-                <input
-                  id="signup-last-name"
-                  type="text"
-                  value={lastName}
-                  onChange={(event) => setLastName(event.target.value)}
-                  placeholder="Doe"
-                  required
-                />
-              </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-last-name">Last name</Label>
+                  <Input
+                    id="signup-last-name"
+                    type="text"
+                    value={lastName}
+                    onChange={(event) => setLastName(event.target.value)}
+                    placeholder="Doe"
+                    required
+                  />
+                </div>
 
-              <div className="auth-field auth-field-full">
-                <label htmlFor="signup-age">Age</label>
-                <input
-                  id="signup-age"
-                  type="number"
-                  min={MIN_AGE}
-                  max={MAX_AGE}
-                  value={age}
-                  onChange={(event) => setAge(event.target.value)}
-                  placeholder="21"
-                  required
-                />
-              </div>
-            </div>
-          </fieldset>
-
-          <fieldset className="auth-group">
-            <legend>Account</legend>
-            <div className="auth-grid">
-              <div className="auth-field auth-field-full">
-                <label htmlFor="signup-email">Email</label>
-                <input
-                  id="signup-email"
-                  type="email"
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  placeholder="you@example.com"
-                  required
-                />
-              </div>
-
-              <div className="auth-field">
-                <label htmlFor="signup-password">Password</label>
-                <input
-                  id="signup-password"
-                  type="password"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  placeholder="At least 8 characters"
-                  required
-                />
-              </div>
-
-              <div className="auth-field">
-                <label htmlFor="signup-confirm-password">
-                  Confirm Password
-                </label>
-                <input
-                  id="signup-confirm-password"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(event) => setConfirmPassword(event.target.value)}
-                  placeholder="Repeat password"
-                  required
-                />
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="signup-age">Age</Label>
+                  <Input
+                    id="signup-age"
+                    type="number"
+                    min={MIN_AGE}
+                    max={MAX_AGE}
+                    value={age}
+                    onChange={(event) => setAge(event.target.value)}
+                    placeholder="21"
+                    required
+                  />
+                </div>
               </div>
             </div>
-          </fieldset>
 
-          {errorMessage ? <p className="auth-error">{errorMessage}</p> : null}
+            <div className="rounded-lg border border-border/70 bg-background/40 p-4">
+              <p className="mb-4 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                Account
+              </p>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="signup-email">Email</Label>
+                  <Input
+                    id="signup-email"
+                    type="email"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    placeholder="you@example.com"
+                    required
+                  />
+                </div>
 
-          <button type="submit" className="auth-button" disabled={isSubmitting}>
-            {isSubmitting ? "Creating Account..." : "Sign Up"}
-          </button>
-        </form>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-password">Password</Label>
+                  <Input
+                    id="signup-password"
+                    type="password"
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    placeholder="At least 8 characters"
+                    required
+                  />
+                </div>
 
-        <p className="auth-switch">
-          Already have an account? <Link to="/login">Log in</Link>
-        </p>
-      </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-confirm-password">Confirm password</Label>
+                  <Input
+                    id="signup-confirm-password"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(event) => setConfirmPassword(event.target.value)}
+                    placeholder="Repeat password"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            {errorMessage ? (
+              <p className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                {errorMessage}
+              </p>
+            ) : null}
+
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? "Creating account..." : "Sign up"}
+            </Button>
+          </form>
+        </CardContent>
+
+        <CardFooter className="text-sm text-muted-foreground">
+          Already have an account?{" "}
+          <Link
+            to="/login"
+            className="ml-1 font-semibold text-primary transition-colors hover:text-primary/85"
+          >
+            Log in
+          </Link>
+        </CardFooter>
+      </Card>
     </section>
   );
 }
