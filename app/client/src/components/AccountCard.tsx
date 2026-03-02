@@ -9,7 +9,7 @@ export default function AccountCard({ title, amount }: AccountCardProps) {
         flex-1
         relative
         px-6 py-6
-        rounded-2xl
+        rounded-[10px]
         bg-gradient-to-br from-[#0f1f14] to-[#0a0a0a]
         border border-green-500/20
         shadow-[0_0_30px_rgba(34,197,94,0.15)]

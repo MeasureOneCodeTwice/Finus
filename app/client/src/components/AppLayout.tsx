@@ -53,7 +53,7 @@ export default function AppLayout({ onLogout }: AppLayoutProps) {
         />
       )}
 
-      <div className="min-h-screen bg-[#f6f7fb] transition-[margin-left] duration-250 ease-in-out"
+      <div className="min-h-screen bg-[#1d1d1d] transition-[margin-left] duration-100 ease-in-out"
           style={{ marginLeft: isNavBarOpen ? `${SIDEBAR_WIDTH}px` : "0px"}}
       >
         <Outlet />
