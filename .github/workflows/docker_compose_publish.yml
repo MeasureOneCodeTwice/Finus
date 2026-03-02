@@ -25,6 +25,7 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
       - run: | 
+          echo $DOCKER_HUB_USERNAME
           BRANCH_NAME=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
           RELEASE_VERSION=$(echo $BRANCH_NAME | sed "s|release\/||g")
 
