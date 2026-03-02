@@ -37,7 +37,7 @@ function NavBar({ isOpen, onClose, onLogout }: NavigationBarProps) {
           flexDirection: "column",
           background: "transparent",
         }}
-        className="!bg-transparent"
+        className="bg-transparent!"
       >
         <div
           className="

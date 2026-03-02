@@ -224,7 +224,10 @@ const savingsLineOptions = {
         <button onClick={() => setActiveChart('income')} className="bg-blue-500 text-white p-2 rounded">Income Flow</button>
       </section>
       <section className="block">
-        <div className="flex flex-col items-center bg-white py-12 p-15 rounded-lg shadow-md">
+        <div className="flex flex-col items-center py-12 p-15 rounded-[20px]
+         bg-black backdrop-blur-xs backdrop-grayscale border border-green-500/15 shadow-[0_0_40px_rgba(34,197,94,0.15)]
+          transition-all duration-300 hover:shadow-[0_0_60px_rgba(34,197,94,0.3)]"
+        >
           {/* This chart is here just to test all the graph components */}
           <div className="flex flex-row gap-4 mb-10">
              <button className={selectedPeriod === 'w' ? 'bg-blue-500 text-white p-2 rounded' : 'bg-gray-200 text-white p-2 rounded'} onClick={() => setSelectedPeriod('w')}>Week</button>
