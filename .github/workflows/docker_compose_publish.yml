@@ -33,9 +33,9 @@ jobs:
           echo DOCKER_HUB_USERNAME=$DOCKER_HUB_USERNAME >> .env
 
           echo "Building images..."
-          docker compose build -q
+          docker compose build
           echo "Pushing images..."
-          docker compose push  -q
+          docker compose push
         env:
           DOCKER_HUB_USERNAME: ${{ inputs.DOCKER_HUB_USERNAME }}
 
