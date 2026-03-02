@@ -83,7 +83,7 @@ CREATE TABLE finus.financialAccount (
     subtype      VARCHAR(50), 
     PRIMARY KEY (id),
     FOREIGN KEY (type)    REFERENCES finus.financialAccountType(type) ON DELETE CASCADE,
-    FOREIGN KEY (subtype) REFERENCES finus.financialAccountType(type) ON DELETE CASCADE
+    FOREIGN KEY (subtype) REFERENCES finus.financialAccountSubtype(type) ON DELETE CASCADE
 
 );
 
@@ -161,6 +161,6 @@ CREATE TABLE finus.fixedInterestInvestment(
 
 #Populate lookup tables
 INSERT INTO finus.financialAccountType    (type) VALUES ('chequing'), ('savings'), ('credit_card'), ('investment');
-INSERT INTO finus.financialAccountSubtype (type) VALUES ('RRSP'), ('TFSA'), ('FHSA'), ('RESP'), ('RDSP');
+INSERT INTO finus.financialAccountSubtype (type) VALUES ('RRSP'), ('TFSA'), ('FHSA'), ('RESP'), ('RDSP'), ('na');
 INSERT  INTO finus.investmentType          (type) VALUES ('fixedInterest'), ('stock'); #These have to match table names
 INSERT  INTO finus.goalType                (type) VALUES ('money'), ('debt');

@@ -19,9 +19,9 @@ app.add_middleware(
 
 def get_db_connection():
     return mysql.connect(
-        host=os.getenv("DB_HOST", "localhost"),
-        user=os.getenv("DB_USER", "root"),
-        password=os.getenv("DB_PASSWORD", "dummypw"),
+        host=os.getenv("MYSQL_HOST", "database"),
+        user=os.getenv("MYSQL_USER", "finus_app"),
+        password=os.getenv("MYSQL_PASSWORD", "dummypw"),
         database=os.getenv("DB_NAME", "finus")
     )
 
@@ -153,7 +153,7 @@ async def get_income_flow_synth(period: str = Query(default='w', enum=['w', 'm',
     return {
         'nodes': [{'name': node} for node in nodes_list],
         'links': links
-    }
+        }
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))

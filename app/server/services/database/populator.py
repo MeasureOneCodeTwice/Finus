@@ -5,6 +5,7 @@
 #Can also specify the number of users to populate with --users, default is 1
 #  :python populator.py --users 5
 
+import mysql
 import mysql.connector
 from mysql.connector import Error
 import random
@@ -14,14 +15,14 @@ from datetime import datetime, timedelta
 import argparse
 import subprocess
 
-# Database connection configuration
-DB_CONFIG = {
-    'host': '127.0.0.1',
-    'port': 3306,
-    'user': 'finus_app',#'root',
-    'password': 'dummypw', #very unsafe, yes, but this file should not be accessible in prod 
-    'database': 'finus'
-}
+
+def get_db_connection():
+    return mysql.connector.connect(
+        host=os.getenv("MYSQL_HOST", "localhost"),
+        user=os.getenv("MYSQL_USER", "root"),
+        password=os.getenv("MYSQL_PASSWORD", "dummypw"),
+        database=os.getenv("DB_NAME", "finus")
+    )
 
 # Configuration for mock data generation
 NUM_USERS = 1
@@ -31,13 +32,13 @@ START_DATE = datetime.now() - timedelta(days=365)
 
 
 
-def get_db_connection():
-    try:
-        connection = mysql.connector.connect(**DB_CONFIG)
-        return connection
-    except Error as e:
-        print(f"Error connecting to db: {e}")
-        return None
+# def get_db_connection():
+#     try:
+#         connection = mysql.connector.connect(**DB_CONFIG)
+#         return connection
+#     except Error as e:
+#         print(f"Error connecting to db: {e}")
+#         return None
 
 
 FINANCIAL_ACCOUNT_TYPES = ['chequing', 'savings', 'credit_card', 'investment']
@@ -87,6 +88,8 @@ def create_goals(cursor, profile_ids):
 def create_financial_accounts(cursor, profile_ids):
     financialAccount_ids = []
     
+    #the values for financial account type and subtypes are prepopulated inside the schema itself - refer to the schema for valid types
+
     for profile_id in profile_ids:
         # create 2-5 accounts per profile
         for _ in range(random.randint(2, 5)):
