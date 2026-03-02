@@ -8,6 +8,7 @@ on:
 
 jobs:
   publish-images:
+    environment: "Docker hub"
     uses: ./.github/workflows/docker_compose_publish.yml
     with:
       dockerfile-dir: app/server
