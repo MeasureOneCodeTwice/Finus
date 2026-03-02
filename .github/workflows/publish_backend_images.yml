@@ -1,4 +1,4 @@
-name: "Publish Backend Images"
+name: "Publish Images"
 
 on:
   push:
@@ -7,10 +7,21 @@ on:
   workflow_dispatch:
 
 jobs:
-  publish-images:
+  publish-backend-images:
     uses: ./.github/workflows/docker_compose_publish.yml
     with:
       dockerfile-dir: app/server
       DOCKER_HUB_USERNAME: ${{ vars.DOCKER_HUB_USERNAME }}
     secrets:
       DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
+
+  publish-frontend-images:
+    name: "Publish frontend images"
+    uses: ./.github/workflows/docker_compose_publish.yml
+    with:
+      dockerfile-dir: app/client
+      DOCKER_HUB_USERNAME: ${{ vars.DOCKER_HUB_USERNAME }}
+    secrets:
+      DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
+
+
