@@ -4,7 +4,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import SankeyChart from '@/components/SankeyChart';
 import { getExpensesChartData, getSavingsContribChartData, getIncomeFlowChartData } from '@/api/ManagerAPI';
 import type { SankeyData } from 'recharts/types/chart/Sankey';
-import type { ChartData } from 'chart.js';
+import type { ChartData, ChartOptions } from 'chart.js';
 function DashboardChartSection() {
     //Active chart state - this just determines which chart is displayed in the holder - change this later to potentially load up all charts at once if latency is good
     const [activeChart, setActiveChart] = useState<'expenses' | 'savings' | 'income'>('expenses');
@@ -130,35 +130,35 @@ function DashboardChartSection() {
   }
 
 
-const expensesBarOptions = {
+const expensesBarOptions : ChartOptions<"bar"> = {
   responsive: true,
   plugins: {
     legend: {
-      position: 'top' as const,
+      position: 'top'
     },
     title: {
       display: true,
       text: 'Expenses Over Time',
       font: {
         size: 24,
-        weight: 'bold' as const
+        weight: 'bold'
       }
     }
   },
 };
 
-const savingsLineOptions = {
+const savingsLineOptions : ChartOptions<"line"> = {
   responsive: true,
   plugins: {
     legend: {
-      position: 'top' as const,
+      position: 'top'
     },
     title: {
       display: true,
-      text: 'Expenses Over Time',
+      text: 'Savings Contributions Over Time',
       font: {
         size: 24,
-        weight: 'bold' as const
+        weight: 'bold'
       }
     }
   },
@@ -216,12 +216,48 @@ const savingsLineOptions = {
         );
     }
   };
+
+  const transactionButtons = [
+    { key: "expenses", label: "Expenses" },
+    { key: "savings", label: "Savings" },
+    { key: "income", label: "Income Flow" },
+  ].map(({ key, label }) => (
+    <button
+      key={key}
+      onClick={() => setActiveChart(key as 'expenses' | 'savings' | 'income')}
+      className={`
+        px-5 py-2 text-sm font-medium rounded-lg transition-all outline-1
+        ${
+          activeChart === key
+            ? "bg-green-500 text-green-400 outline-2 outline-green-400 shadow"
+            : "text-gray-300 hover:text-white hover:bg-gray-800"
+        }
+      `}
+    >
+      {label}
+    </button>
+  ))
+  const periodButtons = [
+    { key: 'w', label: 'Week' },
+    { key: 'm', label: 'Month' },
+    { key: 'y', label: 'Year' },
+  ].map(({ key, label }) => (
+    <button
+      key={key}
+      onClick={() => setSelectedPeriod(key as 'w' | 'm' | 'y')}
+      className={`px-4 py-1.5 text-sm rounded-md transition-all outline-1
+        ${selectedPeriod === key ? "bg-green-500 text-green-400 outline-2 outline-green-400" : "text-gray-300"}
+      `}
+    >
+      {label}
+    </button>
+  ))
   return (
     <>
-      <section className="flex flex-row items-center justify-center gap-12">
-        <button onClick={() => setActiveChart('expenses')} className="bg-blue-500 text-white p-2 rounded">Expenses</button>
-        <button onClick={() => setActiveChart('savings')} className="bg-blue-500 text-white p-2 rounded">Savings</button>
-        <button onClick={() => setActiveChart('income')} className="bg-blue-500 text-white p-2 rounded">Income Flow</button>
+     <section className="flex justify-center mb-6">
+        <div className="inline-flex rounded-xl bg-gray-900/70 p-1 border border-green-500/15 gap-2">
+          {transactionButtons}
+        </div>
       </section>
       <section className="block">
         <div className="flex flex-col items-center py-12 p-15 rounded-[20px]
@@ -229,15 +265,10 @@ const savingsLineOptions = {
           transition-all duration-300 hover:shadow-[0_0_60px_rgba(34,197,94,0.3)]"
         >
           {/* This chart is here just to test all the graph components */}
-          <div className="flex flex-row gap-4 mb-10">
-             <button className={selectedPeriod === 'w' ? 'bg-blue-500 text-white p-2 rounded' : 'bg-gray-200 text-white p-2 rounded'} onClick={() => setSelectedPeriod('w')}>Week</button>
-            <button className={selectedPeriod === 'm' ? 'bg-blue-500 text-white p-2 rounded' : 'bg-gray-200 text-white p-2 rounded'} onClick={() => setSelectedPeriod('m')}>Month</button>
-            <button className={selectedPeriod === 'y' ? 'bg-blue-500 text-white p-2 rounded' : 'bg-gray-200 text-white p-2 rounded'} onClick={() => setSelectedPeriod('y')}>Year</button>
+          <div className="inline-flex rounded-lg bg-gray-900/70 p-1 border border-green-500/10 gap-2">
+            {periodButtons}
           </div>
           {renderChart()}
-          {/*<div className="bg-white p-6 rounded-lg shadow-md">
-            <Pie data={data} options={options} />
-          </div>*/}
         </div>
       </section>
     </>
