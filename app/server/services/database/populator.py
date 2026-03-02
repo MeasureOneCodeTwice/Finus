@@ -27,7 +27,7 @@ def get_db_connection():
 # Configuration for mock data generation
 NUM_USERS = 1
 ACCOUNTS_PER_USER = 3  # Average number of financial accounts per user
-TRANSACTIONS_PER_ACCOUNT = 5
+TRANSACTIONS_PER_ACCOUNT = 500
 START_DATE = datetime.now() - timedelta(days=365)
 
 
@@ -42,7 +42,7 @@ START_DATE = datetime.now() - timedelta(days=365)
 
 
 FINANCIAL_ACCOUNT_TYPES = ['chequing', 'savings', 'credit_card', 'investment']
-FINANCIAL_ACCOUNT_SUBTYPES = ['RRSP', 'TFSA', 'FHSA', 'RESP', 'RDSP']
+FINANCIAL_ACCOUNT_SUBTYPES = ['RRSP', 'TFSA', 'FHSA', 'RESP', 'RDSP', 'na']
 INVESTMENT_TYPES = ['stocks', 'bonds', 'mutual funds', 'ETFs']
 GOAL_TYPES = ['money', 'debt']
 FIRST_NAMES = ['John', 'Jane', 'Alex', 'Emily', 'Michael', 'Sarah', 'David', 'Laura']
@@ -92,7 +92,7 @@ def create_financial_accounts(cursor, profile_ids):
 
     for profile_id in profile_ids:
         # create 2-5 accounts per profile
-        for _ in range(random.randint(2, 5)):
+        for _ in range(ACCOUNTS_PER_USER):
             financialAccount_id = random.randint(10000, 99999)
             while financialAccount_id in financialAccount_ids:
                 financialAccount_id = random.randint(10000, 99999)
@@ -172,7 +172,6 @@ def create_users_and_profiles(cursor):
 
 
 def create_transactions(cursor, account_ids):
-    """Create transactions for each financial account"""
     print(f"Creating transactions (about {len(account_ids) * TRANSACTIONS_PER_ACCOUNT} total)...")
     
     for account_id in account_ids:
@@ -246,7 +245,6 @@ def create_investments(cursor, account_ids):
 
 
 def clear_database(cursor):
-    """Clear all data from tables (in correct order due to foreign keys)"""
     print("Clearing existing data...")
     
     tables_to_clear = [
