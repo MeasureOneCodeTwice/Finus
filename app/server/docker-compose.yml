@@ -68,6 +68,9 @@ services:
     #connect manually with `mysql -h 127.0.0.1 -P 3306 -u root -p`
     database:
       image: mysql:8.0-debian
+      cap_add:
+      #this is needed to avoid mbind operation not permitted errors when users keep requesting a ton of charts over and over
+      - SYS_NICE
       volumes: 
       - db_data:/var/lib/mysql
       #startup scripts are executed in alphabetical order
