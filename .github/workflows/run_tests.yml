@@ -1,0 +1,26 @@
+name: "Run tests"
+
+on:
+  pull_request:
+    branches: [ "*" ]
+  push:
+    branches: [ "main", "development", "release/*" ]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  run-backend-tests:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: app/server
+    steps:
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+    - name: Build base images
+      run: docker compose build
+    - name: Build test images
+      run: |
+        mv docker-compose.test.yml docker-compose.yml 
+        docker compose build
+    - name: Run tests
+      run: docker compose up --abort-on-container-failure

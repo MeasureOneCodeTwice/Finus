@@ -4,7 +4,7 @@
 #you can use the following command to run the tests
 #docker compose build -q && docker compose -f docker-compose.test.yml build -q && docker compose -f docker-compose.test.yml up --abort-on-container-failure
 services:
-    auth:
+    auth-test:
       build: 
         context: services/ts
         dockerfile: auth/Dockerfile.test
