@@ -1,5 +1,5 @@
-import type { LoginBody, SignupBody } from "./types";
-import { validateType } from "@/types";
+import type { LoginBody, SignupBody } from "./types.ts";
+import { validateType } from "@/types.ts";
 
 export function parseLoginBody(obj: unknown): LoginBody {
   validateType(obj, ["email", "password"]);

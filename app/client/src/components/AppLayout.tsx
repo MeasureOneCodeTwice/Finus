@@ -26,7 +26,7 @@ export default function AppLayout({ onLogout }: AppLayoutProps) {
             w-[45px] h-[45px]
             rounded-[14px]
             border border-[rgba(15,23,42,0.10)]
-            bg-[rgba(255,255,255,0.92)]
+            bg-[rgba(24,255,63,0.92)]
             backdrop-blur-md
             shadow-[0_10px_24px_rgba(2,6,23,0.10)]
             cursor-pointer
