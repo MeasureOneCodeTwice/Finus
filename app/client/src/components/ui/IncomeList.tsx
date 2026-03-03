@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { getIncome} from "../../api/Income"
-import { type Income } from "../../type/IncomeType"
+import { type Income } from "../../types/IncomeType"
 import IncomePopup from "./IncomeForm"
 import IncomeCard from "./IncomeCard"
 

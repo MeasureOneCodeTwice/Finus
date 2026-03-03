@@ -6,8 +6,8 @@ import CsvFile from "./CsvFile";
 import CsvError from "./CsvError";
 import CsvPreviewTable from "./CsvPreview";
 import CsvConfirmation from "./CsvConfirm";
-import { parseCsvFile } from "../../util/ParseCsv";
-import type { TransactionDraft } from "../../util/ConvertTransaction";
+import { parseCsvFile } from "../../utils/ParseCsv";
+import type { TransactionDraft } from "../../utils/ConvertTransaction";
 import SuccessScreen from "./csvSuccess";
 
 export default function CsvUpload({ accountId }: { accountId: number }) {

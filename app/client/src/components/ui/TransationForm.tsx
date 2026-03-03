@@ -2,11 +2,11 @@ import React, { useState} from "react";
 import CsvUpload from "../csvread/CsvUpload";
 import './UserForm.css'
 import { getUserAccounts} from "../../api/Account";
-import { validateTransactionForm } from "../../util/ValidateForms";
+import { validateTransactionForm } from "../../utils/ValidateForms";
 import { postTranscations, putTranscations} from "../../api/Transaction";
-import { handleCurrencyChange, handleCurrencyBlur } from "../../util/handleInput";
-import { type Transaction } from "../../type/TransactionType";
-import { type Account } from "../../type/AccountType";
+import { handleCurrencyChange, handleCurrencyBlur } from "../../utils/handleInput";
+import { type Transaction } from "../../types/TransactionType";
+import { type Account } from "../../types/AccountType";
 
 interface popupProp{
     toggle: () => void;
@@ -22,6 +22,7 @@ export const transactionCategory = {
     HOUSING: "Housing",
     UTIL: "Utilzities",
     TRANSPORTATION: "Transportation",
+    INCOME:"INCOME",
     OTHER: "Other",
 };
 

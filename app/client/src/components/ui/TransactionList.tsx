@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { getTransactions} from "../../api/Transaction";
-import { type Transaction } from "../../type/TransactionType";
+import { type Transaction } from "../../types/TransactionType";
 import TransactionPopup from "./TransationForm"
 import TransactionCard from "./TransactionCard"
 

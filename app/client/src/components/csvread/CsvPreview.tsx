@@ -1,6 +1,6 @@
 // Component to display parsed CSV rows in a preview table
 
-import type { TransactionDraft } from "../../util/ConvertTransaction";
+import type { TransactionDraft } from "../../utils/ConvertTransaction";
 
 interface Props {
   rows: TransactionDraft[];

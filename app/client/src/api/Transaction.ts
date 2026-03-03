@@ -1,5 +1,5 @@
-import type { updateResponse } from "../type/responseTypes";
-import { type Transaction } from "../type/TransactionType";
+import type { updateResponse } from "../types/responseTypes";
+import { type Transaction } from "../types/TransactionType";
 
 const requestUrl = "http://localhost:3000/api/transacitons"
 

@@ -1,6 +1,6 @@
 //shows a summary of parsed CSV data before final import
 
-import type { TransactionDraft } from "../../util/ConvertTransaction";
+import type { TransactionDraft } from "../../utils/ConvertTransaction";
 
 interface Props {
   rows: TransactionDraft[];

@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import './UserForm.css'
 import {postUserAccount, putUserAccount} from '../../api/Account.ts'
-import { type Account } from "../../type/AccountType.ts";
-import { validateAccountForm } from "../../util/ValidateForms.ts";
-import { handleCurrencyChange, handleCurrencyBlur } from "../../util/handleInput.ts";
+import { type Account } from "../../types/AccountType.ts";
+import { validateAccountForm } from "../../utils/ValidateForms.ts";
+import { handleCurrencyChange, handleCurrencyBlur } from "../../utils/handleInput.ts";
 
 
 interface popupProp{

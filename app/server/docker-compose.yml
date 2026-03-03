@@ -1,7 +1,7 @@
 services:
 
   api-gateway:
-    build: ./services/api-gateway
+    build: ./services/ts/api-gateway
     ports:
       - "3000:8000"
     env_file: 
@@ -15,22 +15,22 @@ services:
       - market
   
   auth:
-    build: ./services/auth
+    build: ./services/ts/auth
     env_file: 
     - path: ./default.env
   
   user:
-    build: ./services/user
+    build: ./services/ts/user
     env_file: 
     - path: ./default.env
   
   analytics:
-      build: ./services/analytics
+      build: ./services/ts/analytics
       env_file: 
       - path: ./default.env
     
   market:
-    build: ./services/market
+    build: ./services/ts/market
     env_file: 
     - path: ./default.env
 

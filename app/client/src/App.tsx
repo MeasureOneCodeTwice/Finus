@@ -9,7 +9,7 @@ import LoadingSpinner from './components/ui/LoadingSpinner.tsx'
 import AccountPopup from './components/ui/AccountForm.tsx'
 import TransactionPopup from './components/ui/TransationForm.tsx'
 import IncomePopup from './components/ui/IncomeForm.tsx'
-import type { Account } from './type/AccountType.ts'
+import type { Account } from './types/AccountType.ts'
 
 function App() {
   return (

@@ -1,6 +1,6 @@
 
-import type { updateResponse } from "../type/responseTypes"
-import { type Income } from "../type/IncomeType"
+import type { updateResponse } from "../types/responseTypes"
+import { type Income } from "../types/IncomeType"
 
 const requestUrl = "http://localhost:3000/api/income"
 
