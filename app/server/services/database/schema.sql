@@ -67,10 +67,10 @@ CREATE TABLE finus.financialAccountType (
 );
 
 CREATE TABLE finus.financialAccountSubtype(
-    type VARCHAR(50) NOT NULL,
+    subtype VARCHAR(50) NOT NULL,
     -- These subtypes are really only needed for savings accounts as they can be taxed differently and might have weird rules about them
     -- type ENUM('RRSP', 'TFSA', 'FHSA', 'RESP', 'RDSP') DEFAULT 'NA',
-    PRIMARY KEY (type)
+    PRIMARY KEY (subtype)
 );
 
 CREATE TABLE finus.financialAccount (
@@ -83,7 +83,7 @@ CREATE TABLE finus.financialAccount (
     subtype      VARCHAR(50), 
     PRIMARY KEY (id),
     FOREIGN KEY (type)    REFERENCES finus.financialAccountType(type) ON DELETE CASCADE,
-    FOREIGN KEY (subtype) REFERENCES finus.financialAccountSubtype(type) ON DELETE CASCADE
+    FOREIGN KEY (subtype) REFERENCES finus.financialAccountSubtype(subtype) ON DELETE CASCADE
 
 );
 
@@ -161,6 +161,8 @@ CREATE TABLE finus.fixedInterestInvestment(
 
 #Populate lookup tables
 INSERT INTO finus.financialAccountType    (type) VALUES ('chequing'), ('savings'), ('credit_card'), ('investment');
-INSERT INTO finus.financialAccountSubtype (type) VALUES ('RRSP'), ('TFSA'), ('FHSA'), ('RESP'), ('RDSP'), ('na');
+INSERT INTO finus.financialAccountSubtype (subtype) VALUES ('RRSP'), ('TFSA'), ('FHSA'), ('RESP'), ('RDSP'), ('na');
 INSERT  INTO finus.investmentType          (type) VALUES ('fixedInterest'), ('stock'); #These have to match table names
 INSERT  INTO finus.goalType                (type) VALUES ('money'), ('debt');
+
+GRANT ALL PRIVILEGES ON finus.* TO 'finus_app'@'%';

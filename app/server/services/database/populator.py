@@ -19,10 +19,11 @@ import subprocess
 
 def get_db_connection():
     return mysql.connector.connect(
-        host=os.getenv("MYSQL_HOST", "localhost"),
-        user=os.getenv("MYSQL_USER", "root"),
-        password=os.getenv("MYSQL_PASSWORD", "dummypw"),
-        database=os.getenv("DB_NAME", "finus")
+        host="127.0.0.1",
+        port=3306,
+        user="finus_app",
+        password= "dummypw",
+        database= "finus"
     )
 
 # Configuration for mock data generation
@@ -335,7 +336,7 @@ def populate_lookup_tables(cursor):
     
     for subtype in FINANCIAL_ACCOUNT_SUBTYPES:
         cursor.execute(
-            "INSERT IGNORE INTO finus.financialAccountSubtype (type) VALUES (%s)",
+            "INSERT IGNORE INTO finus.financialAccountSubtype (subtype) VALUES (%s)",
             (subtype,)
         )
     
