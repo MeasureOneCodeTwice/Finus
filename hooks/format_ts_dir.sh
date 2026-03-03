@@ -1,9 +1,10 @@
 #!/bin/bash
 #first argument ($1) is the directory to format the files of.
 changed_files=$(git diff --cached --name-only --diff-filter=ACMR | grep -E $1/)
-if [[ $changed_files == '' ]]; then
+if [ -n $changed_files ]; then
     exit 0
 fi
+echo "files: $changed_files"
 
 normalized_files=$(echo $changed_files | sed "s|$1/||g" )
 cd $1
