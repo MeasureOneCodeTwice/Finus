@@ -1,0 +1,31 @@
+// profile creation route this lets us create profiles in the db , which can be used to group accounts together and track them.
+
+import { Router } from "express";
+import type { Request, Response } from "express";
+import type { ResultSetHeader } from "mysql2";
+import { getConnectionPool } from "../../../common/sqlUtil.js"
+
+export const profilesRouter = Router();
+const db = getConnectionPool()
+
+// Create a profile
+profilesRouter.post("/", async (req: Request, res: Response) => {
+  try {
+    const { name, description } = req.body;
+
+    const [result] = await db.query<ResultSetHeader>(
+      `INSERT INTO profile (name, description)
+       VALUES (?, ?)`,
+      [name, description ?? null]
+    );
+
+    res.json({
+      message: "Profile successfully created",
+      id: result.insertId
+    });
+  } catch (err) {
+    console.error("Profile creation failed:", err);
+    res.status(500).json({ error: "Profile creation failed" });
+  }
+});
+

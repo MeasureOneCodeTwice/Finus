@@ -71,7 +71,7 @@ function DashboardChartSection() {
       default:
       fetchExpensesData();
     }    
-  }, [activeChart, selectedPeriod]);
+  }, [activeChart, selectedPeriod, fetchExpensesData, fetchSavingsData,fetchIncomeData]);
 
 
   //Temporary test data for expenses - delete once API works. This is just to test graph components

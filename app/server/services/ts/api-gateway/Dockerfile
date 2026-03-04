@@ -18,3 +18,4 @@ WORKDIR /project/app
 COPY api-gateway/src ./src
 
 CMD ["bun", "--no-env-file", "src/index.ts"]
+

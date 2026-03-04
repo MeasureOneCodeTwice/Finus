@@ -18,3 +18,4 @@ WORKDIR /project/app
 COPY user/src ./src
 
 CMD ["bun", "--no-env-file", "src/index.ts"]
+

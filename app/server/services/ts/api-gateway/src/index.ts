@@ -4,7 +4,24 @@ import { onExit } from "@/hooks";
 import express from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
 
+import cors from 'cors';
+
 const app = express();
+
+//app.use(buildCorsConfig(undefined));
+
+app.use(cors({
+  origin: 'http://localhost:8080',  // vite dev server so that the client can access this API
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+app.use((req,res,next)=>{
+  console.log("API-GATEWAY Incoming request: " + req.method + " " + req.url)
+  console.log(req.body)
+  next()
+})
 
 app.use(
   createProxyMiddleware({
@@ -13,6 +30,16 @@ app.use(
     changeOrigin: true,
     pathRewrite: { "^/api/signup": "/signup" },
   }),
+);
+
+// Api Gateway routes to account, transaction and profiles
+app.use(
+  createProxyMiddleware({
+    pathFilter: "/api/accounts",
+    target: process.env.USER_SERVICE_ADDR,
+    changeOrigin: true,
+    pathRewrite: { "^/api/accounts": "/accounts" },
+  })
 );
 
 app.use(
@@ -42,14 +69,6 @@ app.get("/health", async (_req: express.Request, res: express.Response) => {
   }
   res.json(result);
 });
-
-app.use(buildCorsConfig(undefined));
-app.use(express.json());
-
-const server = app.listen(PORT, () => {
-  console.log(`API Gateway running on port ${PORT}`);
-});
-onExit(async () => await server.close());
 
 //API gateway sits on port 3000 and is accessible from there. Go to browser and type http://localhost:3000/health and you should see which services are up.
 app.get("/health", async (req: express.Request, res: express.Response) => {
@@ -128,3 +147,27 @@ app.get(
     res.json(response);
   },
 );
+app.use(
+  createProxyMiddleware({
+    pathFilter: "/api/tranasctions",
+    target: process.env.USER_SERVICE_ADDR,
+    changeOrigin: true,
+    pathRewrite: { "^/api/transactions": "/transactions" }
+  })
+);
+
+app.use(
+  createProxyMiddleware({
+    pathFilter:"/api/profiles",
+    target: process.env.USER_SERVICE_ADDR,
+    changeOrigin: true,
+    pathRewrite: { "^/api/profiles": "/profiles" }
+  })
+);
+
+const server = app.listen(PORT, () => {
+  console.log(`API Gateway running on port ${PORT}`);
+});
+onExit(async () => await server.close());
+
+//process.on("SIGTERM", () =>  server.close());
