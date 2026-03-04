@@ -1,5 +1,5 @@
 //
 export interface updateResponse {
-   lastUpdated?: Date
-   id?: number 
+  lastUpdated?: Date;
+  id?: number;
 }

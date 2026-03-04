@@ -15,7 +15,7 @@ export default function CsvDrop({ onFileSelect }: CsvDropProps) {
     const file = e.dataTransfer.files?.[0];
     onFileSelect(file || null);
   };
-//accepts only csv files 
+  //accepts only csv files
   return (
     <div
       onDragEnter={() => setIsDragging(true)}
@@ -30,7 +30,7 @@ export default function CsvDrop({ onFileSelect }: CsvDropProps) {
         textAlign: "center",
         background: isDragging ? "#eef" : "#fafafa",
         cursor: "pointer",
-        marginBottom: "1rem"
+        marginBottom: "1rem",
       }}
     >
       <p>Drag & drop your CSV here, or click to select</p>

@@ -1,5 +1,5 @@
-import { Outlet } from 'react-router-dom'
-import Header from './Header'
+import { Outlet } from "react-router-dom";
+import Header from "./Header";
 
 function Layout() {
   // const location = useLocation()
@@ -8,7 +8,7 @@ function Layout() {
       <Header />
       <Outlet />
     </>
-  )
+  );
 }
 
-export default Layout
+export default Layout;

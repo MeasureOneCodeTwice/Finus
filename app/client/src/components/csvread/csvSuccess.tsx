@@ -2,14 +2,16 @@
 export default function SuccessScreen({
   inserted,
   skipped,
-  onDone
+  onDone,
 }: {
   inserted: number;
   skipped: number;
   onDone: () => void;
 }) {
   return (
-    <div style={{ marginTop: "1rem", padding: "1rem", border: "1px solid #ccc" }}>
+    <div
+      style={{ marginTop: "1rem", padding: "1rem", border: "1px solid #ccc" }}
+    >
       <h3>Import Complete</h3>
       <p>{inserted} transactions imported successfully.</p>
       <p>{skipped} rows were skipped due to validation errors.</p>

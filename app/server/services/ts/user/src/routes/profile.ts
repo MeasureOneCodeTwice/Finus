@@ -3,10 +3,10 @@
 import { Router } from "express";
 import type { Request, Response } from "express";
 import type { ResultSetHeader } from "mysql2";
-import { getConnectionPool } from "../../../common/sqlUtil.js"
+import { getConnectionPool } from "../../../common/sqlUtil.js";
 
 export const profilesRouter = Router();
-const db = getConnectionPool()
+const db = getConnectionPool();
 
 // Create a profile
 profilesRouter.post("/", async (req: Request, res: Response) => {
@@ -16,16 +16,15 @@ profilesRouter.post("/", async (req: Request, res: Response) => {
     const [result] = await db.query<ResultSetHeader>(
       `INSERT INTO profile (name, description)
        VALUES (?, ?)`,
-      [name, description ?? null]
+      [name, description ?? null],
     );
 
     res.json({
       message: "Profile successfully created",
-      id: result.insertId
+      id: result.insertId,
     });
   } catch (err) {
     console.error("Profile creation failed:", err);
     res.status(500).json({ error: "Profile creation failed" });
   }
 });
-

@@ -16,13 +16,23 @@
 }
 
 .auth-glow-left {
-  background: radial-gradient(circle, #18cc5f 0%, #0d4d26 70%, transparent 100%);
+  background: radial-gradient(
+    circle,
+    #18cc5f 0%,
+    #0d4d26 70%,
+    transparent 100%
+  );
   top: -8rem;
   left: -8rem;
 }
 
 .auth-glow-right {
-  background: radial-gradient(circle, #27a552 0%, #0f411d 65%, transparent 100%);
+  background: radial-gradient(
+    circle,
+    #27a552 0%,
+    #0f411d 65%,
+    transparent 100%
+  );
   right: -8rem;
   bottom: -8rem;
   animation-delay: 1.2s;
@@ -140,7 +150,9 @@
   color: #deffe9;
   padding: 0.68rem 0.8rem;
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
   font-size: 0.95rem;
 }
 
@@ -170,7 +182,9 @@
   cursor: pointer;
   color: #041108;
   background: linear-gradient(135deg, #53ff8c, #17ac4d);
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .auth-button:hover {

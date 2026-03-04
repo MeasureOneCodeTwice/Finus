@@ -13,11 +13,10 @@ export default function CsvError({ message }: CsvErrorProps) {
         background: "#ffe5e5",
         color: "#b30000",
         border: "1px solid #ffb3b3",
-        marginBottom: "1rem"
+        marginBottom: "1rem",
       }}
     >
       {message}
     </div>
   );
 }
-

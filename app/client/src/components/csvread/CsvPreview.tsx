@@ -8,11 +8,11 @@ interface Props {
 
 export default function CsvPreviewTable({ rows }: Props) {
   // count valid and invalid rows
-  const validCount = rows.filter(r => r.errors.length === 0).length;
+  const validCount = rows.filter((r) => r.errors.length === 0).length;
   const invalidCount = rows.length - validCount;
 
-  return (                                          
-    <div style={{ marginTop: "1rem" }}>     
+  return (
+    <div style={{ marginTop: "1rem" }}>
       <div style={{ marginBottom: "0.5rem" }}>
         <strong>Total rows:</strong> {rows.length} <br />
         <strong>Valid rows:</strong> {validCount} <br />
@@ -45,7 +45,7 @@ export default function CsvPreviewTable({ rows }: Props) {
               <tr
                 key={index}
                 style={{
-                  background: isInvalid ? "#ff0000" : "white",               // highlight invalid rows
+                  background: isInvalid ? "#ff0000" : "white", // highlight invalid rows
                 }}
               >
                 <td style={cell}>{row.date}</td>
@@ -53,9 +53,7 @@ export default function CsvPreviewTable({ rows }: Props) {
                 <td style={cell}>{row.amount}</td>
                 <td style={cell}>{row.sender}</td>
                 <td style={cell}>{row.recipient}</td>
-                <td style={cell}>
-                  {isInvalid ? row.errors.join(", ") : "—"}
-                </td>
+                <td style={cell}>{isInvalid ? row.errors.join(", ") : "—"}</td>
               </tr>
             );
           })}

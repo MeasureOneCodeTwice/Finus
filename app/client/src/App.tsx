@@ -9,7 +9,7 @@ import "./App.css";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
 import type { AuthApiResponse, AuthSession, AuthUser } from "./pages/authTypes";
-import DashboardPage from './pages/DashboardPage.tsx'
+import DashboardPage from "./pages/DashboardPage.tsx";
 
 const SESSION_STORAGE_KEY = "finus-session";
 const API_BASE_URL =
@@ -204,6 +204,5 @@ function App() {
     </Router>
   );
 }
-
 
 export default App;

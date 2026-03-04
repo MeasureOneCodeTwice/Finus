@@ -1,13 +1,16 @@
-### Typescript services 
-Each service inherits from this directory's:
-* packages
-* tsconfig
-* eslint.config
+### Typescript services
 
-Unless a package will be used in multiple modules install it only in the subdirectory (by running `bun install` in the module directory, not this one).  
+Each service inherits from this directory's:
+
+- packages
+- tsconfig
+- eslint.config
+
+Unless a package will be used in multiple modules install it only in the subdirectory (by running `bun install` in the module directory, not this one).
 
 The `common` folder is home for modules that are used by one or more services. For example `common/port.ts` is used by all services to determine which port to bind their webserver to.
 
 ### Tests
+
 To run tests use `bun run vitest`
 to see the coverage run `bun run vitest --coverage`

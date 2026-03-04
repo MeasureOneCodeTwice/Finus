@@ -1,5 +1,5 @@
 import type { UserWithPassword } from "./types";
-export async function getUserByEmail (
+export async function getUserByEmail(
   email: string,
   pool,
 ): Promise<UserWithPassword> {

@@ -1,9 +1,5 @@
 import { type LoginBody, type SignupBody } from "./types";
-import {
-  createUser,
-  getUserByEmail,
-  accountWithEmailExists,
-} from "./queries";
+import { createUser, getUserByEmail, accountWithEmailExists } from "./queries";
 import { validateSignupBody } from "./validation";
 import { passwordMatchesHash, generateJWT, hashPassword } from "./secrets.ts";
 import { type User } from "@/types";

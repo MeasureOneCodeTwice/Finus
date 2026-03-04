@@ -8,16 +8,17 @@ interface Props {
   onBack: () => void;
 }
 
-export default function CsvConfirmation({ rows, onConfirm, onBack }: Props) {           // calculates summary stats and displays them along with confirm/back buttons
-  const validRows = rows.filter(r => r.errors.length === 0);
-  const invalidRows = rows.filter(r => r.errors.length > 0);
+export default function CsvConfirmation({ rows, onConfirm, onBack }: Props) {
+  // calculates summary stats and displays them along with confirm/back buttons
+  const validRows = rows.filter((r) => r.errors.length === 0);
+  const invalidRows = rows.filter((r) => r.errors.length > 0);
 
   const totalIncome = validRows
-    .filter(r => (r.amount ?? 0) > 0)
+    .filter((r) => (r.amount ?? 0) > 0)
     .reduce((sum, r) => sum + (r.amount ?? 0), 0);
 
   const totalExpenses = validRows
-    .filter(r => (r.amount ?? 0) < 0)
+    .filter((r) => (r.amount ?? 0) < 0)
     .reduce((sum, r) => sum + (r.amount ?? 0), 0);
 
   return (
@@ -36,9 +37,7 @@ export default function CsvConfirmation({ rows, onConfirm, onBack }: Props) {   
         Back
       </button>
 
-      <button onClick={onConfirm}>
-        Confirm Import
-      </button>
+      <button onClick={onConfirm}>Confirm Import</button>
     </div>
   );
 }

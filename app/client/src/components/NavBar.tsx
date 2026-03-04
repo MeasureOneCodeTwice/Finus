@@ -1,5 +1,5 @@
 function NavBar() {
-    /*<div id="mySidenav" className="sidenav">
+  /*<div id="mySidenav" className="sidenav">
         <a href="javascript:void(0)" className="closebtn" onClick={() => {}}>&times;</a>
         <a href="#">About</a>
         <a href="#">Services</a>
@@ -7,10 +7,8 @@ function NavBar() {
         <a href="#">Contact</a>
     </div> */
   return (
-    <div className='fixed top-0 left-0 w-64 h-full bg-gray-700 text-white p-4 z-50'>
-        
-    </div>
-  )
+    <div className="fixed top-0 left-0 w-64 h-full bg-gray-700 text-white p-4 z-50"></div>
+  );
 }
 
-export default NavBar
+export default NavBar;

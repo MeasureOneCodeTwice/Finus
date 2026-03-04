@@ -1,67 +1,62 @@
-
 .popupForm {
-    background-color: lightgrey;
-    padding: 15px;
-    place-content: start;
-    height: auto;
+  background-color: lightgrey;
+  padding: 15px;
+  place-content: start;
+  height: auto;
 }
 
-input{
-    margin-top: 2.5%;
-    margin-bottom: 2.5%;
-    margin-left: 1%;
-    
+input {
+  margin-top: 2.5%;
+  margin-bottom: 2.5%;
+  margin-left: 1%;
 }
 
-select{
-    margin-top: 2.5%;
-    margin-bottom: 2.5%;
-    margin-left: 1%;
+select {
+  margin-top: 2.5%;
+  margin-bottom: 2.5%;
+  margin-left: 1%;
 }
 
-.popup{
-    color:black;
-    background-color:floralwhite;
-    padding: 15px;
-    border-radius: 5px;
-    border-style: solid;
-    border-width: 2px;   
-    border-color: black;
+.popup {
+  color: black;
+  background-color: floralwhite;
+  padding: 15px;
+  border-radius: 5px;
+  border-style: solid;
+  border-width: 2px;
+  border-color: black;
 
-    
-    position:fixed;
-    top:0;
-    bottom: 0;
-    right: 35%;
-    left: 35%;
-    z-index: 100;
-    width: max-content;
-    height: max-content;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: 35%;
+  left: 35%;
+  z-index: 100;
+  width: max-content;
+  height: max-content;
 
-    font-size: 10pt;
+  font-size: 10pt;
 
-
-    justify-content: center;
-    align-items: center;
+  justify-content: center;
+  align-items: center;
 }
 
-button{
-    padding: 5px;
-    border-width:1px;
-    border-color: black;
-    border-radius: 5px;
+button {
+  padding: 5px;
+  border-width: 1px;
+  border-color: black;
+  border-radius: 5px;
 }
 
-.bottomButtons{
-    display: flex;
+.bottomButtons {
+  display: flex;
 }
 
-.bottomButtons :first-child{
-    margin-right: auto;
-    background-color: lightcoral;
+.bottomButtons :first-child {
+  margin-right: auto;
+  background-color: lightcoral;
 }
-.bottomButtons button:last-child{
-    margin-left: auto;
-    background-color: aquamarine;
+.bottomButtons button:last-child {
+  margin-left: auto;
+  background-color: aquamarine;
 }
-

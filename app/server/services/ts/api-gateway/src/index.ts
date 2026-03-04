@@ -3,27 +3,31 @@ import { onExit } from "@/hooks";
 import express from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
 
-import cors from 'cors';
+import cors from "cors";
 
 const app = express();
 
-const allowedOrigins = (process.env.CORS_ORIGINS ?? "http://localhost,http://localhost:8080")
+const allowedOrigins = (
+  process.env.CORS_ORIGINS ?? "http://localhost,http://localhost:8080"
+)
   .split(",")
   .map((origin) => origin.trim())
   .filter((origin) => origin.length > 0);
 
-app.use(cors({
-  origin: allowedOrigins,
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
+);
 
-app.use((req,res,next)=>{
-  console.log("API-GATEWAY Incoming request: " + req.method + " " + req.url)
-  console.log(req.body)
-  next()
-})
+app.use((req, res, next) => {
+  console.log("API-GATEWAY Incoming request: " + req.method + " " + req.url);
+  console.log(req.body);
+  next();
+});
 
 app.use(
   createProxyMiddleware({
@@ -41,7 +45,7 @@ app.use(
     target: process.env.USER_SERVICE_ADDR,
     changeOrigin: true,
     pathRewrite: { "^/api/accounts": "/accounts" },
-  })
+  }),
 );
 
 app.use(
@@ -154,17 +158,17 @@ app.use(
     pathFilter: "/api/tranasctions",
     target: process.env.USER_SERVICE_ADDR,
     changeOrigin: true,
-    pathRewrite: { "^/api/transactions": "/transactions" }
-  })
+    pathRewrite: { "^/api/transactions": "/transactions" },
+  }),
 );
 
 app.use(
   createProxyMiddleware({
-    pathFilter:"/api/profiles",
+    pathFilter: "/api/profiles",
     target: process.env.USER_SERVICE_ADDR,
     changeOrigin: true,
-    pathRewrite: { "^/api/profiles": "/profiles" }
-  })
+    pathRewrite: { "^/api/profiles": "/profiles" },
+  }),
 );
 
 const server = app.listen(PORT, () => {

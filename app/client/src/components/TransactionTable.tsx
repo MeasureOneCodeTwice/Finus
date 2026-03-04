@@ -1,7 +1,6 @@
-import { getTransactions } from '@/api/ManagerAPI';
-import type { Transaction } from '@/types/Transaction';
-import { useEffect, useState } from 'react'
-
+import { getTransactions } from "@/api/ManagerAPI";
+import type { Transaction } from "@/types/Transaction";
+import { useEffect, useState } from "react";
 
 function TransactionTable() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -16,7 +15,7 @@ function TransactionTable() {
       }
     };
     fetchTransactions();
-  },[])
+  }, []);
   return (
     <div className="my-10 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
       {/* Header */}
@@ -46,9 +45,7 @@ function TransactionTable() {
               {tx.description || "N/A"}
             </div>
 
-            <div className="text-gray-600">
-              {tx.category}
-            </div>
+            <div className="text-gray-600">{tx.category}</div>
 
             <div
               className={`font-semibold ${
@@ -60,17 +57,13 @@ function TransactionTable() {
                 : `$${tx.amount.toFixed(2)}`}
             </div>
 
-            <div className="text-gray-600 truncate">
-              {tx.from}
-            </div>
+            <div className="text-gray-600 truncate">{tx.from}</div>
 
-            <div className="text-gray-600 truncate">
-              {tx.to}
-            </div>
+            <div className="text-gray-600 truncate">{tx.to}</div>
           </div>
         ))}
       </div>
     </div>
-  )
+  );
 }
-export default TransactionTable
+export default TransactionTable;

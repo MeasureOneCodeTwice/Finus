@@ -1,6 +1,5 @@
 //function to convert a normalized row into a transaction draft
 
-
 import type { NormalizedRow } from "./NormalizeRow";
 import { validateRow } from "./ValidateRow";
 
@@ -13,7 +12,8 @@ export interface TransactionDraft {
   errors: string[];
 }
 
-export function convertDraft(row: NormalizedRow): TransactionDraft {           // convert normalized row to transaction draft and validate it
+export function convertDraft(row: NormalizedRow): TransactionDraft {
+  // convert normalized row to transaction draft and validate it
   const errors = validateRow(row);
 
   return {
@@ -21,4 +21,3 @@ export function convertDraft(row: NormalizedRow): TransactionDraft {           /
     errors,
   };
 }
-

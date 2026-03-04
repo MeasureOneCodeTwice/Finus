@@ -1,4 +1,4 @@
-//This displays file name, size, and a remove 
+//This displays file name, size, and a remove
 
 interface CsvFileProps {
   file: File;
@@ -13,7 +13,7 @@ export default function CsvFile({ file, onRemove }: CsvFileProps) {
         border: "1px solid #ddd",
         borderRadius: 6,
         background: "#f9f9f9",
-        marginBottom: "1rem"
+        marginBottom: "1rem",
       }}
     >
       <strong>{file.name}</strong>
@@ -28,7 +28,7 @@ export default function CsvFile({ file, onRemove }: CsvFileProps) {
           border: "none",
           padding: "0.4rem 0.8rem",
           borderRadius: 4,
-          cursor: "pointer"
+          cursor: "pointer",
         }}
       >
         Remove
