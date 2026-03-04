@@ -29,9 +29,10 @@ export function parseSignupBody(obj: unknown): SignupBody {
     "password",
   ]);
 
-  const idInt = Number.parseInt(obj.age);
-  if (Number.isNaN(idInt)) {
-    throw new Error("age must be a number");
+  const idInt = Number(obj.age);
+  if (Number.isNaN(idInt) || Math.floor(idInt) !== idInt) {
+    const error = new Error("age must be a number");
+    throw error;
   }
 
   return {
