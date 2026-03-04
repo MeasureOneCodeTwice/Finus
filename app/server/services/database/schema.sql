@@ -165,4 +165,4 @@ INSERT INTO finus.financialAccountSubtype (subtype) VALUES ('RRSP'), ('TFSA'), (
 INSERT  INTO finus.investmentType          (type) VALUES ('fixedInterest'), ('stock'); #These have to match table names
 INSERT  INTO finus.goalType                (type) VALUES ('money'), ('debt');
 
-GRANT ALL PRIVILEGES ON finus.* TO 'finus_app'@'%';
+-- GRANT ALL PRIVILEGES ON finus.* TO 'finus_app'@'%';
