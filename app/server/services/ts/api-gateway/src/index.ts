@@ -1,5 +1,4 @@
 import { PORT } from "@/port";
-import { buildCorsConfig } from "@/expressUtils";
 import { onExit } from "@/hooks";
 import express from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
@@ -8,10 +7,13 @@ import cors from 'cors';
 
 const app = express();
 
-//app.use(buildCorsConfig(undefined));
+const allowedOrigins = (process.env.CORS_ORIGINS ?? "http://localhost,http://localhost:8080")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter((origin) => origin.length > 0);
 
 app.use(cors({
-  origin: 'http://localhost:8080',  // vite dev server so that the client can access this API
+  origin: allowedOrigins,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']

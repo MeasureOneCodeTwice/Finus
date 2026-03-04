@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { handleCurrencyChange, handleCurrencyBlur } from "../utils/handleInput"
-import './UserForm.css'
+import './userForm.css'
 import {postIncome, putIncome} from "../api/Income"
 import { validateIncomeForm } from "../utils/ValidateForms";
 import { type Income } from "../types/IncomeType"; 

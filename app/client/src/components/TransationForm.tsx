@@ -1,13 +1,13 @@
-import React, { useState} from "react";
+import { useState} from "react";
 import CsvUpload from "./csvread/CsvUpload";
-import './UserForm.css'
+import './userForm.css'
 import { getUserAccounts} from "../api/Account";
 import { validateTransactionForm } from "../utils/ValidateForms";
 import { postTranscations, putTranscations} from "../api/Transaction";
 import { handleCurrencyChange, handleCurrencyBlur } from "../utils/handleInput";
 import { type Transaction } from "../types/TransactionType";
 import { type Account } from "../types/AccountType";
-import { transactionCategory } from "@/enum/transactionCategory";
+import { transactionCategory } from "@/enum/TransactionCategory";
 
 interface popupProp{
     toggle: () => void;

@@ -1,5 +1,5 @@
-import { accountCategory } from "@/enum/accountCategory";
-import { transactionCategory } from "@/enum/transactionCategory";
+import { accountCategory } from "@/enum/AccountCategory";
+import { transactionCategory } from "@/enum/TransactionCategory";
 
 export function validateAccountForm(name:string, accountType:string, balance: number, csvFile?: File, subtype?: string, interest?: number) {
     let result = false

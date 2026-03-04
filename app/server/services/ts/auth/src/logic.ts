@@ -29,7 +29,7 @@ export async function signup(body: SignupBody, res, pool) {
   const hash = await hashPassword(body.password);
   await createUser({ ...body, pw_hash: hash }, pool);
 
-  res.status(201);
+  res.status(201).json({ ok: true });
 }
 
 export async function login(body: LoginBody, res, pool): void {

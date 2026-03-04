@@ -1,5 +1,4 @@
 //component to show parsing errors
-import React from "react";
 
 interface CsvErrorProps {
   message: string;

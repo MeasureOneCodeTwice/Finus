@@ -1,7 +1,5 @@
 //This displays file name, size, and a remove 
 
-import React from "react";
-
 interface CsvFileProps {
   file: File;
   onRemove: () => void;

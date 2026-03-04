@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import './UserForm.css'
+import './userForm.css'
 import {postUserAccount, putUserAccount} from '../api/Account.ts'
 import { type Account } from "../types/AccountType.ts";
 import { validateAccountForm } from "../utils/ValidateForms.ts";
 import { handleCurrencyChange, handleCurrencyBlur } from "../utils/handleInput.ts";
-import { accountCategory } from "@/enum/accountCategory.ts";
+import { accountCategory } from "@/enum/AccountCategory.ts";
 
 interface popupProp{
     toggle: () => void;
