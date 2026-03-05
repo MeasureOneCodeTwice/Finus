@@ -16,9 +16,17 @@ load_dotenv()
 SECRET_KEY = os.getenv('JWT_SECRET')
 ALGORITHM = 'HS256'
 
+origins = [
+    "http://localhost:8080",
+    "http://localhost:3000",#api gateway
+    "http://127.0.0.1:8080",
+    "http://127.0.0.1:3000",
+    #expand these once deployed
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["origins"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -96,11 +104,14 @@ async def get_savings(period: str, user_id: int = Depends(get_current_user)):
         cursor.execute("""
             SELECT fa.id, fa.balance 
             FROM finus.financialAccount fa
-            JOIN finus.finusAccount_profile fap ON fa.id = fap.financialAccount_id
-            JOIN finus.finusAccount u ON fap.profile_id = u.id
+            JOIN finus.profile_financialAccount pfa ON fa.id = pfa.financialAccount_id
+            JOIN finus.profile p ON pfa.profile_id = p.id
+            JOIN finus.finusAccount_profile uap ON p.id = uap.profile_id
+            JOIN finus.finusAccount u ON uap.account_id = u.id
             WHERE u.id = %s AND fa.type = 'savings'
-        """, (user_id,))
+        """, (user_id,))#coma must be here for this to remain a tuple ;-;
         savings_accounts = cursor.fetchall()
+
 
         if not savings_accounts:
             return HTTPException(status_code=404, detail="No savings accounts found")#this should be visible to users
@@ -230,6 +241,19 @@ async def get_income_flow(period: str = Query(default='w', enum=['w', 'm', 'y'])
         #     ORDER BY t.date
         # """
 
+        # query = """
+        #     SELECT 
+        #         t.amount,
+        #         t.category,
+        #         t.date
+        #     FROM finus.transaction t
+        #     JOIN finus.financialAccount fa ON t.financialAccount_id = fa.id
+        #     JOIN finus.finusAccount_profile fap ON fa.id = fap.account_id
+        #     JOIN finus.finusAccount u ON fap.profile_id = u.id
+        #     WHERE u.id = %s 
+        #         AND t.date BETWEEN %s AND %s
+        #     ORDER BY t.date
+        # """
         query = """
             SELECT 
                 t.amount,
@@ -237,13 +261,15 @@ async def get_income_flow(period: str = Query(default='w', enum=['w', 'm', 'y'])
                 t.date
             FROM finus.transaction t
             JOIN finus.financialAccount fa ON t.financialAccount_id = fa.id
-            JOIN finus.finusAccount_profile fap ON fa.id = fap.financialAccount_id
-            JOIN finus.finusAccount u ON fap.profile_id = u.id
+            JOIN finus.profile_financialAccount pfa ON fa.id = pfa.financialAccount_id
+            JOIN finus.profile p ON pfa.profile_id = p.id
+            JOIN finus.finusAccount_profile uap ON p.id = uap.profile_id
+            JOIN finus.finusAccount u ON uap.account_id = u.id
             WHERE u.id = %s 
                 AND t.date BETWEEN %s AND %s
             ORDER BY t.date
         """
-        cursor.execute(query, (start_date, end_date))
+        cursor.execute(query, (user_id, start_date, end_date))
         transactions = cursor.fetchall()
         
         cursor.close()

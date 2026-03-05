@@ -83,7 +83,7 @@ function App() {
           />
           {session &&
             <Route element={<AppLayout onLogout={handleLogout}/>} >
-              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/dashboard" element={<DashboardPage session = {session}/>} />
             </Route>
           }
           <Route path="*" element={<Navigate to="/" replace />} />

@@ -35,10 +35,11 @@ app.get("/health", (req: express.Request, res: express.Response) => {
 //authenticaion of JWT - returns user id
 export const authenticateJWT = (req: Request) => {
     const authHeader = req.headers.authorization;
+    console.log(req.headers);
     if (!authHeader) {
         throw new Error('Authorization header missing');
     }
-
+    
     const parts = authHeader.split(' ');
     if (parts.length !== 2 || parts[0].toLowerCase() !== 'bearer') {
         throw new Error('Invalid authorization header format');
@@ -47,7 +48,7 @@ export const authenticateJWT = (req: Request) => {
 
     const decoded = jwt.verify(token, JWT_SECRET) as any;
     const userId = decoded.sub
-
+    console.log("user id: " + userId);
     if (!userId) {
         throw new Error('User ID not found in token');
     }
@@ -62,6 +63,7 @@ app.get('/charts/expenses', async (req: express.Request, res: express.Response) 
     
     try {
         const userId = authenticateJWT(req);
+        // console.log("User authenticated with ID:", userId);
         const period = req.query.period as string;
         const connection = await pool.getConnection();
 
@@ -108,8 +110,10 @@ app.get('/charts/expenses', async (req: express.Request, res: express.Response) 
                 SUM(ABS(t.amount)) as total_expenses
             FROM finus.transaction t
             JOIN finus.financialAccount fa ON t.financialAccount_id = fa.id
-            JOIN finus.finusAccount_profile fap ON fa.id = fap.financialAccount_id
-            JOIN finus.finusAccount u ON fap.profile_id = u.id
+            JOIN finus.profile_financialAccount pfa ON fa.id = pfa.financialAccount_id
+            JOIN finus.profile p ON pfa.profile_id = p.id
+            JOIN finus.finusAccount_profile uap ON p.id = uap.profile_id
+            JOIN finus.finusAccount u ON uap.account_id = u.id
             WHERE t.amount < 0 
                 AND u.id = ?
                 AND t.date >= ? 
@@ -140,7 +144,7 @@ app.get('/charts/expenses', async (req: express.Request, res: express.Response) 
             'm': 'Monthly Expenses',
             'y': 'Yearly Expenses'
         };
-        
+        console.log("Found data:", data);
         res.json({
             labels: allLabels,
             datasets: [{

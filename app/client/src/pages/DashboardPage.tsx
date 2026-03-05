@@ -10,6 +10,7 @@ type DashboardPageProps = {
   session?: AuthSession;
 };
 
+
 function DashboardPage({ session }: DashboardPageProps) {
   const glowLeft = <div
     className="
@@ -52,8 +53,8 @@ function DashboardPage({ session }: DashboardPageProps) {
         <AccountCard title="Current Debt" amount="$50,000"/>
         <AccountCard title="Total Savings" amount="$100,000,000"/>
       </section>
-      <DashboardChartSection />
-      <BudgetExpenditureChart />
+      <DashboardChartSection session={session}/>
+      <BudgetExpenditureChart session={session}/>
       <h2 className="text-2xl font-bold mb-4">Recent Transactions</h2>
       <TransactionTable  />
     </section>

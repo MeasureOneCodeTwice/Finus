@@ -39,14 +39,6 @@ TEST_USER_AGE = 22
 TEST_USER_EMAIL = 'j@j.com'
 TEST_USER_PASSWORD = 'pwd'
 
-# def get_db_connection():
-#     try:
-#         connection = mysql.connector.connect(**DB_CONFIG)
-#         return connection
-#     except Error as e:
-#         print(f"Error connecting to db: {e}")
-#         return None
-
 
 FINANCIAL_ACCOUNT_TYPES = ['chequing', 'savings', 'credit_card', 'investment']
 FINANCIAL_ACCOUNT_SUBTYPES = ['RRSP', 'TFSA', 'FHSA', 'RESP', 'RDSP', 'na']
@@ -138,6 +130,7 @@ def create_users_and_profiles(cursor):
     
     if NUM_USERS == 1:
         print('Creating the TEST user John Finus...')
+        uid = 2
         first_name = TEST_USER_F_NAME
         last_name =  TEST_USER_L_NAME
         username = TEST_USER_NAME
@@ -146,9 +139,9 @@ def create_users_and_profiles(cursor):
 
         cursor.execute("""
             INSERT INTO finus.finusAccount 
-            (username, email, first_name, last_name, age)
-            VALUES (%s, %s, %s, %s, %s)
-        """, (username, email, first_name, last_name, age))
+            (id, username, email, first_name, last_name, age)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (uid, username, email, first_name, last_name, age))
         
         user_id = cursor.lastrowid
         user_ids.append(user_id)
@@ -174,6 +167,7 @@ def create_users_and_profiles(cursor):
             INSERT INTO finus.finusAccount_profile (profile_id, account_id)
             VALUES (%s, %s)
         """, (profile_id, user_id))
+
     else:
         for i in range(NUM_USERS):
             first_name = random.choice(FIRST_NAMES)
@@ -307,8 +301,8 @@ def clear_database(cursor):
         'investmentState',
         'investment',
         'finusAccount_profile',
-        'goal',
         'profile_goal',
+        'goal',
         'financialAccount',
         'credentials',
         'finusAccount',
@@ -316,6 +310,7 @@ def clear_database(cursor):
     ]
     
     for table in tables_to_clear:
+        print('Clearing table:', table)
         cursor.execute(f"DELETE FROM finus.{table}")
     
     cursor.execute("ALTER TABLE finus.finusAccount AUTO_INCREMENT = 1")

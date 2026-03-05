@@ -9,7 +9,14 @@ import NoTransactionReport from './NoTransactionReport';
 import { MdOutlineSavings } from "react-icons/md";
 import { MdOutlinePayment } from "react-icons/md";
 import { TrendingDown } from "lucide-react";
-function DashboardChartSection() {
+import type { AuthSession } from '../types/authTypes';
+
+interface DashboardChartSectionProps {
+  session?: AuthSession;
+}
+
+
+function DashboardChartSection({ session }: DashboardChartSectionProps) {
     //Active chart state - this just determines which chart is displayed in the holder - change this later to potentially load up all charts at once if latency is good
     const [activeChart, setActiveChart] = useState<'expenses' | 'savings' | 'income'>('expenses');
   
@@ -23,10 +30,10 @@ function DashboardChartSection() {
     const [isLoading, setIsLoading] = useState(false);
 
     
-    const fetchExpensesData = async () => {
+    const fetchExpensesData = async (token?: string) => {
     setIsLoading(true);
     try {
-      const data = await getTestExpensesData(selectedPeriod);
+      const data = await getTestExpensesData(selectedPeriod, token);
       setExpensesData(data);
     } catch (error) {
       console.error("Failed to fetch expenses data:", error);
@@ -35,10 +42,10 @@ function DashboardChartSection() {
     }
   };
 
-  const fetchSavingsData = async () => {
+  const fetchSavingsData = async (token?: string) => {
     setIsLoading(true);
     try {
-      const data = await getTestSavingsContribData(selectedPeriod);
+      const data = await getTestSavingsContribData(selectedPeriod, token);
       setsavingsData(data);
     } catch (error) {
       console.error("Failed to fetch savings data:", error);
@@ -47,10 +54,10 @@ function DashboardChartSection() {
     }
   };
 
-  const fetchIncomeData = async () => {
+  const fetchIncomeData = async (token?: string) => {
     setIsLoading(true);
     try {
-      const data = await getTestIncomeFlowData(selectedPeriod);
+      const data = await getTestIncomeFlowData(selectedPeriod, token);
       //console.log("Fetched income flow data:", data);
       setIncomeData(data);
     } catch (error) {
@@ -62,12 +69,18 @@ function DashboardChartSection() {
 
 
   useEffect(() => {
+    const token = session?.token;
+    if (!token) {
+      console.log('No token available, cannot fetch data');//handle this gracefully
+      console.log(session);
+      return;
+    }
     switch(activeChart) {
       case 'expenses':
-        fetchExpensesData();
+        fetchExpensesData(token);
         break;
       case 'savings':
-        fetchSavingsData();
+        fetchSavingsData(token);
         break;
       case 'income':
         fetchIncomeData();
@@ -80,10 +93,10 @@ function DashboardChartSection() {
 
 
   //Temporary test data for expenses - delete once API works. This is just to test graph components
-  const getTestExpensesData = async (period: 'w' | 'm' | 'y'): Promise<ChartData<"bar">> => {
+  const getTestExpensesData = async (period: 'w' | 'm' | 'y', token?: string): Promise<ChartData<"bar">> => {
     //Try to reach API first, get synthetic data if fails
     try{
-      const response = await getExpensesChartData(period);
+      const response = await getExpensesChartData(period, token);
       return response;
     }catch(error) {
       console.error("Error fetching expenses chart data:", error);
@@ -100,9 +113,9 @@ function DashboardChartSection() {
   };
 
 
-  const getTestSavingsContribData = async (period: 'w' | 'm' | 'y'): Promise<ChartData<"line">> => {
+  const getTestSavingsContribData = async (period: 'w' | 'm' | 'y', token?: string): Promise<ChartData<"line">> => {
     try{
-      const response = await getSavingsContribChartData(period);
+      const response = await getSavingsContribChartData(period, token);
       return response;
     }catch(error) {
       console.error("Error fetching savings contribution chart data:", error);
@@ -118,9 +131,9 @@ function DashboardChartSection() {
     };
   }
 
-  const getTestIncomeFlowData = async (period: 'w' | 'm' | 'y'): Promise<SankeyData> => {
+  const getTestIncomeFlowData = async (period: 'w' | 'm' | 'y', token?: string): Promise<SankeyData> => {
     try{
-      const response = await getIncomeFlowChartData(period);
+      const response = await getIncomeFlowChartData(period, token);
       //console.log("Received income flow chart data:", response);
       return response;
     }catch(error) {

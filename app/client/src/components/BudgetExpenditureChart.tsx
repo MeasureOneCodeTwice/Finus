@@ -3,7 +3,14 @@ import type { ChartData, ChartOptions } from "chart.js";
 import { useEffect, useState } from "react";
 import { Bar } from "react-chartjs-2";
 import NoBudgetState from "./NoBudgetState";
-function BudgetExpenditureChart() {
+import type { AuthSession } from '../types/authTypes';
+
+
+interface DashboardChartSectionProps {
+  session?: AuthSession;
+}
+
+function BudgetExpenditureChart({ session }: DashboardChartSectionProps) {
   const [chartData, setChartData] = useState<ChartData<"bar"> | null>(null);
   const chartOptions: ChartOptions<"bar"> = {
     responsive: true,

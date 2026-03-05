@@ -14,4 +14,18 @@ const session = loadSession();
 const accessToken = session ? `Bearer ${session.token}` : "";
 instance.defaults.headers.common["Authorization"] = accessToken;
 
+//updates the token on each user request in case it has changed
+instance.interceptors.request.use(
+    (config) => {
+        const session = loadSession();
+        if (session?.token) {
+            config.headers.Authorization = `Bearer ${session.token}`;
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
+
 export { instance };

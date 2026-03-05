@@ -97,8 +97,8 @@ def generate_budget(period: str, user_id: int):
                 'category': category,
                 'type': cat_type,
                 'avg_monthly_spent': round(avg_spent, 2),
-                'monthly_budget': round(monthly_recommended, 2),  # Keep for reference
-                'recommended_budget': round(scaled_recommended, 2),  # Scaled to period
+                'monthly_budget': round(monthly_recommended, 2),
+                'recommended_budget': round(scaled_recommended, 2),
                 'is_essential': cat_type == 'need'
             })
         
@@ -174,13 +174,14 @@ def get_user_transactions(user_id: int, start_date: str, end_date: str):
         SELECT t.*, fa.name as account_name
         FROM finus.transaction t
         JOIN finus.financialAccount fa ON t.financialAccount_id = fa.id
-        JOIN finus.finusAccount_profile fap ON fa.id = fap.financialAccount_id
-        JOIN finus.finusAccount u ON fap.profile_id = u.id
+        JOIN finus.profile_financialAccount pfa ON fa.id = pfa.financialAccount_id
+        JOIN finus.profile p ON pfa.profile_id = p.id
+        JOIN finus.finusAccount_profile uap ON p.id = uap.profile_id
+        JOIN finus.finusAccount u ON uap.account_id = u.id
         WHERE u.id = %s 
             AND t.date BETWEEN %s AND %s
         ORDER BY t.date
     """
-    
     cursor.execute(query, (user_id, start_date, end_date))
     transactions = cursor.fetchall()
     cursor.close()
