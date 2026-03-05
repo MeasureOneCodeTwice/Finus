@@ -227,8 +227,8 @@ def create_transactions(cursor, account_ids):
                 amount = random.randint(-50, -5)
             
             description = random.choice(TRANSACTION_DESCRIPTIONS)
-            sender = random.choice(SENDERS_RECIPIENTS) if amount < 0 else None
-            recipient = random.choice(SENDERS_RECIPIENTS) if amount > 0 else None
+            sender = random.choice(SENDERS_RECIPIENTS) if amount > 0 else None
+            recipient = random.choice(SENDERS_RECIPIENTS) if amount < 0 else None
             
             # random date within the last year
             days_offset = random.randint(0, 365)

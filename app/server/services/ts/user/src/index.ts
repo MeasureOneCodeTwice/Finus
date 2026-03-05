@@ -3,7 +3,7 @@ import { onExit } from "@/hooks.ts";
 import { buildCorsConfig } from "@/corsUtil.ts";
 import { Request, Response, NextFunction } from 'express'
 import express from "express";
-import type { Pool } from "mysql2/promise";
+import type { Pool, RowDataPacket } from "mysql2/promise";
 import mysql from "mysql2/promise";
 import jwt from 'jsonwebtoken'
 
@@ -22,14 +22,26 @@ app.use(express.json());
 app.use(buildCorsConfig());
 
 const server = app.listen(PORT, () => {
-  console.log(`User Service running on port ${PORT}`);
+    console.log(`User Service running on port ${PORT}`);
 });
 onExit(async () => await server.close());
 
 //test endpoint
 app.get("/health", (req: express.Request, res: express.Response) => {
-  res.send("ok");
+    res.send("ok");
 });
+
+
+interface Transaction extends RowDataPacket {
+    id: number;
+    financialAccount_id: string;
+    amount: number;
+    category: string;
+    description: string;
+    sender: string;
+    recipient: string;
+    date: string;
+}
 
 
 //authenticaion of JWT - returns user id
@@ -156,6 +168,50 @@ app.get('/charts/expenses', async (req: express.Request, res: express.Response) 
     } catch (error) {
         console.error('Error fetching expenses chart data:', error);
         res.status(500).json({ error: 'Failed to fetch expenses chart data' });
+    }
+});
+
+//this gets all transactions for now - can be capped to a certain amount in the future when any user reaches over 100k transactions
+app.get('/table/trasactions', async (req: express.Request, res: express.Response) => {
+    try {
+        console.log("Fetching transactions...");
+        const userId = authenticateJWT(req);
+        const connection = await pool.getConnection();
+        const query = `
+            SELECT *
+            FROM finus.transaction t
+            JOIN finus.financialAccount fa ON t.financialAccount_id = fa.id
+            JOIN finus.profile_financialAccount pfa ON fa.id = pfa.financialAccount_id
+            JOIN finus.profile p ON pfa.profile_id = p.id
+            JOIN finus.finusAccount_profile uap ON p.id = uap.profile_id
+            JOIN finus.finusAccount u ON uap.account_id = u.id
+            WHERE u.id = ?
+            ORDER BY t.date DESC
+        `;
+        
+        const [rows] = await connection.query<Transaction[]>(query, [userId]);
+        connection.release();
+        const dataMap = new Map();
+
+        //get first and last names of the user associated with the first transaction
+        let first_name = rows[0]? rows[0].first_name: "";
+        let last_name = rows[0]? rows[0].last_name: "";
+
+        if (Array.isArray(rows)) {
+            rows.forEach((row: any) => {
+                if(!row.sender){//these cases really only appear because of the populator script
+                    row.sender = first_name + " " + last_name;
+                }
+                if (!row.recipient){
+                    row.recipient = first_name + " " + last_name;
+                }
+                console.log(row);
+            });
+        }
+        res.json(rows);
+    } catch (error) {
+        console.error('Error fetching transactions:', error);
+        res.status(500).json({ error: 'Failed to fetch transactions' });
     }
 });
 

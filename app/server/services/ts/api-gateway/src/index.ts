@@ -3,6 +3,7 @@ import { buildCorsConfig } from "@/corsUtil.ts";
 import { onExit } from "@/hooks.ts";
 import express from "express";
 import { createProxyMiddleware } from 'http-proxy-middleware';
+import { create } from "node:domain";
 
 const app = express();
 
@@ -78,6 +79,14 @@ app.use(
     changeOrigin: true,
   })
 );
+
+app.use(
+  createProxyMiddleware({
+    pathFilter: ["/table/trasactions"],
+    target: process.env.USER_SERVICE_ADDR,
+    changeOrigin: true,
+  })
+)
 
 
 app.use(

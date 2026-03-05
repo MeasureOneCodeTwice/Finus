@@ -66,7 +66,6 @@ def generate_budget(period: str, user_id: int):
         )[:10]
         
         budget_categories = []
-        print('about to append categories for budget')
         for category, avg_spent in top_categories:
             cat_type = category_types.get(category, 'want')#default to want if no category is found
             

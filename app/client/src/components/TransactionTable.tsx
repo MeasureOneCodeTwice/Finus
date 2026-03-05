@@ -64,7 +64,7 @@ function TransactionTable() {
             <div className="font-medium text-white">{tx.description || "N/A"}</div>
 
             {/* Category */}
-            <div className="text-gray-300">{tx.category}</div>
+            <div className="text-gray-300">{formatCategoryLabel(tx.category)}</div>
 
             {/* Amount */}
             <div className={`font-semibold ${tx.amount < 0 ? "text-red-400" : "text-green-400"}`}>
@@ -89,4 +89,14 @@ function TransactionTable() {
   ) : null;
   return (transactions && transactions.length === 0 ? noTransactionFound : transactionTable )
 }
+
+//split on underscore, capitalize first letter of each word, then join with space
+function formatCategoryLabel(category: string): string {
+  return category
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+}
+
+
 export default TransactionTable
