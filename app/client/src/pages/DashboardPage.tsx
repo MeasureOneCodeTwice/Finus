@@ -22,6 +22,10 @@ import TransactionTable from "@/components/TransactionTable";
 // import ChartSection from '@/components/DashboardChartSection';
 import DashboardChartSection from "@/components/DashboardChartSection";
 import type { AuthSession } from "./authTypes";
+
+import AccountList from "@/components/AccountList";
+import TransactionList from "@/components/TransactionList";
+
 Chart.register(
   PointElement,
   LineElement,
@@ -81,6 +85,12 @@ function DashboardPage({ session, onLogout }: DashboardPageProps) {
       <DashboardChartSection />
       <h2 className="text-2xl font-bold mb-4">Recent Transactions</h2>
       <TransactionTable />
+
+      <h2 className="text-2xl font-bold mb-4">Account List</h2>
+      <AccountList session={session} />
+
+      <h2 className="text-2xl font-bold mb-4">Transaction List</h2>
+      <TransactionList session={session} />
     </section>
   );
 }

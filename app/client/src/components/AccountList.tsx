@@ -24,7 +24,7 @@ export default function AccountList({ session }: listProp) {
       }
     });
   } catch {
-    alert("Failed to retrieve user accounts");
+    //alert("Failed to retrieve user accounts");
   }
 
   //Adds a account to the list

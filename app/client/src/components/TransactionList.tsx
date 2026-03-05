@@ -27,11 +27,11 @@ export default function TransactionList({ session }: listProp) {
       if (accounts) {
         setUserAccounts(accounts);
       } else {
-        alert("Failed to get accounts");
+        //alert("Failed to get accounts");
       }
     })
     .catch(() => {
-      alert("Failed to get accounts");
+      //alert("Failed to get accounts");
     });
 
   //Try to get the account's transaction from the server
@@ -44,7 +44,7 @@ export default function TransactionList({ session }: listProp) {
         }
       })
       .catch(() => {
-        alert("Failed to get transaction");
+        //alert("Failed to get transaction");
       });
   }
 
