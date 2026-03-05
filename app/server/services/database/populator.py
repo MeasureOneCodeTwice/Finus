@@ -106,7 +106,9 @@ def create_financial_accounts(cursor, profile_ids):
             # randomly assign subtype for savings accounts
             subtype = None
             if acc_type == 'savings' and random.random() > 0.5:
-                subtype = random.choice(FINANCIAL_ACCOUNT_SUBTYPES)
+                subtype = random.choice(FINANCIAL_ACCOUNT_SUBTYPES-['na','loan'])
+            if acc_type == 'credit_card':
+                random.choice(['na','loan'])
             
             cursor.execute("""
                 INSERT INTO finus.financialAccount (id, name, type, balance, value, last_updated, subtype)

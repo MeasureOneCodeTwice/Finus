@@ -71,7 +71,7 @@ app.get('/health', async (req: express.Request, res: express.Response) => {
     res.json(result);
 });
 
-
+//expenses bar chart in user service
 app.use(
   createProxyMiddleware({
     pathFilter: ["/charts/expenses"],
@@ -80,6 +80,7 @@ app.use(
   })
 );
 
+//transactions table in user service
 app.use(
   createProxyMiddleware({
     pathFilter: ["/table/trasactions"],
@@ -88,7 +89,16 @@ app.use(
   })
 )
 
+//snapshot of total values like debt, savings, etc from user service
+app.use(
+  createProxyMiddleware({
+    pathFilter: ["/table/snapshot"],
+    target: process.env.USER_SERVICE_ADDR,
+    changeOrigin: true,
+  })
+);
 
+//savings chart from analytics service
 app.use(
   createProxyMiddleware({
     pathFilter: ["/charts/savings"],
@@ -97,7 +107,7 @@ app.use(
   })
 );
 
-
+//income flow chart from analytics service - this is the sankey chart
 app.use(
   createProxyMiddleware({
     pathFilter: ["/charts/incomeflow"],
@@ -106,7 +116,7 @@ app.use(
   })
 );
 
-
+//budget-expenditure chart from analytics service
 app.use(
   createProxyMiddleware({
     pathFilter: ["/charts/budget-expenditure"],

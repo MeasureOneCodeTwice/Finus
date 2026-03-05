@@ -216,6 +216,123 @@ app.get('/table/trasactions', async (req: express.Request, res: express.Response
 });
 
 
+//gets the following totals as massively aggregated values:
+// total balance - combined sum of all account balances
+// current income - YTD sum of all positive transactions
+// average expenses - YTD average of all negative transactions
+// current debt - sum of all credit_card accounts of subtype 'loan'
+// total savings - sum of all savings accounts
+app.get('/table/snapshot', authenticateJWT, async (req: express.Request, res: express.Response) => {
+    let connection;
+    try {
+        const userId = authenticateJWT(req);
+        if (!userId) {
+            return res.status(401).json({ error: 'User not authenticated' });
+        }
+
+        connection = await pool.getConnection();
+
+        const today = new Date();
+        const ytdStart = new Date(today.getFullYear(), 0, 1);
+        const ytdStartStr = ytdStart.toISOString().slice(0, 10);
+        const todayStr = today.toISOString().slice(0, 10);
+        const monthsPassed = today.getMonth() + 1;
+
+        //single massive query to get all the data - this is apparently more efficient than multiple queries
+        const [results] = await connection.query(`
+            SELECT 
+                -- Total Balance
+                (SELECT COALESCE(SUM(fa.balance), 0)
+                 FROM finus.financialAccount fa
+                 JOIN finus.profile_financialAccount pfa ON fa.id = pfa.financialAccount_id
+                 JOIN finus.profile p ON pfa.profile_id = p.id
+                 JOIN finus.finusAccount_profile uap ON p.id = uap.profile_id
+                 WHERE uap.account_id = ?) as total_balance,
+                
+                -- Current Income (YTD)
+                (SELECT COALESCE(SUM(t.amount), 0)
+                 FROM finus.transaction t
+                 JOIN finus.financialAccount fa ON t.financialAccount_id = fa.id
+                 JOIN finus.profile_financialAccount pfa ON fa.id = pfa.financialAccount_id
+                 JOIN finus.profile p ON pfa.profile_id = p.id
+                 JOIN finus.finusAccount_profile uap ON p.id = uap.profile_id
+                 WHERE uap.account_id = ? 
+                     AND t.amount > 0 
+                     AND t.date BETWEEN ? AND ?) as current_income,
+                
+                -- Total Expenses (YTD)
+                (SELECT COALESCE(SUM(ABS(t.amount)), 0)
+                 FROM finus.transaction t
+                 JOIN finus.financialAccount fa ON t.financialAccount_id = fa.id
+                 JOIN finus.profile_financialAccount pfa ON fa.id = pfa.financialAccount_id
+                 JOIN finus.profile p ON pfa.profile_id = p.id
+                 JOIN finus.finusAccount_profile uap ON p.id = uap.profile_id
+                 WHERE uap.account_id = ? 
+                     AND t.amount < 0 
+                     AND t.date BETWEEN ? AND ?) as total_expenses,
+                
+                -- Transaction Count (for averaging)
+                (SELECT COUNT(*)
+                 FROM finus.transaction t
+                 JOIN finus.financialAccount fa ON t.financialAccount_id = fa.id
+                 JOIN finus.profile_financialAccount pfa ON fa.id = pfa.financialAccount_id
+                 JOIN finus.profile p ON pfa.profile_id = p.id
+                 JOIN finus.finusAccount_profile uap ON p.id = uap.profile_id
+                 WHERE uap.account_id = ? 
+                     AND t.amount < 0 
+                     AND t.date BETWEEN ? AND ?) as transaction_count,
+                
+                -- Current Debt (credit_card with loan subtype)
+                (SELECT COALESCE(SUM(fa.balance), 0)
+                 FROM finus.financialAccount fa
+                 JOIN finus.profile_financialAccount pfa ON fa.id = pfa.financialAccount_id
+                 JOIN finus.profile p ON pfa.profile_id = p.id
+                 JOIN finus.finusAccount_profile uap ON p.id = uap.profile_id
+                 WHERE uap.account_id = ? 
+                     AND fa.type = 'credit_card' 
+                     AND fa.subtype = 'loan') as current_debt,
+                
+                -- Total Savings
+                (SELECT COALESCE(SUM(fa.balance), 0)
+                 FROM finus.financialAccount fa
+                 JOIN finus.profile_financialAccount pfa ON fa.id = pfa.financialAccount_id
+                 JOIN finus.profile p ON pfa.profile_id = p.id
+                 JOIN finus.finusAccount_profile uap ON p.id = uap.profile_id
+                 WHERE uap.account_id = ? 
+                     AND fa.type = 'savings') as total_savings
+        `, [
+            userId, userId, ytdStartStr, todayStr,  // for total_balance and current_income
+            userId, ytdStartStr, todayStr,          // for total_expenses
+            userId, ytdStartStr, todayStr,          // for transaction_count
+            userId,                                 // for current_debt
+            userId                                  // for total_savings
+        ]);
+
+        connection.release();
+
+        const data = (results as any[])[0];
+        const avgMonthlyExpenses = monthsPassed > 0 ? data.total_expenses / monthsPassed : 0;
+
+        const response = {
+            totalBalance: data.total_balance || 0,
+            currentIncome: data.current_income || 0,
+            averageExpenses: Math.round(avgMonthlyExpenses * 100) / 100,
+            currentDebt: data.current_debt || 0,
+            totalSavings: data.total_savings || 0
+        };
+
+        res.json(response);
+
+    } catch (error) {
+        console.error('Error fetching snapshot data:', error);
+        if (connection) {
+            connection.release();
+        }
+        res.status(500).json({ error: 'Failed to fetch snapshot data' });
+    }
+});
+
+
 
 //helper method for making a complete date range
 function generateDateRange(start: Date, end: Date, period: string): string[] {
