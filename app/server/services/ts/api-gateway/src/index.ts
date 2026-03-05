@@ -70,18 +70,7 @@ app.get('/health', async (req: express.Request, res: express.Response) => {
     res.json(result);
 });
 
-// app.get('/charts/expenses', async (req: express.Request, res: express.Response) => {
-//   console.log("Received request for expenses chart data with query:", req.query);
-//   const period = req.query.period as string;
-//   const authHeader = req.headers.authorization;
-//   const response = await fetch(`${process.env.USER_SERVICE_ADDR}/charts/expenses?period=${period}`, {headers: {'Authorization': authHeader || ''}})
-//       .then((res) => res.json())
-//       .catch((err) => {
-//           console.error("Error fetching expenses chart data:", err);
-//           res.status(500).json({ error: "Failed to fetch expenses chart data" });
-//       });
-//   res.json(response);
-// });
+
 app.use(
   createProxyMiddleware({
     pathFilter: ["/charts/expenses"],
@@ -90,20 +79,6 @@ app.use(
   })
 );
 
-
-
-// app.get('/charts/savings', async (req: express.Request, res: express.Response) => {
-//   console.log("Received request for savings chart data with query:", req.query);
-//   const period = req.query.period as string;
-//   const authHeader = req.headers.authorization;
-//   const response = await fetch(`${process.env.ANALYTICS_SERVICE_ADDR}/charts/savings?period=${period}`, {headers: {'Authorization': authHeader || ''}})
-//       .then((res) => res.json())
-//       .catch((err) => {
-//           console.error("Error fetching savings chart data:", err);
-//           res.status(500).json({ error: "Failed to fetch savings chart data" });
-//       });
-//   res.json(response);
-// });
 
 app.use(
   createProxyMiddleware({
@@ -114,24 +89,18 @@ app.use(
 );
 
 
-
-
-// app.get('/charts/incomeflow', async (req: express.Request, res: express.Response) => {
-//   console.log("Received request for income chart data with query:", req.query);
-//   const period = req.query.period as string;
-//   const authHeader = req.headers.authorization;
-//   const response = await fetch(`${process.env.ANALYTICS_SERVICE_ADDR}/charts/incomeflow?period=${period}`, {headers: {'Authorization': authHeader || ''}})
-//       .then((res) => res.json())
-//       .catch((err) => {
-//           console.error("Error fetching income chart data:", err);
-//           res.status(500).json({ error: "Failed to fetch income chart data" });
-//       });
-//   res.json(response);
-// });
-
 app.use(
   createProxyMiddleware({
     pathFilter: ["/charts/incomeflow"],
+    target: process.env.ANALYTICS_SERVICE_ADDR,
+    changeOrigin: true,
+  })
+);
+
+
+app.use(
+  createProxyMiddleware({
+    pathFilter: ["/charts/budget-expenditure"],
     target: process.env.ANALYTICS_SERVICE_ADDR,
     changeOrigin: true,
   })

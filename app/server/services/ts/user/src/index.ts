@@ -35,7 +35,7 @@ app.get("/health", (req: express.Request, res: express.Response) => {
 //authenticaion of JWT - returns user id
 export const authenticateJWT = (req: Request) => {
     const authHeader = req.headers.authorization;
-    console.log(req.headers);
+    //console.log(req.headers);
     if (!authHeader) {
         throw new Error('Authorization header missing');
     }
@@ -48,7 +48,7 @@ export const authenticateJWT = (req: Request) => {
 
     const decoded = jwt.verify(token, JWT_SECRET) as any;
     const userId = decoded.sub
-    console.log("user id: " + userId);
+    //console.log("user id: " + userId);
     if (!userId) {
         throw new Error('User ID not found in token');
     }
@@ -134,7 +134,7 @@ app.get('/charts/expenses', async (req: express.Request, res: express.Response) 
             rows.forEach((row: any) => {
                 dataMap.set(row.label, Number(row.total_expenses));
             });
-            console.log(`Found ${rows.length} expense records`);
+            //console.log(`Found ${rows.length} expense records`);
         }
         
         const data = allLabels.map(label => dataMap.get(label) || 0);
@@ -144,7 +144,7 @@ app.get('/charts/expenses', async (req: express.Request, res: express.Response) 
             'm': 'Monthly Expenses',
             'y': 'Yearly Expenses'
         };
-        console.log("Found data:", data);
+        //console.log("Found data:", data);
         res.json({
             labels: allLabels,
             datasets: [{

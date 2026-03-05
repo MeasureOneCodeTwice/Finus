@@ -57,7 +57,6 @@ def generate_budget(period: str, user_id: int):
         
         #classify categories as needs vs wants - expand on this list if needed in the future -- can also use ML
         category_types = classify_categories(monthly_avg_by_category.keys())
-        
         #calculate proportional budgets for top 10 categories
         total_expenses = sum(monthly_avg_by_category.values())
         top_categories = sorted(
@@ -67,6 +66,7 @@ def generate_budget(period: str, user_id: int):
         )[:10]
         
         budget_categories = []
+        print('about to append categories for budget')
         for category, avg_spent in top_categories:
             cat_type = category_types.get(category, 'want')#default to want if no category is found
             
@@ -86,9 +86,9 @@ def generate_budget(period: str, user_id: int):
             else:
                 monthly_recommended = avg_spent * 0.9 #default 10% reduction to prioritize savings
             
-            if period == 'weekly':
+            if period == 'w':
                 scaled_recommended = monthly_recommended / 4.33
-            elif period == 'monthly':
+            elif period == 'm':
                 scaled_recommended = monthly_recommended
             else:  # yearly
                 scaled_recommended = monthly_recommended * 12
@@ -101,29 +101,10 @@ def generate_budget(period: str, user_id: int):
                 'recommended_budget': round(scaled_recommended, 2),
                 'is_essential': cat_type == 'need'
             })
-        
-        if period == 'weekly':
-            scaled_needs = monthly_needs_budget / 4.33
-            scaled_wants = monthly_wants_budget / 4.33
-            scaled_savings = monthly_savings_budget / 4.33
-        elif period == 'monthly':
-            scaled_needs = monthly_needs_budget
-            scaled_wants = monthly_wants_budget
-            scaled_savings = monthly_savings_budget
-        else:  # yearly
-            scaled_needs = monthly_needs_budget * 12
-            scaled_wants = monthly_wants_budget * 12
-            scaled_savings = monthly_savings_budget * 12
 
         return {
-            'avg_monthly_income': round(avg_monthly_income, 2),
-            'budget_summary': {
-                'needs': round(scaled_needs, 2),
-                'wants': round(scaled_wants, 2),
-                'savings': round(scaled_savings, 2)
-            },
-            'categories': budget_categories,
-            'generated_date': pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')#iso format for date time
+            'budget': budget_categories,
+            'generated_date': pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')#iso format for date time in case we want to cache
         }
          
     except Exception as e:
@@ -191,19 +172,19 @@ def get_user_transactions(user_id: int, start_date: str, end_date: str):
 
 
 
-def get_budget_performance(user_id, budget, period='monthly', reference_date=None):
+def generate_budget_performance(user_id, budget, period='monthly', reference_date=None):
     
     if reference_date is None:
         reference_date = pd.Timestamp.now()
     
     #get boundaries based on calendar
-    if period == 'weekly':
+    if period == 'w':
         #week starts on Sunday
         days_to_sunday = (reference_date.dayofweek + 1) % 7
         period_start = (reference_date - pd.Timedelta(days=days_to_sunday)).normalize()
         period_end = period_start + pd.Timedelta(days=6, hours=23, minutes=59, seconds=59)
         
-    elif period == 'monthly':
+    elif period == 'm':
         #first day of current month
         period_start = pd.Timestamp(reference_date.year, reference_date.month, 1)
         #last day of current month
@@ -228,17 +209,15 @@ def get_budget_performance(user_id, budget, period='monthly', reference_date=Non
     
     #compare with budget
     performance = []
-    for budget_cat in budget['categories']:
-        category = budget_cat['category']
-        budget_amount = budget_cat['recommended_budget']
-        actual = actual_spending.get(category, 0)
+
+    for budget_cat in budget['budget']:
+        # Make sure budget_cat is a dictionary, not a string
+        #print(budget_cat)
+        category = budget_cat.get('category', 'unknown')
+        budget_amount = budget_cat.get('recommended_budget', 0)
         
-        if period == 'weekly':
-            #convert monthly budget to weekly (divide by 4.33)
-            budget_amount = budget_amount / 4.33
-        elif period == 'yearly':
-            #convert monthly budget to yearly (multiply by 12)
-            budget_amount = budget_amount * 12
+        # Use the already scaled budget amount
+        actual = actual_spending.get(category, 0)
         
         variance = actual - budget_amount
         percent_used = (actual / budget_amount * 100) if budget_amount > 0 else 0
@@ -251,20 +230,12 @@ def get_budget_performance(user_id, budget, period='monthly', reference_date=Non
             'percent_used': round(percent_used, 1),
             'status': 'overspent' if variance > 0 else 'under_budget' if variance < 0 else 'on_track'
         })
+
     
     #sort by highest actual spending
     performance.sort(key=lambda x: x['actual'], reverse=True)
-    
     return {
-        'period': {
-            'type': period,
-            'start': start_str,
-            'end': end_str
-        },
-        'performance': performance,
-        'summary': {
-            'total_budget': round(sum(p['budget'] for p in performance), 2),
-            'total_actual': round(sum(p['actual'] for p in performance), 2),
-            'overall_status': 'overspent' if sum(p['actual'] for p in performance) > sum(p['budget'] for p in performance) else 'under_budget'
-        }
+        'categories': [p['category'] for p in performance],
+        'budgetAmounts': [p['budget'] for p in performance],
+        'actualAmounts': [p['actual'] for p in performance],
     }

@@ -1,4 +1,4 @@
-import { getTransactions } from '@/api/ManagerAPI';
+import { getTransactions } from '@/api/DashboardAPI';
 import type { Transaction } from '@/types/Transaction';
 import { useEffect, useState } from 'react'
 import { AiOutlineTransaction } from "react-icons/ai";

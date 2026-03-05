@@ -5,8 +5,7 @@ import pandas as pd
 import uvicorn
 import os
 import mysql.connector as mysql
-# from src.budget import generate_budget, generate_budget_performance
-import src.budget
+import src.budget as budget_module
 from dotenv import load_dotenv
 import jwt
 
@@ -231,29 +230,6 @@ async def get_income_flow(period: str = Query(default='w', enum=['w', 'm', 'y'])
         start_date, _, _, _= periodCalc(period, end_date)
         
         # get transactions for the period and group by category
-        # query = """
-        #     SELECT 
-        #         t.amount,
-        #         t.category,
-        #         t.date
-        #     FROM finus.transaction t
-        #     WHERE t.date BETWEEN %s AND %s
-        #     ORDER BY t.date
-        # """
-
-        # query = """
-        #     SELECT 
-        #         t.amount,
-        #         t.category,
-        #         t.date
-        #     FROM finus.transaction t
-        #     JOIN finus.financialAccount fa ON t.financialAccount_id = fa.id
-        #     JOIN finus.finusAccount_profile fap ON fa.id = fap.account_id
-        #     JOIN finus.finusAccount u ON fap.profile_id = u.id
-        #     WHERE u.id = %s 
-        #         AND t.date BETWEEN %s AND %s
-        #     ORDER BY t.date
-        # """
         query = """
             SELECT 
                 t.amount,
@@ -350,18 +326,17 @@ async def get_income_flow(period: str = Query(default='w', enum=['w', 'm', 'y'])
         raise HTTPException(status_code=500, detail=f"Error generating income flow: {str(e)}")
 
 
-
-@app.get
+#this will calcualte a budget, and then pass it into performance calculaiton function to generate all the needed values for the chart.
+#there are a lot of additional values that could be included, but this is the bare minimum for now
+@app.get('/charts/budget-expenditure')
 def get_budget(period: str = Query(default='w', enum=['w', 'm', 'y']), user_id: int = Depends(get_current_user)):
     try:
-        budget = generate_budget(user_id)
-        performance = generate_budget_performance(user_id, budget, period)
-        
-        return {
-            'budget': budget,
-            'performance': performance
-        }
+        budget = budget_module.generate_budget(period, user_id)
+        performance = budget_module.generate_budget_performance(user_id, budget, period)
+        #print('made performance{}'.format(performance))
+        return performance
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=500, detail=str(e))
 
 

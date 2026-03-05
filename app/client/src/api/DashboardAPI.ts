@@ -2,6 +2,8 @@ import type { ChartData } from "chart.js";
 import type { SankeyData } from 'recharts/types/chart/Sankey';
 import type { Transaction } from "@/types/Transaction";
 import { instance } from "./config";
+import type { BudgetWithExpenditure } from "@/types/BudgetWithExpenditure";
+import { budgetsWithExpenditure } from "@/utils/fakeData";
 
 
 
@@ -106,19 +108,45 @@ async function getTransactions(): Promise<Transaction[]> {
 
 //API for calling for various charts below
 
+// Budget with actual expenditure and proposed budgets - returns category, budgetAmount, actualAmount
+async function getBudgetWithExpenditure(period: string): Promise<BudgetWithExpenditure[]> {
+    try {
+        const response = await instance.get(`/charts/budget-expenditure?period=${period}`);
+        if (response.status !== 200) {
+            throw new Error(`Failed to fetch budget with actual expenditure: ${response.statusText}`);
+        }
+        
+        const categories = response.data.categories || [];
+        const budgetAmounts = response.data.budgetAmounts || [];
+        const actualAmounts = response.data.actualAmounts || [];
+        const output: BudgetWithExpenditure[] = [];
+
+        for (let i = 0; i < categories.length; i++) {
+            output.push({
+                id: `budget-${i}-${Date.now()}`, // This will be the same for all items if called once
+                category: categories[i],
+                budgetAmount: budgetAmounts[i],
+                actualAmount: actualAmounts[i]
+            });
+        }
+
+        return output;
+
+    } catch (error) {
+        console.error("Error fetching budget with actual expenditure:", error);
+        throw error;
+    };
+}
+
+
 // Expenses over time chart
 // Accepted time periods are "w" for weekly, "m" for monthly, and "y" for yearly - the backend will handle the units
-async function getExpensesChartData(period: string, token?: string): Promise<ChartData<"bar">> {
+async function getExpensesChartData(period: string): Promise<ChartData<"bar">> {
     try {
         if (!["w", "m", "y"].includes(period)) {
             throw new Error("Invalid period. Must be 'weekly', 'monthly', or 'yearly'.");
         }
-        const headers: any = {};
-        if (token) {
-            headers.Authorization = `Bearer ${token}`;
-        }
-        
-        const response = await instance.get(`/charts/expenses?period=${period}`, { headers });
+        const response = await instance.get(`/charts/expenses?period=${period}`);
         if (response.status !== 200) {
             throw new Error(`Failed to fetch expenses chart data: ${response.statusText}`);
         }
@@ -141,16 +169,12 @@ async function getExpensesChartData(period: string, token?: string): Promise<Cha
 
 
 // Savings contribution chart
-async function getSavingsContribChartData(period: string, token?: string): Promise<ChartData<"line">> {
+async function getSavingsContribChartData(period: string): Promise<ChartData<"line">> {
     try {
         if (!["w", "m", "y"].includes(period)) {
             throw new Error("Invalid period. Must be 'weekly', 'monthly', or 'yearly'.");
         }
-        const headers: any = {};
-        if (token) {
-            headers.Authorization = `Bearer ${token}`;
-        }
-        const response = await instance.get(`/charts/savings?period=${period}`, { headers });
+        const response = await instance.get(`/charts/savings?period=${period}`);
         if (response.status !== 200) {
             throw new Error(`Failed to fetch savings contribution chart data: ${response.statusText}`);
         }
@@ -173,16 +197,12 @@ async function getSavingsContribChartData(period: string, token?: string): Promi
 
 
 // Income flow - sankey chart data
-async function getIncomeFlowChartData(period: string, token?: string): Promise<SankeyData> {
+async function getIncomeFlowChartData(period: string): Promise<SankeyData> {
     try {
         if (!["w", "m", "y"].includes(period)) {
             throw new Error("Invalid period. Must be 'weekly', 'monthly', or 'yearly'.");
         }
-        const headers: any = {};
-        if (token) {
-            headers.Authorization = `Bearer ${token}`;
-        }
-        const response = await instance.get(`/charts/incomeflow?period=${period}`, { headers });
+        const response = await instance.get(`/charts/incomeflow?period=${period}`);
         if (response.status !== 200) {
             throw new Error(`Failed to fetch income flow chart data: ${response.statusText}`);
         }
@@ -195,6 +215,7 @@ async function getIncomeFlowChartData(period: string, token?: string): Promise<S
 
 
 export {
+    getBudgetWithExpenditure,
     getTransactions,
     getExpensesChartData,
     getSavingsContribChartData,

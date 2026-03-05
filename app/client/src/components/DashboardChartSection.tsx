@@ -2,21 +2,16 @@ import { useEffect, useState } from 'react'
 import { Line, Bar } from 'react-chartjs-2';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import SankeyChart from '@/components/SankeyChart';
-import { getExpensesChartData, getSavingsContribChartData, getIncomeFlowChartData } from '@/api/ManagerAPI';
+import { getExpensesChartData, getSavingsContribChartData, getIncomeFlowChartData } from '@/api/DashboardAPI';
 import type { SankeyData } from 'recharts/types/chart/Sankey';
 import type { ChartData, ChartOptions } from 'chart.js';
 import NoTransactionReport from './NoTransactionReport';
 import { MdOutlineSavings } from "react-icons/md";
 import { MdOutlinePayment } from "react-icons/md";
 import { TrendingDown } from "lucide-react";
-import type { AuthSession } from '../types/authTypes';
-
-interface DashboardChartSectionProps {
-  session?: AuthSession;
-}
 
 
-function DashboardChartSection({ session }: DashboardChartSectionProps) {
+function DashboardChartSection() {
     //Active chart state - this just determines which chart is displayed in the holder - change this later to potentially load up all charts at once if latency is good
     const [activeChart, setActiveChart] = useState<'expenses' | 'savings' | 'income'>('expenses');
   
@@ -30,10 +25,10 @@ function DashboardChartSection({ session }: DashboardChartSectionProps) {
     const [isLoading, setIsLoading] = useState(false);
 
     
-    const fetchExpensesData = async (token?: string) => {
+    const fetchExpensesData = async () => {
     setIsLoading(true);
     try {
-      const data = await getTestExpensesData(selectedPeriod, token);
+      const data = await getTestExpensesData(selectedPeriod);
       setExpensesData(data);
     } catch (error) {
       console.error("Failed to fetch expenses data:", error);
@@ -42,10 +37,10 @@ function DashboardChartSection({ session }: DashboardChartSectionProps) {
     }
   };
 
-  const fetchSavingsData = async (token?: string) => {
+  const fetchSavingsData = async () => {
     setIsLoading(true);
     try {
-      const data = await getTestSavingsContribData(selectedPeriod, token);
+      const data = await getTestSavingsContribData(selectedPeriod);
       setsavingsData(data);
     } catch (error) {
       console.error("Failed to fetch savings data:", error);
@@ -54,10 +49,10 @@ function DashboardChartSection({ session }: DashboardChartSectionProps) {
     }
   };
 
-  const fetchIncomeData = async (token?: string) => {
+  const fetchIncomeData = async () => {
     setIsLoading(true);
     try {
-      const data = await getTestIncomeFlowData(selectedPeriod, token);
+      const data = await getTestIncomeFlowData(selectedPeriod);
       //console.log("Fetched income flow data:", data);
       setIncomeData(data);
     } catch (error) {
@@ -69,18 +64,18 @@ function DashboardChartSection({ session }: DashboardChartSectionProps) {
 
 
   useEffect(() => {
-    const token = session?.token;
-    if (!token) {
-      console.log('No token available, cannot fetch data');//handle this gracefully
-      console.log(session);
-      return;
-    }
+    // const token = session?.token;
+    // if (!token) {
+    //   console.log('No token available, cannot fetch data');//handle this gracefully
+    //   console.log(session);
+    //   return;
+    // }
     switch(activeChart) {
       case 'expenses':
-        fetchExpensesData(token);
+        fetchExpensesData();
         break;
       case 'savings':
-        fetchSavingsData(token);
+        fetchSavingsData();
         break;
       case 'income':
         fetchIncomeData();
@@ -93,10 +88,10 @@ function DashboardChartSection({ session }: DashboardChartSectionProps) {
 
 
   //Temporary test data for expenses - delete once API works. This is just to test graph components
-  const getTestExpensesData = async (period: 'w' | 'm' | 'y', token?: string): Promise<ChartData<"bar">> => {
+  const getTestExpensesData = async (period: 'w' | 'm' | 'y'): Promise<ChartData<"bar">> => {
     //Try to reach API first, get synthetic data if fails
     try{
-      const response = await getExpensesChartData(period, token);
+      const response = await getExpensesChartData(period);
       return response;
     }catch(error) {
       console.error("Error fetching expenses chart data:", error);
@@ -113,9 +108,9 @@ function DashboardChartSection({ session }: DashboardChartSectionProps) {
   };
 
 
-  const getTestSavingsContribData = async (period: 'w' | 'm' | 'y', token?: string): Promise<ChartData<"line">> => {
+  const getTestSavingsContribData = async (period: 'w' | 'm' | 'y'): Promise<ChartData<"line">> => {
     try{
-      const response = await getSavingsContribChartData(period, token);
+      const response = await getSavingsContribChartData(period);
       return response;
     }catch(error) {
       console.error("Error fetching savings contribution chart data:", error);
@@ -131,9 +126,9 @@ function DashboardChartSection({ session }: DashboardChartSectionProps) {
     };
   }
 
-  const getTestIncomeFlowData = async (period: 'w' | 'm' | 'y', token?: string): Promise<SankeyData> => {
+  const getTestIncomeFlowData = async (period: 'w' | 'm' | 'y'): Promise<SankeyData> => {
     try{
-      const response = await getIncomeFlowChartData(period, token);
+      const response = await getIncomeFlowChartData(period);
       //console.log("Received income flow chart data:", response);
       return response;
     }catch(error) {
