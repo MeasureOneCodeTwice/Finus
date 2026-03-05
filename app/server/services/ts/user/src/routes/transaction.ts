@@ -82,8 +82,23 @@ transactionsRouter.post(
         return res.status(400).json({ error: "Invalid request payload" });
       }
 
+      // expected shape of a validated CSV row
+      interface CsvRow {
+        amount: number | null;
+        description: string | null;
+        sender?: string | null;
+        recipient?: string | null;
+        date: string | null;
+        category?: string | null;
+        errors: string[];
+      }
+
       const validRows = transactions.filter(
-        (t: unknown) => t.errors?.length === 0,
+        (t: unknown): t is CsvRow =>
+          typeof t === "object" &&
+          t !== null &&
+          Array.isArray((t as { errors?: unknown }).errors) &&
+          (t as { errors: unknown[] }).errors.length === 0,
       );
 
       if (validRows.length === 0) {
@@ -100,7 +115,7 @@ transactionsRouter.post(
         for (const row of validRows) {
           await connection.query(
             `INSERT INTO transaction (financialAccount_id, amount, description, sender, recipient, date, category)
-           VALUES (?, ?, ?, ?, ?, ?, ?)`,
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [
               financialAccount_id,
               row.amount,
