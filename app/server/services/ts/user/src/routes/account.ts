@@ -19,8 +19,8 @@ accountsRouter.post("/", async (req: Request, res: Response) => {
     const last_updated = new Date().toISOString();
 
     const [result] = await db.query<ResultSetHeader>(
-      `INSERT INTO financialAccount (name, type, balance, value, last_updated subtype)
-       VALUES (?, ?, ?, ?, ?)`,
+      `INSERT INTO financialAccount (name, type, balance, value, last_updated, subtype)
+       VALUES (?, ?, ?, ?, ?, ?)`,
       [name, type, balance, value, last_updated, subtype ?? null],
     );
 
@@ -55,8 +55,8 @@ accountsRouter.put("/", async (req: Request, res: Response) => {
 
     await db.query<ResultSetHeader>(
       `UPDATE financialAccount 
-      SET (name = ?, type = ?, balence = ?, value = ?, last_updated = ?, subtype = ?)
-      WHERE id= ?`,
+      SET (name = ?, type = ?, balance = ?, value = ?, last_updated = ?, subtype = ?)
+      WHERE id = ?`,
       [name, type, balance, value, last_updated, subtype ?? null, id],
     );
 
@@ -79,6 +79,8 @@ accountsRouter.delete("/", async (req: Request, res: Response) => {
       WHERE id=?`,
       [id],
     );
+
+    res.json({ message: "Account successfully deleted" });
   } catch (err) {
     console.error("Failed to delete user's account", err);
     res.status(500).json({ error: "Failed to delete user's account" });
