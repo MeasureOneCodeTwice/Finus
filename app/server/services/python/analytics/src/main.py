@@ -1,13 +1,19 @@
-from fastapi import FastAPI, HTTPException, Query
-from pydantic import BaseModel
+from typing import Optional
+from fastapi import FastAPI, HTTPException, Header, Query, Depends
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
-import numpy as np
 import uvicorn
 import os
 import mysql.connector as mysql
+from budget import generate_budget, generate_budget_performance
+from dotenv import load_dotenv
+from jose import JWTError, jwt
+
 
 app = FastAPI()
+load_dotenv()
+SECRET_KEY = os.getenv('JWT_SECRET')
+ALGORITHM = 'HS256'
 
 app.add_middleware(
     CORSMiddleware,
@@ -19,11 +25,35 @@ app.add_middleware(
 
 def get_db_connection():
     return mysql.connect(
-        host=os.getenv("MYSQL_HOST", "database"),
-        user='root',#os.getenv("MYSQL_USER", "finus_app"),
-        password=os.getenv("MYSQL_PASSWORD", "dummypw"),
-        database=os.getenv("DB_NAME", "finus")
+        host=os.getenv("MYSQL_HOST"),
+        user=os.getenv("MYSQL_USER"),
+        password=os.getenv("MYSQL_PASSWORD"),
+        database=os.getenv("DB_NAME")
     )
+
+#helper method to extract user_id from JWT token
+async def get_current_user(authorization: Optional[str] = Header(None)):
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Authorization header missing")
+    
+    try:
+        scheme, token = authorization.split()
+        if scheme.lower() != 'bearer':
+            raise HTTPException(status_code=401, detail="Invalid authentication scheme")
+        
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = payload.get('sub') or payload.get('user_id') or payload.get('id')
+        
+        if not user_id:
+            raise HTTPException(status_code=401, detail="User ID not found in token")
+        
+        return int(user_id)
+        
+    except ValueError:
+        raise HTTPException(status_code=401, detail="Invalid authorization header format")
+    except JWTError as e:
+        raise HTTPException(status_code=401, detail=f"Invalid token: {str(e)}")
+
 
 
 # test endpoint
@@ -272,8 +302,6 @@ async def get_income_flow(period: str = Query(default='w', enum=['w', 'm', 'y'])
                 'value': int(total_expenses - total_income)
             })
         
-        #print(f'Sending out sankey with {len(nodes_list)} nodes and {len(links)} links')
-
         return {
             'nodes': [{'name': node} for node in nodes_list],
             'links': links
@@ -285,86 +313,21 @@ async def get_income_flow(period: str = Query(default='w', enum=['w', 'm', 'y'])
 
 
 
-@app.get('/charts/incomeflow-synth')
-async def get_income_flow_synth(period: str = Query(default='w', enum=['w', 'm', 'y'])):
-    NUM_R_D = 5
-    NUM_R_C = 10
-
-    transaction_categories_pos = ['salary', 'e-transfer', 'cash']
-    transaction_categories_neg = ['food', 'fuel', 'mortgage', 'entertainment', 'tax']
-    transactions = []
-    date_standard = pd.Timestamp.today()
-    for category in transaction_categories_pos:
-        for i in range(np.random.randint(1, NUM_R_D)):
-            transactions.append({'category': category, 'value': np.random.randint(1000, 5000), 'date' : f'{date_standard.year}-{np.random.randint(1, 13):02d}-{np.random.randint(1, 29):02d}'})
-    for category in transaction_categories_neg:
-        for i in range(np.random.randint(1, NUM_R_C)):
-            transactions.append({'category': category, 'value': np.random.randint(-500, -1), 'date' : f'{date_standard.year}-{np.random.randint(1, 13):02d}-{np.random.randint(1, 29):02d}'})
-
-    df = pd.DataFrame(transactions)
-    df['date'] = pd.to_datetime(df['date'])
-    
-    target_period = ''
-    if period == 'w':
-        target_period = 'W'
-    elif period == 'm':
-        target_period = 'M'
-    elif period == 'y':
-        target_period = 'Y'
-    df['period'] = df['date'].dt.to_period(target_period)
-    df_agg = df.groupby(['category']).agg({'value': 'sum'}).reset_index()
-
-    total_income = df_agg[df_agg['value']>0]['value'].sum()
-    total_expenses = abs(df_agg[df_agg['value']<0]['value'].sum())
-
-    node_set = set()
-    node_set.add('total income')
-    
-    for _, row in df_agg.iterrows():
-        node_set.add(row['category'])
-    
-    if total_income > total_expenses:
-        node_set.add('unspent')
-    elif total_expenses > total_income:
-        node_set.add('overspent')
-        node_set.add('savings')
-    
-    nodes_list = list(node_set)
-    node_to_index = {node: idx for idx, node in enumerate(nodes_list)}
-
-    links = []
-    
-    for _, row in df_agg[df_agg['value'] > 0].iterrows():
-        links.append({
-            'source': node_to_index[row['category']],
-            'target': node_to_index['total income'],
-            'value': int(row['value'])
-        })
-    
-    for _, row in df_agg[df_agg['value'] < 0].iterrows():
-        links.append({
-            'source': node_to_index['total income'],
-            'target': node_to_index[row['category']],
-            'value': int(abs(row['value']))
-        })
-    
-    if total_income > total_expenses:
-        links.append({
-            'source': node_to_index['total income'],
-            'target': node_to_index['unspent'],
-            'value': int(total_income - total_expenses)
-        })
-    elif total_expenses > total_income:
-        links.append({
-            'source': node_to_index['savings'],
-            'target': node_to_index['overspent'],
-            'value': int(total_expenses - total_income)
-        })
-
-    return {
-        'nodes': [{'name': node} for node in nodes_list],
-        'links': links
+@app.get
+def get_budget(period: str = Query(default='w', enum=['w', 'm', 'y']), user_id: int = Depends(get_current_user)):
+    try:
+        budget = generate_budget(user_id)
+        performance = generate_budget_performance(user_id, budget, period)
+        
+        return {
+            'budget': budget,
+            'performance': performance
         }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
