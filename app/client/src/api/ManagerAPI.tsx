@@ -127,7 +127,7 @@ async function getExpensesChartData(period: string): Promise<ChartData<"bar">> {
       );
     }
     const response = await axios.get(
-      `${BASE_URL}/charts/expenses?period=${period}`,
+      `${BASE_URL}/api/charts/expenses?period=${period}`,
     );
     if (response.status !== 200) {
       throw new Error(
@@ -163,7 +163,7 @@ async function getSavingsContribChartData(
       );
     }
     const response = await axios.get(
-      `${BASE_URL}/charts/savings?period=${period}`,
+      `${BASE_URL}/api/charts/savings?period=${period}`,
     );
     if (response.status !== 200) {
       throw new Error(
@@ -197,7 +197,7 @@ async function getIncomeFlowChartData(period: string): Promise<SankeyData> {
       );
     }
     const response = await axios.get(
-      `${BASE_URL}/charts/incomeflow?period=${period}`,
+      `${BASE_URL}/api/charts/incomeflow?period=${period}`,
     );
     if (response.status !== 200) {
       throw new Error(

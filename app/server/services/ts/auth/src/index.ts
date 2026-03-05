@@ -10,7 +10,7 @@ import { getConnectionPool } from "@/sqlUtil";
 const pool = getConnectionPool();
 const app = express();
 app.use(express.json());
-app.use(buildCorsConfig(undefined));
+app.use(buildCorsConfig());
 
 app.post("/signup", async (req, res) => {
   let body: SignupBody;

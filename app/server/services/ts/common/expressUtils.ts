@@ -1,7 +1,7 @@
 import cors from "cors";
 
 const defaultMethods = ["GET", "POST", "PUT", "DELETE", "OPTIONS"];
-const defaultOrigins = ["http://localhost:80", "http://localhost:8080"];
+const defaultOrigins = ["http://localhost", "http://localhost:8080"];
 export function buildCorsConfig(opts?: {
   origins?: string | string[];
   methods?: string[];
