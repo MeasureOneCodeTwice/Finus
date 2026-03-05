@@ -3,8 +3,13 @@ import { getUserAccounts } from "../api/Account";
 import { type Account } from "../types/AccountType";
 import AccountListCard from "./AccountListCard";
 import AccountPopup from "./AccountForm";
+import type { AuthSession } from "@/pages/authTypes";
 
-export default function AccountList() {
+interface listProp {
+  session: AuthSession;
+}
+
+export default function AccountList({ session }: listProp) {
   //Stores a lits of the user's account
   const [userAccounts, setUserAccounts] = useState<Account[]>([]);
 
@@ -12,7 +17,7 @@ export default function AccountList() {
 
   //Try to get the accounts from the server
   try {
-    getUserAccounts().then((accounts) => {
+    getUserAccounts(session).then((accounts) => {
       //Determine if we acquired the accounts
       if (accounts) {
         setUserAccounts(accounts);
@@ -44,6 +49,7 @@ export default function AccountList() {
         <div>
           {userAccounts.map((account) => (
             <AccountListCard
+              session={session}
               account={account}
               setAccount={addAccount}
               removeAccount={removeAccount}
@@ -57,7 +63,12 @@ export default function AccountList() {
       </div>
 
       {seen ? (
-        <AccountPopup toggle={toggle} addAccount={addAccount} edit={false} />
+        <AccountPopup
+          toggle={toggle}
+          session={session}
+          addAccount={addAccount}
+          edit={false}
+        />
       ) : null}
     </>
   );

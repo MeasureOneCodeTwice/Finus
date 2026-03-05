@@ -1,11 +1,13 @@
+import type { AuthSession } from "@/pages/authTypes";
 import type { updateResponse } from "../types/responseTypes";
-import { type Transaction } from "../types/TransactionType";
+import { type Transaction } from "../types/Transaction";
 
 const requestUrl = "http://localhost:3000/api/transacitons";
 
 //Sends a GET request to get the list of user transactions for the account
 export async function getTransactions(
-  account_id: number,
+  session: AuthSession,
+  account_id: string,
 ): Promise<Transaction[]> {
   try {
     //Put as object to convert to json when sent in the body
@@ -13,7 +15,7 @@ export async function getTransactions(
 
     const response = await fetch(requestUrl, {
       method: "GET",
-      credentials: "include",
+      headers: { Authorization: `Bearer ${session.token}` },
       body: JSON.stringify(content),
     });
 
@@ -31,6 +33,7 @@ export async function getTransactions(
 
 //Can send multiple transactions in a push request
 export async function postTranscations(
+  session: AuthSession,
   trans: Transaction[],
 ): Promise<updateResponse[]> {
   try {
@@ -38,8 +41,8 @@ export async function postTranscations(
       method: "POST",
       headers: {
         "content-type": "application/json",
+        Authorization: `Bearer ${session.token}`,
       },
-      credentials: "include",
       body: JSON.stringify(trans),
     });
 
@@ -57,14 +60,17 @@ export async function postTranscations(
   }
 }
 
-export async function putTranscations(trans: Transaction): Promise<boolean> {
+export async function putTranscations(
+  session: AuthSession,
+  trans: Transaction,
+): Promise<boolean> {
   try {
     const response = await fetch(requestUrl, {
       method: "PUT",
       headers: {
         "content-type": "application/json",
+        Authorization: `Bearer ${session.token}`,
       },
-      credentials: "include",
       body: JSON.stringify(trans),
     });
 
@@ -82,7 +88,10 @@ export async function putTranscations(trans: Transaction): Promise<boolean> {
   }
 }
 
-export async function deleteTransaction(selectedTransaction: Transaction) {
+export async function deleteTransaction(
+  session: AuthSession,
+  selectedTransaction: Transaction,
+) {
   try {
     const content = JSON.stringify({
       id: selectedTransaction.id,
@@ -93,8 +102,8 @@ export async function deleteTransaction(selectedTransaction: Transaction) {
       method: "DELETE",
       headers: {
         "content-type": "application/json",
+        Authorization: `Bearer ${session.token}`,
       },
-      credentials: "include",
       body: content,
     });
 

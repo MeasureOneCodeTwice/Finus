@@ -1,16 +1,19 @@
 import { useState } from "react";
 import { deleteTransaction } from "../api/Transaction";
-import { type Transaction } from "../types/TransactionType";
+import { type Transaction } from "../types/Transaction";
 import TransactionPopup from "./TransationForm";
+import type { AuthSession } from "@/pages/authTypes";
 
 interface cardProp {
   transaction: Transaction;
+  session: AuthSession;
   setTransaction: (editedTransaction: Transaction) => void;
   removeTransaction: (removeTransaction: Transaction) => void;
 }
 
 export default function Card({
   transaction,
+  session,
   setTransaction,
   removeTransaction,
 }: cardProp) {
@@ -24,7 +27,7 @@ export default function Card({
   const deleteTrans = () => {
     try {
       //Send a request to delete account's transaction
-      deleteTransaction(transaction).then((result) => {
+      deleteTransaction(session, transaction).then((result) => {
         //Sucessfully deleted transaction
         if (result) {
           removeTransaction(transaction);
@@ -54,6 +57,7 @@ export default function Card({
       {seen ? (
         <TransactionPopup
           toggle={toggle}
+          session={session}
           edit={true}
           setTransaction={setTransaction}
         />

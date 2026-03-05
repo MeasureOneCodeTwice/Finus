@@ -2,14 +2,21 @@ import { deleteUserAccount } from "../api/Account.ts";
 import { useState } from "react";
 import AccountPopup from "./AccountForm.tsx";
 import { type Account } from "../types/AccountType.ts";
+import type { AuthSession } from "@/pages/authTypes.ts";
 
 interface cardProp {
   account: Account;
+  session: AuthSession;
   setAccount: (editAccount: Account) => void;
   removeAccount: (removeAccount: Account) => void;
 }
 
-export default function Card({ account, setAccount, removeAccount }: cardProp) {
+export default function Card({
+  account,
+  session,
+  setAccount,
+  removeAccount,
+}: cardProp) {
   //Stores the value that toggles thhe account popup form
   const [seen, setSeen] = useState(false);
 
@@ -21,7 +28,7 @@ export default function Card({ account, setAccount, removeAccount }: cardProp) {
   const deleteAccount = () => {
     try {
       //Send a request to delete user account
-      deleteUserAccount(account).then((result) => {
+      deleteUserAccount(session, account).then((result) => {
         //Sucessfully deleted account
         if (result) {
           removeAccount(account);
@@ -49,7 +56,12 @@ export default function Card({ account, setAccount, removeAccount }: cardProp) {
         </div>
       </div>
       {seen ? (
-        <AccountPopup toggle={toggle} setAccount={setAccount} edit={true} />
+        <AccountPopup
+          toggle={toggle}
+          session={session}
+          setAccount={setAccount}
+          edit={true}
+        />
       ) : null}
     </>
   );

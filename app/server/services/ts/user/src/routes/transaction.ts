@@ -18,11 +18,12 @@ transactionsRouter.post("/", async (req: Request, res: Response) => {
       sender,
       recipient,
       date,
+      category,
     } = req.body;
 
     const [result] = await db.query<ResultSetHeader>(
-      `INSERT INTO transaction (financialAccount_id, amount, description, sender, recipient, date)
-       VALUES (?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO transaction (financialAccount_id, amount, description, sender, recipient, date, category )
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
         financialAccount_id,
         amount,
@@ -30,6 +31,7 @@ transactionsRouter.post("/", async (req: Request, res: Response) => {
         sender ?? null,
         recipient ?? null,
         date,
+        category ?? null,
       ],
     );
 
@@ -97,8 +99,8 @@ transactionsRouter.post(
 
         for (const row of validRows) {
           await connection.query(
-            `INSERT INTO transaction (financialAccount_id, amount, description, sender, recipient, date)
-           VALUES (?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO transaction (financialAccount_id, amount, description, sender, recipient, date, category)
+           VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [
               financialAccount_id,
               row.amount,
@@ -106,6 +108,7 @@ transactionsRouter.post(
               row.sender ?? null,
               row.recipient ?? null,
               row.date,
+              row.category ?? "Uncategorized",
             ],
           );
         }

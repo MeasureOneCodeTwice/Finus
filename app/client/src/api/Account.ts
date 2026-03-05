@@ -1,15 +1,18 @@
 import type { updateResponse } from "../types/responseTypes";
 import type { Account } from "../types/AccountType";
+import type { AuthSession } from "@/pages/authTypes";
 
 const requestUrl = "http://localhost:3000/api/accounts";
 
 //Sends a request to get different accounts the user has
-export async function getUserAccounts(): Promise<Account[]> {
+export async function getUserAccounts(
+  session: AuthSession,
+): Promise<Account[]> {
   try {
     //Sends a http request and waits for a response
     const response = await fetch(requestUrl, {
       method: "GET",
-      credentials: "include",
+      headers: { Authorization: `Bearer ${session.token}` },
     });
 
     //Determine if we were able to retrieve user's data
@@ -30,6 +33,7 @@ export async function getUserAccounts(): Promise<Account[]> {
 
 //Sends a post request to create a user account
 export async function postUserAccount(
+  session: AuthSession,
   newAccount: Account,
 ): Promise<updateResponse> {
   try {
@@ -38,8 +42,8 @@ export async function postUserAccount(
       method: "POST",
       headers: {
         "content-type": "application/json",
+        Authorization: `Bearer ${session.token}`,
       },
-      credentials: "include",
       body: JSON.stringify(newAccount),
     });
 
@@ -60,6 +64,7 @@ export async function postUserAccount(
 
 //Updates the users account
 export async function putUserAccount(
+  session: AuthSession,
   newAccount: Account,
 ): Promise<updateResponse> {
   try {
@@ -68,8 +73,8 @@ export async function putUserAccount(
       method: "PUT",
       headers: {
         "content-type": "application/json",
+        Authorization: `Bearer ${session.token}`,
       },
-      credentials: "include",
       body: JSON.stringify(newAccount),
     });
 
@@ -88,15 +93,18 @@ export async function putUserAccount(
   }
 }
 
-export async function deleteUserAccount(userAccount: Account) {
+export async function deleteUserAccount(
+  session: AuthSession,
+  userAccount: Account,
+) {
   const content = JSON.stringify({ id: userAccount.id });
   //Create delete request to delete the account
   const response = await fetch(requestUrl, {
     method: "DELETE",
     headers: {
       "content-type": "/application/json",
+      Authorization: `Bearer ${session.token}`,
     },
-    credentials: "include",
     body: content,
   });
 

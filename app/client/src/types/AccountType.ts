@@ -1,10 +1,10 @@
 //Coppied from Finance-Account type from server
 export interface Account {
-  id: number;
+  id: string;
   name: string;
   type: string;
   balance: number;
   value: number;
   subtype?: string;
-  last_updated: Date;
+  last_updated: string;
 }

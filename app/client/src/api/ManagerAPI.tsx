@@ -21,6 +21,7 @@ async function getTransactions(): Promise<Transaction[]> {
   const transactions: Transaction[] = [
     {
       id: "tx001",
+      financialAccount_id: "",
       amount: 1200,
       category: "Income",
       date: "2026-02-01",
@@ -30,6 +31,7 @@ async function getTransactions(): Promise<Transaction[]> {
     },
     {
       id: "tx002",
+      financialAccount_id: "",
       amount: -75.5,
       category: "Expenses",
       date: "2026-02-02",
@@ -39,6 +41,7 @@ async function getTransactions(): Promise<Transaction[]> {
     },
     {
       id: "tx003",
+      financialAccount_id: "",
       amount: -45,
       category: "Expenses",
       date: "2026-02-03",
@@ -48,6 +51,7 @@ async function getTransactions(): Promise<Transaction[]> {
     },
     {
       id: "tx004",
+      financialAccount_id: "",
       amount: -120,
       category: "Expenses",
       date: "2026-02-04",
@@ -57,6 +61,7 @@ async function getTransactions(): Promise<Transaction[]> {
     },
     {
       id: "tx005",
+      financialAccount_id: "",
       amount: -60,
       category: "Expenses",
       date: "2026-02-05",
@@ -66,6 +71,7 @@ async function getTransactions(): Promise<Transaction[]> {
     },
     {
       id: "tx006",
+      financialAccount_id: "",
       amount: -35.75,
       category: "Expenses",
       date: "2026-02-06",
@@ -75,6 +81,7 @@ async function getTransactions(): Promise<Transaction[]> {
     },
     {
       id: "tx007",
+      financialAccount_id: "",
       amount: -15.99,
       category: "Expenses",
       date: "2026-02-07",
@@ -84,6 +91,7 @@ async function getTransactions(): Promise<Transaction[]> {
     },
     {
       id: "tx008",
+      financialAccount_id: "",
       amount: -200,
       category: "Expenses",
       date: "2026-02-08",
@@ -93,6 +101,7 @@ async function getTransactions(): Promise<Transaction[]> {
     },
     {
       id: "tx009",
+      financialAccount_id: "",
       amount: 150,
       category: "Expenses",
       date: "2026-02-09",
@@ -102,6 +111,7 @@ async function getTransactions(): Promise<Transaction[]> {
     },
     {
       id: "tx010",
+      financialAccount_id: "",
       amount: -500,
       category: "Expenses",
       date: "2026-02-01",

@@ -34,7 +34,7 @@ export function validateAccountForm(
 }
 
 export function validateTransactionForm(
-  account_id: number,
+  account_id: string,
   transactionType: string,
   amount: number,
   date: string,

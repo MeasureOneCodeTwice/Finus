@@ -8,9 +8,11 @@ import {
   handleCurrencyBlur,
 } from "../utils/handleInput.ts";
 import { accountCategory } from "@/enum/AccountCategory.ts";
+import type { AuthSession } from "@/pages/authTypes.ts";
 
 interface popupProp {
   toggle: () => void;
+  session: AuthSession;
   setAccount?: (account: Account) => void;
   addAccount?: (account: Account) => void;
   edit: boolean;
@@ -21,6 +23,7 @@ type typeofAccount = keyof typeof accountCategory;
 
 export default function PopupForm({
   toggle,
+  session,
   setAccount,
   addAccount,
   edit,
@@ -58,24 +61,24 @@ export default function PopupForm({
       )
     ) {
       const newAccount: Account = {
-        id: 0,
+        id: "",
         name: formInput.name,
         type: accountType,
         balance: accountBalance,
         subtype: "",
         value: 0,
-        last_updated: new Date(),
+        last_updated: "",
       };
       console.log(newAccount);
 
-      //Determine if we edding an account info
+      //Determine if we editing an account info
       if (edit && selectedAccount) {
         newAccount.id = selectedAccount.id;
 
         try {
-          //Put reques to update the account
-          putUserAccount(newAccount).then((response) => {
-            //Determine if sucessfully post
+          //Put request to update the account
+          putUserAccount(session, newAccount).then((response) => {
+            //Determine if sucessfully updated the account
             if (response && response.lastUpdated && addAccount) {
               newAccount.last_updated = response.lastUpdated;
               addAccount(newAccount);
@@ -86,10 +89,12 @@ export default function PopupForm({
         }
       } else {
         try {
-          //Send a post request to create or edit the account
-          postUserAccount(newAccount).then((response) => {
+          //Send a post request to create
+          postUserAccount(session, newAccount).then((response) => {
             //When creating new account, id and lastupdated is returned for that account
-            if (response && response.id) newAccount.id = response.id;
+            if (response && response.id) {
+              newAccount.id = response.id;
+            }
 
             if (response.lastUpdated) {
               newAccount.last_updated = response.lastUpdated;

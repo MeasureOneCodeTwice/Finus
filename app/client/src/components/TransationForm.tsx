@@ -5,12 +5,14 @@ import { getUserAccounts } from "../api/Account";
 import { validateTransactionForm } from "../utils/ValidateForms";
 import { postTranscations, putTranscations } from "../api/Transaction";
 import { handleCurrencyChange, handleCurrencyBlur } from "../utils/handleInput";
-import { type Transaction } from "../types/TransactionType";
-import { type Account } from "../types/AccountType";
+import { type Transaction } from "../types/Transaction";
+import { type Account } from "@/types/AccountType";
 import { transactionCategory } from "@/enum/TransactionCategory";
+import type { AuthSession } from "@/pages/authTypes";
 
 interface popupProp {
   toggle: () => void;
+  session: AuthSession;
   setTransaction?: (editedTransaction: Transaction) => void;
   addTransaction?: (newTransaction: Transaction) => void;
   edit: boolean;
@@ -23,6 +25,7 @@ type typeOfTransaction = keyof typeof transactionCategory;
 //Returns a form of for the user to enter their info
 export default function PopupForm({
   toggle,
+  session,
   setTransaction,
   addTransaction,
   edit,
@@ -30,26 +33,37 @@ export default function PopupForm({
 }: popupProp) {
   //Handles the submiting the form
   const handleSubmit = () => {
-    const accountId = Number(selectedAccount);
     const transferAmount = Number(amount);
     let userTransaction: Transaction;
+    let to = "";
+    let from = "";
 
     if (
       selectedType &&
       validateTransactionForm(
-        accountId,
+        selectedAccount[0],
         selectedType,
         transferAmount,
         selectedDate,
         undefined,
       )
     ) {
+      if (selectedType === transactionCategory.INCOME) {
+        to = selectedAccount[1];
+        from = other;
+      } else {
+        to = other;
+        from = selectedAccount[1];
+      }
+
       userTransaction = {
-        id: 0,
-        financialAccount_id: accountId,
+        id: "",
+        financialAccount_id: selectedAccount[0],
+        to: to,
+        from: from,
         amount: transferAmount,
-        type: selectedType,
-        date: new Date(selectedDate),
+        category: selectedType,
+        date: selectedDate,
       };
 
       if (edit && selectedTransaction) {
@@ -58,7 +72,7 @@ export default function PopupForm({
           userTransaction.id = selectedTransaction.id;
 
           //Send a request to update the transaction
-          putTranscations(userTransaction).then((result) => {
+          putTranscations(session, userTransaction).then((result) => {
             //Determine if the
             if (result && setTransaction) {
               setTransaction(userTransaction);
@@ -70,7 +84,7 @@ export default function PopupForm({
       } else {
         try {
           //Send a request to create the transaction
-          postTranscations([userTransaction]).then((response) => {
+          postTranscations(session, [userTransaction]).then((response) => {
             //Successful put if response is returned
             if (response && response[0].id) {
               userTransaction.id = response[0].id;
@@ -110,21 +124,29 @@ export default function PopupForm({
   //State of the user's account
   const [account, setAccount] = useState<Account[] | []>();
 
-  getUserAccounts().then((accounts) => {
-    console.log(accounts);
-
-    //Detemrine accounts exist
-    if (accounts) {
-      setAccount(accounts);
-    }
-  });
+  getUserAccounts(session)
+    .then((accounts) => {
+      console.log(accounts);
+      //Detemrine accounts exist
+      if (accounts) {
+        setAccount(accounts);
+      } else {
+        alert("Failed to retrieve user's accounts, cannot make a transaction");
+        toggle();
+      }
+    })
+    .catch(() => {
+      alert("Failed to retrieve user's accounts, cannot make a transaction");
+      toggle();
+    });
 
   //Holds state of user input
-  const [selectedAccount, setSelectedAccount] = useState("");
+  const [selectedAccount, setSelectedAccount] = useState<string[]>([]);
   const [selectedType, setSelectedType] = useState("");
   const [amount, setAmount] = useState<string>("");
   //const [file, setFile] = useState<File | undefined>(undefined)
   const [selectedDate, setSelectedDate] = useState<string>("");
+  const [other, setOther] = useState("");
 
   //Holds the types of transfers
   const transCat: typeOfTransaction[] = Object.keys(
@@ -132,9 +154,16 @@ export default function PopupForm({
   ) as typeOfTransaction[];
 
   if (edit && selectedTransaction) {
-    setSelectedAccount(selectedTransaction.amount.toString());
-    setSelectedType(selectedTransaction.type);
+    setSelectedType(selectedTransaction.category);
     setAmount(selectedTransaction.amount.toString());
+
+    //Depending the transaction, the user can be the recipient or sender
+    if (selectedTransaction.category === transactionCategory.INCOME) {
+      setSelectedAccount([selectedTransaction.id, selectedTransaction.to]);
+      setOther(selectedTransaction.from);
+    } else {
+      setOther(selectedTransaction.to);
+    }
   }
 
   return (
@@ -143,18 +172,34 @@ export default function PopupForm({
         <div className="popupForm">
           {edit ? <h2>Edit Transaction</h2> : <h2>Create Transaction</h2>}
 
-          <label>User Account:</label>
-          <select onChange={(event) => setSelectedAccount(event.target.value)}>
+          <label htmlFor="sellectAccount">User Account:</label>
+          <select
+            id="selectAccount"
+            value={selectedAccount[0]}
+            onChange={(event) =>
+              setSelectedAccount(event.target.value.split(","))
+            }
+          >
             <option value="">Select Account</option>
             {account &&
               account.map((account) => (
-                <option key={account.id} value={account.id}>
+                <option key={account.id} value={[account.id, account.name]}>
                   {account.name} ({account.type})
                 </option>
               ))}
           </select>
-
           <br></br>
+
+          {selectedType == transactionCategory.INCOME ? (
+            <label htmlFor="other">Recipient: </label>
+          ) : (
+            <label htmlFor="other">Sender:</label>
+          )}
+          <input
+            id="other"
+            type="text"
+            onChange={(event) => setOther(event.target.value)}
+          ></input>
 
           <label>Type</label>
           <select

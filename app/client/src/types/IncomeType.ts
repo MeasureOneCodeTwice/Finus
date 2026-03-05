@@ -1,5 +1,5 @@
 export interface Income {
-  id: number;
+  id: string;
   name: string;
   income: number;
   description: string;
