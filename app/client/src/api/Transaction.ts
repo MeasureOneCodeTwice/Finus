@@ -22,6 +22,7 @@ export async function getTransactions(
     if (!response.ok) {
       alert("Failed to retrieve account's transaction\n");
       console.error(response.status);
+      return [];
     }
 
     return response.json();

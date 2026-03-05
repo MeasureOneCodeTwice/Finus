@@ -4,9 +4,11 @@ import "./userForm.css";
 import { postIncome, putIncome } from "../api/Income";
 import { validateIncomeForm } from "../utils/ValidateForms";
 import { type Income } from "../types/IncomeType";
+import type { AuthSession } from "@/pages/authTypes";
 
 interface popupProp {
   toggle: () => void;
+  session: AuthSession;
   setIncome?: (income: Income) => void;
   addIncome?: (income: Income) => void;
   edit: boolean;
@@ -15,6 +17,7 @@ interface popupProp {
 
 export default function PopupForm({
   toggle,
+  session,
   setIncome,
   addIncome,
   edit,
@@ -26,7 +29,7 @@ export default function PopupForm({
 
     if (validateIncomeForm(name, Number(amount))) {
       if (edit) {
-        putIncome(name, inputAmount, description).then((result) => {
+        putIncome(session, name, inputAmount, description).then((result) => {
           if (result && selectedIncome && setIncome) {
             const updateIncome: Income = {
               id: selectedIncome.id,
@@ -38,9 +41,9 @@ export default function PopupForm({
           }
         });
       } else {
-        postIncome(name, inputAmount, description).then((data) => {
+        postIncome(session, name, inputAmount, description).then((data) => {
           const newIncome: Income = {
-            id: 0,
+            id: "",
             name: name,
             income: inputAmount,
             description: description,

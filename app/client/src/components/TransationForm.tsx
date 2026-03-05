@@ -131,13 +131,13 @@ export default function PopupForm({
       if (accounts) {
         setAccount(accounts);
       } else {
-        alert("Failed to retrieve user's accounts, cannot make a transaction");
-        toggle();
+        //alert("Failed to retrieve user's accounts, cannot make a transaction");
+        //toggle();
       }
     })
     .catch(() => {
-      alert("Failed to retrieve user's accounts, cannot make a transaction");
-      toggle();
+      //alert("Failed to retrieve user's accounts, cannot make a transaction");
+      //toggle();
     });
 
   //Holds state of user input
@@ -200,6 +200,7 @@ export default function PopupForm({
             type="text"
             onChange={(event) => setOther(event.target.value)}
           ></input>
+          <br></br>
 
           <label>Type</label>
           <select

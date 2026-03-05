@@ -99,7 +99,7 @@ export default function TransactionList({ session }: listProp) {
         </div>
 
         <div>
-          <button onClick={toggle}>Create Account</button>
+          <button onClick={toggle}>Create Transaction</button>
         </div>
       </div>
 

@@ -3,14 +3,19 @@ import { getIncome } from "../api/Income";
 import { type Income } from "../types/IncomeType";
 import IncomePopup from "./IncomeForm";
 import IncomeCard from "./IncomeCard";
+import type { AuthSession } from "@/pages/authTypes";
 
-export default function IncomeList() {
+interface listProp {
+  session: AuthSession;
+}
+
+export default function IncomeList({ session }: listProp) {
   const [userIncomes, setUsersIncomes] = useState<Income[]>([]);
   const [seen, setSeen] = useState<boolean>(false);
 
   //Try to get the account's transaction from the server
   try {
-    getIncome().then((incomes) => {
+    getIncome(session).then((incomes) => {
       //Determine if we acquired the accounts transaction
       if (incomes) {
         setUsersIncomes(incomes);

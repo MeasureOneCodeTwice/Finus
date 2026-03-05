@@ -20,6 +20,7 @@ export default function AccountList({ session }: listProp) {
     getUserAccounts(session).then((accounts) => {
       //Determine if we acquired the accounts
       if (accounts) {
+        console.log(accounts);
         setUserAccounts(accounts);
       }
     });

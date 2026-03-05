@@ -22,6 +22,7 @@ export async function getUserAccounts(
         "Error: Failed to retrieve users accounts ",
         response.status,
       );
+      return [];
     }
 
     return response.json();
