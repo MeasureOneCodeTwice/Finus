@@ -6,6 +6,7 @@ export interface NormalizedRow {
   amount: number | null;
   sender?: string | null;
   recipient?: string | null;
+  category?: string | null;
 }
 
 export function normalizeRow(raw: unknown): NormalizedRow {
@@ -28,6 +29,7 @@ export function normalizeRow(raw: unknown): NormalizedRow {
     amount,
     sender: clean(record.sender),
     recipient: clean(record.recipient),
+    category: clean(record.category),
   };
 }
 

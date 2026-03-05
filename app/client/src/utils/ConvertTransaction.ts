@@ -9,6 +9,7 @@ export interface TransactionDraft {
   amount: number | null;
   sender?: string | null;
   recipient?: string | null;
+  category?: string | null;
   errors: string[];
 }
 
