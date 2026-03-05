@@ -1,11 +1,11 @@
-import express, { type NextFunction } from "express";
+import express from "express";
 import { accountsRouter } from "./routes/account";
 import { profilesRouter } from "./routes/profile";
 import { transactionsRouter } from "./routes/transaction";
 import { PORT } from "@/port";
 import { onExit } from "@/hooks";
 import { buildCorsConfig } from "@/expressUtils";
-import jwt from "jsonwebtoken";
+//import jwt from "jsonwebtoken";
 
 const app = express();
 app.use(buildCorsConfig());
@@ -19,24 +19,25 @@ app.use((req, res, next) => {
   next();
 });
 
+/*
 function verifyToken(
   req: express.Request,
   res: express.Response,
   next: NextFunction,
 ) {
   const authHeader = req.headers.authorization;
-
+  console.log(authHeader)
   //Determine if jwt header was passed
   if (authHeader) {
     const token = authHeader.split(" ")[1];
-    console.log(token);
     try {
       const payload = jwt.verify(token, process.env.JWT_SECRET);
 
       console.log(payload);
+      
       next();
     } catch (err) {
-      console.log(err);
+      console.error(err);
       res.status(401).json({ error: "Invalid token" });
     }
   } else {
@@ -47,8 +48,9 @@ function verifyToken(
       });
   }
 }
+*/
 
-app.use(verifyToken);
+//app.use(verifyToken);
 
 //test endpoint
 app.get("/health", (req: express.Request, res: express.Response) => {

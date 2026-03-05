@@ -61,7 +61,7 @@ export default function PopupForm({
       )
     ) {
       const newAccount: Account = {
-        id: "",
+        id: 0,
         name: formInput.name,
         type: accountType,
         balance: accountBalance,

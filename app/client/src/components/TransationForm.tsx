@@ -57,8 +57,8 @@ export default function PopupForm({
       }
 
       userTransaction = {
-        id: "",
-        financialAccount_id: selectedAccount[0],
+        id: 0,
+        financialAccount_id: Number(selectedAccount[0]),
         to: to,
         from: from,
         amount: transferAmount,
@@ -159,7 +159,10 @@ export default function PopupForm({
 
     //Depending the transaction, the user can be the recipient or sender
     if (selectedTransaction.category === transactionCategory.INCOME) {
-      setSelectedAccount([selectedTransaction.id, selectedTransaction.to]);
+      setSelectedAccount([
+        selectedTransaction.id.toString(),
+        selectedTransaction.to,
+      ]);
       setOther(selectedTransaction.from);
     } else {
       setOther(selectedTransaction.to);
@@ -183,7 +186,10 @@ export default function PopupForm({
             <option value="">Select Account</option>
             {account &&
               account.map((account) => (
-                <option key={account.id} value={[account.id, account.name]}>
+                <option
+                  key={account.id}
+                  value={[account.id.toString(), account.name]}
+                >
                   {account.name} ({account.type})
                 </option>
               ))}

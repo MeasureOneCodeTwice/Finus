@@ -5,6 +5,7 @@ import { Router } from "express";
 import type { Request, Response } from "express";
 import type { ResultSetHeader } from "mysql2";
 import { getConnectionPool } from "@/sqlUtil";
+import type { financialAccount } from "@/types.js";
 //import { error } from "node:console";
 
 export const accountsRouter = Router();
@@ -35,17 +36,27 @@ accountsRouter.post("/", async (req: Request, res: Response) => {
   }
 });
 
-/*
-accountsRouter.get("/", async (req:Request, res:Response)=>{
-  try{
+accountsRouter.get("/", async (req: Request, res: Response) => {
+  const { id } = req.body;
 
+  try {
+    const [result] = await db.query(
+      `SELECT * FROM financialAccount WHERE id = ?`,
+      [id],
+    );
 
-  } catch(err){
-    console.error("Failed to retrieve user's account", err)
-    res.status(500).json({error:"Failed to retrieve account(s)"})
+    const accounts: financialAccount[] = new Array(result.length);
+
+    for (let i = 0; i < result.length; i++) {
+      accounts[i] = result[i];
+    }
+
+    res.json(accounts);
+  } catch (err) {
+    console.error("Failed to retrieve user's account", err);
+    res.status(500).json({ error: "Failed to retrieve account(s)" });
   }
-})
-*/
+});
 
 accountsRouter.put("/", async (req: Request, res: Response) => {
   try {
@@ -55,7 +66,7 @@ accountsRouter.put("/", async (req: Request, res: Response) => {
 
     await db.query<ResultSetHeader>(
       `UPDATE financialAccount 
-      SET (name = ?, type = ?, balence = ?, value = ?, last_updated = ?, subtype = ?)
+      SET name = ?, type = ?, balence = ?, value = ?, last_updated = ?, subtype = ?
       WHERE id= ?`,
       [name, type, balance, value, last_updated, subtype ?? null, id],
     );

@@ -20,8 +20,8 @@ async function getTransactions(): Promise<Transaction[]> {
   //Assume doing api call here and getting transactions back, but for now just simulate with timeout
   const transactions: Transaction[] = [
     {
-      id: "tx001",
-      financialAccount_id: "",
+      id: 1,
+      financialAccount_id: 0,
       amount: 1200,
       category: "Income",
       date: "2026-02-01",
@@ -30,8 +30,8 @@ async function getTransactions(): Promise<Transaction[]> {
       description: "Monthly salary payment",
     },
     {
-      id: "tx002",
-      financialAccount_id: "",
+      id: 2,
+      financialAccount_id: 0,
       amount: -75.5,
       category: "Expenses",
       date: "2026-02-02",
@@ -40,8 +40,8 @@ async function getTransactions(): Promise<Transaction[]> {
       description: "Weekly grocery shopping",
     },
     {
-      id: "tx003",
-      financialAccount_id: "",
+      id: 3,
+      financialAccount_id: 0,
       amount: -45,
       category: "Expenses",
       date: "2026-02-03",
@@ -50,8 +50,8 @@ async function getTransactions(): Promise<Transaction[]> {
       description: "Monthly bus pass",
     },
     {
-      id: "tx004",
-      financialAccount_id: "",
+      id: 4,
+      financialAccount_id: 0,
       amount: -120,
       category: "Expenses",
       date: "2026-02-04",
@@ -60,8 +60,8 @@ async function getTransactions(): Promise<Transaction[]> {
       description: "Electricity bill",
     },
     {
-      id: "tx005",
-      financialAccount_id: "",
+      id: 5,
+      financialAccount_id: 0,
       amount: -60,
       category: "Expenses",
       date: "2026-02-05",
@@ -70,8 +70,8 @@ async function getTransactions(): Promise<Transaction[]> {
       description: "Home internet bill",
     },
     {
-      id: "tx006",
-      financialAccount_id: "",
+      id: 6,
+      financialAccount_id: 0,
       amount: -35.75,
       category: "Expenses",
       date: "2026-02-06",
@@ -80,8 +80,8 @@ async function getTransactions(): Promise<Transaction[]> {
       description: "Lunch with friends",
     },
     {
-      id: "tx007",
-      financialAccount_id: "",
+      id: 7,
+      financialAccount_id: 0,
       amount: -15.99,
       category: "Expenses",
       date: "2026-02-07",
@@ -90,8 +90,8 @@ async function getTransactions(): Promise<Transaction[]> {
       description: "Monthly subscription",
     },
     {
-      id: "tx008",
-      financialAccount_id: "",
+      id: 8,
+      financialAccount_id: 0,
       amount: -200,
       category: "Expenses",
       date: "2026-02-08",
@@ -100,8 +100,8 @@ async function getTransactions(): Promise<Transaction[]> {
       description: "Electronics purchase",
     },
     {
-      id: "tx009",
-      financialAccount_id: "",
+      id: 9,
+      financialAccount_id: 0,
       amount: 150,
       category: "Expenses",
       date: "2026-02-09",
@@ -110,8 +110,8 @@ async function getTransactions(): Promise<Transaction[]> {
       description: "Website development payment",
     },
     {
-      id: "tx010",
-      financialAccount_id: "",
+      id: 10,
+      financialAccount_id: 0,
       amount: -500,
       category: "Expenses",
       date: "2026-02-01",
