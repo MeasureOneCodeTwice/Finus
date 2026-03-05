@@ -1,15 +1,17 @@
 import { getTransactions } from '@/api/ManagerAPI';
 import type { Transaction } from '@/types/Transaction';
 import { useEffect, useState } from 'react'
-
+import { AiOutlineTransaction } from "react-icons/ai";
+import NoItemState from './NoItemState';
 
 function TransactionTable() {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[] | null>(null);
 
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
         const txs = await getTransactions();
+        console.log("Fetched transactions:", txs);
         setTransactions(txs);
       } catch (error) {
         console.error("Error fetching transactions:", error);
@@ -17,10 +19,26 @@ function TransactionTable() {
     };
     fetchTransactions();
   },[])
-  return (
-    <div className="my-10 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+
+  const noTransactionFound = (
+    <NoItemState 
+      title="No Transactions Found"
+      description="It looks like you haven't recorded any transactions yet. Start adding your expenses and income to see them here."
+      icon={<AiOutlineTransaction className="w-10 h-10 text-green-400" />}
+    />
+  );
+
+  const transactionTable = transactions && transactions.length > 0 ? (
+    <div className="my-10 bg-black rounded-[20px] 
+      border border-green-500/15 
+      shadow-[0_0_40px_rgba(34,197,94,0.12)]
+      overflow-hidden">
+
       {/* Header */}
-      <div className="grid grid-cols-[1fr_2fr_1fr_1fr_1fr_1fr] bg-gray-50 px-6 py-4 text-sm font-semibold text-gray-600 uppercase tracking-wide border-b gap-x-2">
+      <div className="grid grid-cols-[1fr_2fr_1fr_1fr_1fr_1fr]
+        bg-gray-900/70 px-6 py-4 text-xs font-semibold
+        text-green-400 uppercase tracking-wider
+        border-b border-green-500/10 gap-x-2">
         <div>Date</div>
         <div>Description</div>
         <div>Category</div>
@@ -30,47 +48,45 @@ function TransactionTable() {
       </div>
 
       {/* Body */}
-      <div className="divide-y divide-gray-100">
+      <div className="divide-y divide-green-500/10">
         {transactions.map((tx, index) => (
           <div
             key={tx.id}
-            className={`grid grid-cols-[1fr_2fr_1fr_1fr_1fr_1fr] px-6 py-4 items-center text-sm transition duration-150 
-            ${index % 2 === 0 ? "bg-white" : "bg-gray-50"}
-            hover:bg-blue-50 gap-x-2`}
+            className={`grid grid-cols-[1fr_2fr_1fr_1fr_1fr_1fr]
+            px-6 py-4 items-center text-sm transition duration-200
+            ${index % 2 === 0 ? "bg-black" : "bg-gray-900/40"}
+            hover:bg-green-500/20 gap-x-2`}
           >
-            <div className="text-gray-500">
-              {new Date(tx.date).toLocaleDateString()}
-            </div>
+            {/* Date */}
+            <div className="text-gray-400">{new Date(tx.date).toLocaleDateString()}</div>
 
-            <div className="font-medium text-gray-800">
-              {tx.description || "N/A"}
-            </div>
+            {/* Description */}
+            <div className="font-medium text-white">{tx.description || "N/A"}</div>
 
-            <div className="text-gray-600">
-              {tx.category}
-            </div>
+            {/* Category */}
+            <div className="text-gray-300">{tx.category}</div>
 
-            <div
-              className={`font-semibold ${
-                tx.amount < 0 ? "text-red-500" : "text-green-600"
-              }`}
-            >
+            {/* Amount */}
+            <div className={`font-semibold ${tx.amount < 0 ? "text-red-400" : "text-green-400"}`}>
               {tx.amount < 0
                 ? `-$${Math.abs(tx.amount).toFixed(2)}`
                 : `$${tx.amount.toFixed(2)}`}
             </div>
 
-            <div className="text-gray-600 truncate">
+            {/* From */}
+            <div className="text-gray-400 truncate">
               {tx.from}
             </div>
 
-            <div className="text-gray-600 truncate">
+            {/* To */}
+            <div className="text-gray-400 truncate">
               {tx.to}
             </div>
           </div>
         ))}
       </div>
     </div>
-  )
+  ) : null;
+  return (transactions && transactions.length === 0 ? noTransactionFound : transactionTable )
 }
 export default TransactionTable

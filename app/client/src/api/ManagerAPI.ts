@@ -110,7 +110,7 @@ async function getTransactions(): Promise<Transaction[]> {
             description: "Monthly rent"
           }
         ];
-    return new Promise(resolve => setTimeout(() => resolve(transactions), 1000));
+    return new Promise(resolve => setTimeout(() => resolve(transactions), 5000));
 }
 
 

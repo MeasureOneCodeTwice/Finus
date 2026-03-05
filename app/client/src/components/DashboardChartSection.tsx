@@ -145,7 +145,7 @@ const expensesBarOptions : ChartOptions<"bar"> = {
       text: 'Expenses Over Time',
       font: {
         size: 24,
-        weight: 'bold'
+        weight: 'bold',
       }
     }
   },

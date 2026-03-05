@@ -2,7 +2,8 @@ import { getBudgetWithExpenditure } from "@/api/BudgetAPI";
 import type { ChartData, ChartOptions } from "chart.js";
 import { useEffect, useState } from "react";
 import { Bar } from "react-chartjs-2";
-import NoBudgetState from "./NoBudgetState";
+import { Wallet } from "lucide-react";
+import NoItemState from "./NoItemState";
 function BudgetExpenditureChart() {
   const [chartData, setChartData] = useState<ChartData<"bar"> | null>(null);
   const chartOptions: ChartOptions<"bar"> = {
@@ -80,7 +81,11 @@ function BudgetExpenditureChart() {
             <Bar data={chartData} options={chartOptions}/>
       </div>
     ) 
-      : <NoBudgetState /> 
+      : <NoItemState 
+          title="No Budget Available" 
+          description="You currently have no budget to be reported. Create a budget to start tracking your expenses and savings." 
+          icon={<Wallet className="w-10 h-10 text-green-400" />}
+        /> 
   return budgetExpenditureSection
 }
 
