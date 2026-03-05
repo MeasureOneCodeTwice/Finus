@@ -1,19 +1,21 @@
 import { PORT } from "@/port.ts";
 import { onExit } from "@/hooks.ts";
 import { buildCorsConfig } from "@/corsUtil.ts";
+import { Request, Response, NextFunction } from 'express'
 import express from "express";
 import type { Pool } from "mysql2/promise";
 import mysql from "mysql2/promise";
+import jwt from 'jsonwebtoken'
 
 const pool = mysql.createPool({
   host: process.env.MYSQL_HOST,
   port: Number(process.env.MYSQL_PORT),
-  user: 'root',//process.env.MYSQL_USER, // ------------------------------------ Needs fixing, finus_app gets denied access, this might be an issue of accessing the db from outside its container
+  user: process.env.MYSQL_USER,
   password: process.env.MYSQL_PASSWORD,
   database: process.env.DB_NAME
 });
 
-
+const JWT_SECRET = process.env.JWT_SECRET;
 
 const app = express();
 app.use(express.json());
@@ -30,15 +32,42 @@ app.get("/health", (req: express.Request, res: express.Response) => {
 });
 
 
-app.get('/charts/expenses', async (req: express.Request, res: express.Response) => {
-    const period = req.query.period as string;
-    const connection = await pool.getConnection();
-
-    if (!["w", "m", "y"].includes(period)) {
-        return(res.status(400).json({ error: "Invalid period. Must be 'w', 'm', or 'y'." }));
+//authenticaion of JWT - returns user id
+export const authenticateJWT = (req: Request) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        throw new Error('Authorization header missing');
     }
+
+    const parts = authHeader.split(' ');
+    if (parts.length !== 2 || parts[0].toLowerCase() !== 'bearer') {
+        throw new Error('Invalid authorization header format');
+    }
+    const token = parts[1];
+
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    const userId = decoded.sub
+
+    if (!userId) {
+        throw new Error('User ID not found in token');
+    }
+
+    return userId
+};
+
+
+app.get('/charts/expenses', async (req: express.Request, res: express.Response) => {
+    
+    
     
     try {
+        const userId = authenticateJWT(req);
+        const period = req.query.period as string;
+        const connection = await pool.getConnection();
+
+        if (!["w", "m", "y"].includes(period)) {
+        return(res.status(400).json({ error: "Invalid period. Must be 'w', 'm', or 'y'." }));
+    }
         const endDate = new Date();
         let startDate = new Date();
         let dateFormat: string = '%Y-%m-%d';
@@ -75,17 +104,21 @@ app.get('/charts/expenses', async (req: express.Request, res: express.Response) 
         const query = `
             SELECT 
                 ${selectFormat} as date_group,
-                DATE_FORMAT(date, ?) as label,
-                SUM(ABS(amount)) as total_expenses
-            FROM finus.transaction
-            WHERE amount < 0 
-                AND date >= ? 
-                AND date <= ?
-            GROUP BY date_group, DATE_FORMAT(date, ?)
+                DATE_FORMAT(t.date, ?) as label,
+                SUM(ABS(t.amount)) as total_expenses
+            FROM finus.transaction t
+            JOIN finus.financialAccount fa ON t.financialAccount_id = fa.id
+            JOIN finus.finusAccount_profile fap ON fa.id = fap.financialAccount_id
+            JOIN finus.finusAccount u ON fap.profile_id = u.id
+            WHERE t.amount < 0 
+                AND u.id = ?
+                AND t.date >= ? 
+                AND t.date <= ?
+            GROUP BY date_group, DATE_FORMAT(t.date, ?)
             ORDER BY date_group ASC
         `;
         
-        const [rows] = await connection.query(query, [dateFormat, startDateStr, endDateStr, dateFormat]);
+        const [rows] = await connection.query(query, [dateFormat, userId,startDateStr, endDateStr, dateFormat]);
         
         connection.release() 
         

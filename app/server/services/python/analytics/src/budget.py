@@ -1,9 +1,16 @@
 from fastapi import HTTPException
 import pandas as pd
-#import datetime
+import mysql.connector as mysql
+import os
 
-from main import get_db_connection
 
+def get_db_connection():
+    return mysql.connect(
+        host=os.getenv("MYSQL_HOST"),
+        user=os.getenv("MYSQL_USER"),
+        password=os.getenv("MYSQL_PASSWORD"),
+        database=os.getenv("DB_NAME")
+    )
 
 #Take all transactions over the last 12 months and sum up the amount for each category found
 # Find the top 10 most impactful categories and calculate a budget for each
@@ -81,13 +88,10 @@ def generate_budget(period: str, user_id: int):
             
             if period == 'weekly':
                 scaled_recommended = monthly_recommended / 4.33
-                period_label = 'Weekly'
             elif period == 'monthly':
                 scaled_recommended = monthly_recommended
-                period_label = 'Monthly'
             else:  # yearly
                 scaled_recommended = monthly_recommended * 12
-                period_label = 'Yearly'
             
             budget_categories.append({
                 'category': category,

@@ -5,9 +5,10 @@ import pandas as pd
 import uvicorn
 import os
 import mysql.connector as mysql
-from budget import generate_budget, generate_budget_performance
+# from src.budget import generate_budget, generate_budget_performance
+import src.budget
 from dotenv import load_dotenv
-from jose import JWTError, jwt
+import jwt
 
 
 app = FastAPI()
@@ -42,7 +43,7 @@ async def get_current_user(authorization: Optional[str] = Header(None)):
             raise HTTPException(status_code=401, detail="Invalid authentication scheme")
         
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id = payload.get('sub') or payload.get('user_id') or payload.get('id')
+        user_id = payload.get('sub') or payload.get('user_id') or payload.get('id')#pretty sure sub works just fine
         
         if not user_id:
             raise HTTPException(status_code=401, detail="User ID not found in token")
@@ -51,8 +52,6 @@ async def get_current_user(authorization: Optional[str] = Header(None)):
         
     except ValueError:
         raise HTTPException(status_code=401, detail="Invalid authorization header format")
-    except JWTError as e:
-        raise HTTPException(status_code=401, detail=f"Invalid token: {str(e)}")
 
 
 
@@ -86,19 +85,21 @@ def periodCalc(period: str, end_date: pd.Timestamp):
 
 
 @app.get('/charts/savings')
-async def get_savings(period: str):
+async def get_savings(period: str, user_id: int = Depends(get_current_user)):
     try:
         connection = get_db_connection()
         if not connection:
             raise HTTPException(status_code=500, detail="Database connection failed")
         
-        #get all savings accounts
+        #get all savings accounts for user id
         cursor = connection.cursor(dictionary=True)
         cursor.execute("""
-            SELECT id, balance 
-            FROM finus.financialAccount 
-            WHERE type = 'savings'
-        """)
+            SELECT fa.id, fa.balance 
+            FROM finus.financialAccount fa
+            JOIN finus.finusAccount_profile fap ON fa.id = fap.financialAccount_id
+            JOIN finus.finusAccount u ON fap.profile_id = u.id
+            WHERE u.id = %s AND fa.type = 'savings'
+        """, (user_id,))
         savings_accounts = cursor.fetchall()
 
         if not savings_accounts:
@@ -202,7 +203,7 @@ async def get_savings(period: str):
 
 
 @app.get('/charts/incomeflow')
-async def get_income_flow(period: str = Query(default='w', enum=['w', 'm', 'y'])):
+async def get_income_flow(period: str = Query(default='w', enum=['w', 'm', 'y']), user_id: int = Depends(get_current_user)):
     #fetch all positive and negative transactions for the user that fall within today and the start of the period (week, month, year)
     #aggregate the transactions by category and sum the values for each category
     #return the aggregated data as a list of dictionaries with the category as the key and the sum of the values as the value
@@ -219,16 +220,29 @@ async def get_income_flow(period: str = Query(default='w', enum=['w', 'm', 'y'])
         start_date, _, _, _= periodCalc(period, end_date)
         
         # get transactions for the period and group by category
+        # query = """
+        #     SELECT 
+        #         t.amount,
+        #         t.category,
+        #         t.date
+        #     FROM finus.transaction t
+        #     WHERE t.date BETWEEN %s AND %s
+        #     ORDER BY t.date
+        # """
+
         query = """
             SELECT 
                 t.amount,
                 t.category,
                 t.date
             FROM finus.transaction t
-            WHERE t.date BETWEEN %s AND %s
+            JOIN finus.financialAccount fa ON t.financialAccount_id = fa.id
+            JOIN finus.finusAccount_profile fap ON fa.id = fap.financialAccount_id
+            JOIN finus.finusAccount u ON fap.profile_id = u.id
+            WHERE u.id = %s 
+                AND t.date BETWEEN %s AND %s
             ORDER BY t.date
         """
-        
         cursor.execute(query, (start_date, end_date))
         transactions = cursor.fetchall()
         
@@ -246,8 +260,6 @@ async def get_income_flow(period: str = Query(default='w', enum=['w', 'm', 'y'])
             }
         df = pd.DataFrame(transactions)
         df_agg = df.groupby('category').agg({'amount': 'sum'}).reset_index()
-
-        print(df)
         
         #totals are used later to figure out overflow or overspending
         total_income = df_agg[df_agg['amount'] > 0]['amount'].sum()

@@ -10,7 +10,7 @@ import { parseLoginBody, parseSignupBody } from "./parsing.ts";
 const pool = mysql.createPool({
   host: process.env.MYSQL_HOST,
   port: Number(process.env.MYSQL_PORT),
-  user: 'root',//process.env.MYSQL_USER, // ------------------------------------ Needs fixing, finus_app gets denied access, this might be an issue of accessing the db from outside its container
+  user: process.env.MYSQL_USER,
   password: process.env.MYSQL_PASSWORD,
   database: process.env.DB_NAME,
   waitForConnections: true,
