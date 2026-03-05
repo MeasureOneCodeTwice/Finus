@@ -5,9 +5,10 @@ import pandas as pd
 from main import get_db_connection
 
 
-#take all transactions over the last 12 months and sum up the amount for each category found
-# find the top 10 most impactful categories and calculate a budget for each
-#at the moment, this uses a 50/30/20 rule, where categories are classified as needs, wants, savings and then a proportional budget is calculated
+#Take all transactions over the last 12 months and sum up the amount for each category found
+# Find the top 10 most impactful categories and calculate a budget for each
+#At the moment, this uses a 50/30/20 rule, where categories are classified as needs, wants, savings and then a proportional budget is calculated
+# Monthly budget is generated based on the average monthly income, but then it can be divided or multiplied to match the specified period (week is divided by 4.33, year multiplied by 12)
 # 
 def generate_budget(period: str, user_id: int):    
     try:
@@ -31,9 +32,9 @@ def generate_budget(period: str, user_id: int):
         avg_monthly_income = total_income / 12  # Over 12 months
         
         #this budget is calculated using the standard 50/30/20 rule for now - can change later to ML
-        needs_budget = avg_monthly_income * 0.5      # 50% for essentials
-        wants_budget = avg_monthly_income * 0.3      # 30% for discretionary
-        savings_budget = avg_monthly_income * 0.2    # 20% for savings/debt
+        monthly_needs_budget = avg_monthly_income * 0.5      # 50% for essentials
+        monthly_wants_budget = avg_monthly_income * 0.3      # 30% for discretionary
+        monthly_savings_budget = avg_monthly_income * 0.2    # 20% for savings/debt
         
         #group expenses by category
         expense_by_category = {}
@@ -47,7 +48,7 @@ def generate_budget(period: str, user_id: int):
             cat: total/12 for cat, total in expense_by_category.items()
         }
         
-        #classify categories as needs vs wants (you'll need a mapping)
+        #classify categories as needs vs wants - expand on this list if needed in the future -- can also use ML
         category_types = classify_categories(monthly_avg_by_category.keys())
         
         #calculate proportional budgets for top 10 categories
@@ -64,34 +65,58 @@ def generate_budget(period: str, user_id: int):
             
             #determine which budget pool this comes from
             if cat_type == 'need':
-                pool_total = needs_budget
+                pool_total = monthly_needs_budget
                 pool_actual = sum(monthly_avg_by_category.get(c, 0) 
                                 for c, t in category_types.items() if t == 'need')
             else:  # want
-                pool_total = wants_budget
+                pool_total = monthly_wants_budget
                 pool_actual = sum(monthly_avg_by_category.get(c, 0) 
                                 for c, t in category_types.items() if t == 'want')
             
             #proportional allocation
             if pool_actual > 0:
-                recommended = (avg_spent / pool_actual) * pool_total
+                monthly_recommended = (avg_spent / pool_actual) * pool_total
             else:
-                recommended = avg_spent * 0.9 #default 10% reduction to prioritize savings
+                monthly_recommended = avg_spent * 0.9 #default 10% reduction to prioritize savings
+            
+            if period == 'weekly':
+                scaled_recommended = monthly_recommended / 4.33
+                period_label = 'Weekly'
+            elif period == 'monthly':
+                scaled_recommended = monthly_recommended
+                period_label = 'Monthly'
+            else:  # yearly
+                scaled_recommended = monthly_recommended * 12
+                period_label = 'Yearly'
             
             budget_categories.append({
                 'category': category,
                 'type': cat_type,
                 'avg_monthly_spent': round(avg_spent, 2),
-                'recommended_budget': round(recommended, 2),
+                'monthly_budget': round(monthly_recommended, 2),  # Keep for reference
+                'recommended_budget': round(scaled_recommended, 2),  # Scaled to period
                 'is_essential': cat_type == 'need'
             })
         
+        if period == 'weekly':
+            scaled_needs = monthly_needs_budget / 4.33
+            scaled_wants = monthly_wants_budget / 4.33
+            scaled_savings = monthly_savings_budget / 4.33
+        elif period == 'monthly':
+            scaled_needs = monthly_needs_budget
+            scaled_wants = monthly_wants_budget
+            scaled_savings = monthly_savings_budget
+        else:  # yearly
+            scaled_needs = monthly_needs_budget * 12
+            scaled_wants = monthly_wants_budget * 12
+            scaled_savings = monthly_savings_budget * 12
+
         return {
             'avg_monthly_income': round(avg_monthly_income, 2),
             'budget_summary': {
-                'needs': round(needs_budget, 2),
-                'wants': round(wants_budget, 2),
-                'savings': round(savings_budget, 2)
+                'needs': round(scaled_needs, 2),
+                'wants': round(scaled_wants, 2),
+                'savings': round(scaled_savings, 2)
             },
             'categories': budget_categories,
             'generated_date': pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')#iso format for date time
@@ -164,29 +189,30 @@ def get_user_transactions(user_id: int, start_date: str, end_date: str):
 def get_budget_performance(user_id, budget, period='monthly', reference_date=None):
     
     if reference_date is None:
-        reference_date = pd.Timestamp.now()#datetime.now()
+        reference_date = pd.Timestamp.now()
     
     #get boundaries based on calendar
     if period == 'weekly':
         #week starts on Sunday
-        start_of_week = reference_date - pd.Timedelta(days=reference_date.weekday() + 1 % 7)#timedelta(days=reference_date.weekday() + 1 % 7)
-        period_start = pd.Timestamp(start_of_week)#datetime(start_of_week.year, start_of_week.month, start_of_week.day)
-        period_end = period_start + pd.Timedelta(days=6, hours=23, minutes=59, seconds=59)#timedelta(days=6, hours=23, minutes=59, seconds=59)
+        days_to_sunday = (reference_date.dayofweek + 1) % 7
+        period_start = (reference_date - pd.Timedelta(days=days_to_sunday)).normalize()
+        period_end = period_start + pd.Timedelta(days=6, hours=23, minutes=59, seconds=59)
         
     elif period == 'monthly':
-        period_start = pd.Timestamp(reference_date.replace(day=1))#datetime(reference_date.year, reference_date.month, 1)
-        next_month = period_start.replace(day=28) + pd.Timedelta(days=4)#timedelta(days=4)
-        period_end = next_month - pd.Timedelta(next_month.day)#timedelta(days=next_month.day)
+        #first day of current month
+        period_start = pd.Timestamp(reference_date.year, reference_date.month, 1)
+        #last day of current month
+        next_month = period_start + pd.offsets.MonthBegin(1)
+        period_end = next_month - pd.Timedelta(seconds=1)
         
     else:  # yearly
-        period_start = pd.Timestamp(reference_date.replace(month=1, day=1))#datetime(reference_date.year, 1, 1)
-        period_end = pd.Timestamp(reference_date.replace(month=12, day=31, hour=23, minute=59, second=59))#datetime(reference_date.year, 12, 31, 23, 59, 59)
+        period_start = pd.Timestamp(reference_date.year, 1, 1)
+        period_end = pd.Timestamp(reference_date.year, 12, 31, 23, 59, 59)
+
+    start_str = period_start.strftime('%Y-%m-%d')
+    end_str = period_end.strftime('%Y-%m-%d')
     
-    transactions = get_user_transactions(
-        user_id, 
-        period_start.strftime('%Y-%m-%d'),
-        period_end.strftime('%Y-%m-%d')
-    )
+    transactions = get_user_transactions(user_id, start_str, end_str)
     
     actual_spending = {}
     for t in transactions:
@@ -227,8 +253,8 @@ def get_budget_performance(user_id, budget, period='monthly', reference_date=Non
     return {
         'period': {
             'type': period,
-            'start': period_start.strftime('%Y-%m-%d'),
-            'end': period_end.strftime('%Y-%m-%d')
+            'start': start_str,
+            'end': end_str
         },
         'performance': performance,
         'summary': {
