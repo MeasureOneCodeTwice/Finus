@@ -174,7 +174,7 @@ app.get('/charts/expenses', async (req: express.Request, res: express.Response) 
 //this gets all transactions for now - can be capped to a certain amount in the future when any user reaches over 100k transactions
 app.get('/table/trasactions', async (req: express.Request, res: express.Response) => {
     try {
-        console.log("Fetching transactions...");
+        //console.log("Fetching transactions...");
         const userId = authenticateJWT(req);
         const connection = await pool.getConnection();
         const query = `
@@ -205,7 +205,7 @@ app.get('/table/trasactions', async (req: express.Request, res: express.Response
                 if (!row.recipient){
                     row.recipient = first_name + " " + last_name;
                 }
-                console.log(row);
+                //console.log(row);
             });
         }
         res.json(rows);
@@ -222,7 +222,7 @@ app.get('/table/trasactions', async (req: express.Request, res: express.Response
 // average expenses - YTD average of all negative transactions
 // current debt - sum of all credit_card accounts of subtype 'loan'
 // total savings - sum of all savings accounts
-app.get('/table/snapshot', authenticateJWT, async (req: express.Request, res: express.Response) => {
+app.get('/table/snapshot', async (req: express.Request, res: express.Response) => {
     let connection;
     try {
         const userId = authenticateJWT(req);
@@ -237,7 +237,6 @@ app.get('/table/snapshot', authenticateJWT, async (req: express.Request, res: ex
         const ytdStartStr = ytdStart.toISOString().slice(0, 10);
         const todayStr = today.toISOString().slice(0, 10);
         const monthsPassed = today.getMonth() + 1;
-
         //single massive query to get all the data - this is apparently more efficient than multiple queries
         const [results] = await connection.query(`
             SELECT 
@@ -312,13 +311,20 @@ app.get('/table/snapshot', authenticateJWT, async (req: express.Request, res: ex
 
         const data = (results as any[])[0];
         const avgMonthlyExpenses = monthsPassed > 0 ? data.total_expenses / monthsPassed : 0;
-
         const response = {
             totalBalance: data.total_balance || 0,
             currentIncome: data.current_income || 0,
             averageExpenses: Math.round(avgMonthlyExpenses * 100) / 100,
             currentDebt: data.current_debt || 0,
-            totalSavings: data.total_savings || 0
+            totalSavings: data.total_savings || 0,
+            metadata: {
+                ytdPeriod: {
+                    start: ytdStartStr,
+                    end: todayStr
+                },
+                monthsInYTD: monthsPassed,
+                transactionCount: data.transaction_count || 0
+            }
         };
 
         res.json(response);

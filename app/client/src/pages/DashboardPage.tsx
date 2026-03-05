@@ -4,6 +4,7 @@ import TransactionTable from '@/components/TransactionTable';
 import DashboardChartSection from '@/components/DashboardChartSection';
 import type { AuthSession } from '../types/authTypes';
 import BudgetExpenditureChart from '@/components/BudgetExpenditureChart';
+import SnapshotSection from '@/components/SnapshotSection';
 Chart.register(PointElement, LineElement, ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 type DashboardPageProps = {
@@ -46,15 +47,16 @@ function DashboardPage({ session }: DashboardPageProps) {
       {glowRight}
       <h1 className="text-4xl font-bold mb-4">Hello {session?.user.first_name ?? session?.user.name ?? "there"}</h1>
       <p className="text-lg text-green-500">Here you can view your recent transactions and manage your finances.</p>
-      <section className="flex flex-row items-center justify-center gap-12 my-10">
+      {/* <section className="flex flex-row items-center justify-center gap-12 my-10">
         <AccountCard title="Total Balance" amount="$5,000" />
         <AccountCard title="Current Income" amount="$5,000"/>
         <AccountCard title="Average Expenses" amount="$100,000"/>
         <AccountCard title="Current Debt" amount="$50,000"/>
         <AccountCard title="Total Savings" amount="$100,000,000"/>
-      </section>
-      <DashboardChartSection session={session}/>
-      <BudgetExpenditureChart session={session}/>
+      </section> */}
+      <SnapshotSection />
+      <DashboardChartSection/>
+      <BudgetExpenditureChart/>
       <h2 className="text-2xl font-bold mb-4">Recent Transactions</h2>
       <TransactionTable  />
     </section>

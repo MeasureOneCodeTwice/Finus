@@ -3,14 +3,17 @@ import type { SankeyData } from 'recharts/types/chart/Sankey';
 import type { Transaction } from "@/types/Transaction";
 import { instance } from "./config";
 import type { BudgetWithExpenditure } from "@/types/BudgetWithExpenditure";
+import type { SnapshotData } from "@/types/AggregatedSnapshot";
 import { budgetsWithExpenditure } from "@/utils/fakeData";
+
+
 
 
 
 async function getTransactions(): Promise<Transaction[]> {
     try {
         const response = await instance.get(`/table/trasactions`);
-        console.log(response);  
+        //console.log(response);  
         if (response.status !== 200) {
             throw new Error(`Failed to fetch transactions table data: ${response.statusText}`);
         }
@@ -34,6 +37,20 @@ async function getTransactions(): Promise<Transaction[]> {
         console.error("Error fetching expenses chart data:", error);
         throw error;
     };
+}
+
+
+export async function getSnapshotData(): Promise<SnapshotData> {
+  try {
+    const response = await instance.get('/table/snapshot');
+    if (response.status !== 200) {
+      throw new Error(`Failed to fetch snapshot data: ${response.statusText}`);
+    }
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching snapshot data:", error);
+    throw error;
+  }
 }
 
 
@@ -110,7 +127,7 @@ async function getSavingsContribChartData(period: string): Promise<ChartData<"li
         if (response.status !== 200) {
             throw new Error(`Failed to fetch savings contribution chart data: ${response.statusText}`);
         }
-        console.log("Received savings contribution chart data:", response.data);
+        //console.log("Received savings contribution chart data:", response.data);
         return {
             labels: response.data["labels"],
             datasets: [{

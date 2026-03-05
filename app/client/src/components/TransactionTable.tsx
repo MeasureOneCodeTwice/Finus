@@ -11,7 +11,7 @@ function TransactionTable() {
     const fetchTransactions = async () => {
       try {
         const txs = await getTransactions();
-        console.log("Fetched transactions:", txs);
+        //console.log("Fetched transactions:", txs);
         setTransactions(txs);
       } catch (error) {
         console.error("Error fetching transactions:", error);

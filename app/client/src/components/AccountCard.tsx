@@ -1,8 +1,23 @@
 type AccountCardProps = {
   title: string;
   amount: string;
+  trend?: 'positive' | 'negative' | 'neutral';// for tracking performance at a glance instead of a budget
+  isLoading?: boolean;
 };
-export default function AccountCard({ title, amount }: AccountCardProps) {
+export default function AccountCard({ title, amount, trend, isLoading}: AccountCardProps) {
+  const getAmountColor = () => {
+    if (isLoading) return 'text-gray-500';
+    if (trend === 'positive') return 'text-green-400';
+    if (trend === 'negative') return 'text-red-400';
+    if (trend === 'neutral') return 'text-white';
+    
+    //auto-detect from amount string
+    if (amount.includes('-') || amount.startsWith('-')) return 'text-red-400';
+    if (amount !== 'Loading...' && amount !== '$0' && !amount.includes('Loading')) {
+      return 'text-green-400';
+    }
+    return 'text-white';
+  };
   return (
     <div
       className="
@@ -26,9 +41,14 @@ export default function AccountCard({ title, amount }: AccountCardProps) {
         {title}
       </h2>
 
-      <p className="text-3xl font-bold text-white">
+      <p className={'text-3xl font-bold ${getAmountColor()}'}>
         {amount}
       </p>
+      {isLoading && (
+        <div className="w-full h-1 bg-gray-700 mt-2 rounded overflow-hidden">
+          <div className="w-1/2 h-full bg-green-500/30 animate-pulse" />
+        </div>
+      )}
     </div>
   );
 }

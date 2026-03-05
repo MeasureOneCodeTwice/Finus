@@ -53,7 +53,6 @@ function DashboardChartSection() {
     setIsLoading(true);
     try {
       const data = await getTestIncomeFlowData(selectedPeriod);
-      //console.log("Fetched income flow data:", data);
       setIncomeData(data);
     } catch (error) {
       console.error("Failed to fetch income data:", error);
@@ -64,12 +63,6 @@ function DashboardChartSection() {
 
 
   useEffect(() => {
-    // const token = session?.token;
-    // if (!token) {
-    //   console.log('No token available, cannot fetch data');//handle this gracefully
-    //   console.log(session);
-    //   return;
-    // }
     switch(activeChart) {
       case 'expenses':
         fetchExpensesData();

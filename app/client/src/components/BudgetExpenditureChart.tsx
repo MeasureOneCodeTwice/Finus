@@ -51,7 +51,7 @@ function BudgetExpenditureChart() {
       const labels = data.map((item) => formatCategoryLabel(item.category));
       const budgetAmounts = data.map((item) => item.budgetAmount);
       const expenditureAmounts = data.map((item) => item.actualAmount);
-      console.log("Received data:", data);
+      //console.log("Received data:", data);
       const renderedData: ChartData<"bar"> = {
         labels,
         datasets: [
