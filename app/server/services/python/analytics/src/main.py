@@ -333,7 +333,6 @@ def get_budget(period: str = Query(default='w', enum=['w', 'm', 'y']), user_id: 
     try:
         budget = budget_module.generate_budget(period, user_id)
         performance = budget_module.generate_budget_performance(user_id, budget, period)
-        #print('made performance{}'.format(performance))
         return performance
     except Exception as e:
         print(e)

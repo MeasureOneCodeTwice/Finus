@@ -48,7 +48,7 @@ function BudgetExpenditureChart() {
   useEffect(() => {
     const fetchData = async (period: 'w' | 'm' | 'y') => {
       const data = await getBudgetWithExpenditure(period);
-      const labels = data.map((item) => item.category);
+      const labels = data.map((item) => formatCategoryLabel(item.category));
       const budgetAmounts = data.map((item) => item.budgetAmount);
       const expenditureAmounts = data.map((item) => item.actualAmount);
       console.log("Received data:", data);
@@ -112,6 +112,17 @@ function BudgetExpenditureChart() {
           icon={<Wallet className="w-10 h-10 text-green-400" />}
         /> 
   return budgetExpenditureSection
+}
+
+
+
+//small function to format category labels for budget chart
+//split on underscore, capitalize first letter of each word, then join with space
+function formatCategoryLabel(category: string): string {
+  return category
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
 }
 
 export default BudgetExpenditureChart
