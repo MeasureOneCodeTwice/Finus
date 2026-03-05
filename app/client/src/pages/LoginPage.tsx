@@ -1,5 +1,16 @@
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import type { AuthUser, RequestAuth } from "./authTypes";
 
 type LoginPageProps = {
@@ -36,43 +47,55 @@ function LoginPage({ onLogin, requestAuth }: LoginPageProps) {
 
   return (
     <section className="auth-layout">
-      <div className="auth-panel">
-        <p className="auth-tag">Finus</p>
-        <h1>Welcome back</h1>
-        <p className="auth-copy">Log in to continue managing your finances.</p>
+      <Card className="auth-panel">
+        <CardHeader className="space-y-0 p-0">
+          <Badge variant="outline" className="auth-tag">
+            Finus
+          </Badge>
+          <CardTitle className="auth-title">Welcome back</CardTitle>
+          <CardDescription className="auth-copy text-base">
+            Log in to continue managing your finances.
+          </CardDescription>
+        </CardHeader>
 
-        <form className="auth-form" onSubmit={handleSubmit}>
-          <label htmlFor="login-email">Email</label>
-          <input
-            id="login-email"
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="you@example.com"
-            required
-          />
+        <CardContent className="p-0">
+          <form className="auth-form" onSubmit={handleSubmit}>
+            <Label htmlFor="login-email">Email</Label>
+            <Input
+              id="login-email"
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="you@example.com"
+              required
+            />
 
-          <label htmlFor="login-password">Password</label>
-          <input
-            id="login-password"
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            placeholder="Your password"
-            required
-          />
+            <Label htmlFor="login-password">Password</Label>
+            <Input
+              id="login-password"
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              placeholder="Your password"
+              required
+            />
 
-          {errorMessage ? <p className="auth-error">{errorMessage}</p> : null}
+            {errorMessage ? <p className="auth-error">{errorMessage}</p> : null}
 
-          <button type="submit" className="auth-button" disabled={isSubmitting}>
-            {isSubmitting ? "Logging In..." : "Log In"}
-          </button>
-        </form>
+            <Button
+              type="submit"
+              className="auth-button h-auto"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Logging In..." : "Log In"}
+            </Button>
+          </form>
 
-        <p className="auth-switch">
-          New here? <Link to="/signup">Create an account</Link>
-        </p>
-      </div>
+          <p className="auth-switch">
+            New here? <Link to="/signup">Create an account</Link>
+          </p>
+        </CardContent>
+      </Card>
     </section>
   );
 }
