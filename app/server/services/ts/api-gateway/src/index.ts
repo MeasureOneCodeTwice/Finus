@@ -56,7 +56,7 @@ app.use(
 
 app.use(
   createProxyMiddleware({
-    pathFilter: "/api/tranasctions",
+    pathFilter: "/api/transactions",
     target: process.env.USER_SERVICE_ADDR,
     changeOrigin: true,
     pathRewrite: { "^/api/transactions": "/transactions" }
