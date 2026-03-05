@@ -28,6 +28,8 @@
   animation-delay: 1.2s;
 }
 
+
+
 .auth-layout {
   min-height: 100vh;
   display: flex;
@@ -203,6 +205,15 @@
 
 .auth-switch a:hover {
   text-decoration: underline;
+}
+
+.dash-hover-scrollbar {
+  scrollbar-width: none;
+}
+
+.dash-hover-scrollbar:hover {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(34, 197, 94, 0.3) rgba(8, 22, 12, 0.55);
 }
 
 @media (max-width: 640px) {
