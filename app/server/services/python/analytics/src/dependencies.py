@@ -43,3 +43,5 @@ async def get_current_user(authorization: Optional[str] = Header(None)):
         raise HTTPException(status_code=401, detail="Invalid token")
     except ValueError:
         raise HTTPException(status_code=401, detail="Invalid authorization header format")
+    except TypeError as e:
+        raise HTTPException(status_code=401, detail=str(e))

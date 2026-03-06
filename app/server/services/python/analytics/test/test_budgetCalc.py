@@ -12,7 +12,6 @@ class TestBudgetCalculator:
         return BudgetCalculator(classifier)
     
     def test_separate_income_expenses(self, calculator, sample_transactions):
-        """Test separating income and expenses."""
         income, expenses = calculator.separate_income_expenses(sample_transactions)
         
         assert len(income) == 3  # Three positive transactions
@@ -62,7 +61,6 @@ class TestBudgetCalculator:
         assert pools['savings'] == 1000  # 20%
     
     def test_calculate_category_budget_need(self, calculator):
-        """Test budget calculation for need category."""
         monthly_avg = {'rent': 1200, 'groceries': 400}
         category_types = {'rent': 'need', 'groceries': 'need'}
         pools = {'needs': 2000, 'wants': 1000, 'savings': 500}
@@ -75,7 +73,6 @@ class TestBudgetCalculator:
         assert result == 1500
     
     def test_calculate_category_budget_want(self, calculator):
-        """Test budget calculation for want category."""
         monthly_avg = {'dining': 500, 'entertainment': 300}
         category_types = {'dining': 'want', 'entertainment': 'want'}
         pools = {'needs': 2000, 'wants': 1000, 'savings': 500}
@@ -88,7 +85,6 @@ class TestBudgetCalculator:
         assert result == 625
     
     def test_scale_budget(self, calculator):
-        """Test budget scaling for different periods."""
         monthly_amount = 1000
         
         weekly = calculator.scale_budget(monthly_amount, 'w')

@@ -7,7 +7,6 @@ class TestBudgetIntegration:
     
     @pytest.mark.asyncio
     async def test_full_budget_flow(self):
-        """Test the complete budget generation and performance flow."""
         user_id = 123
         period = 'w'
         

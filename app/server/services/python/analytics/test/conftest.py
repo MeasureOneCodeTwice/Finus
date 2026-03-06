@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 from datetime import datetime, timedelta
 from src.models.schemas import BudgetCategory, BudgetResponse
 from src.utils.trans_cat_classifier import CategoryClassifier
@@ -8,7 +8,6 @@ import os
 
 @pytest.fixture
 def sample_transactions():
-    """Provide sample transaction data."""
     base_date = datetime.now() - timedelta(days=30)
     return [
         {'amount': 5000, 'category': 'salary', 'date': base_date},
@@ -65,7 +64,6 @@ def mock_db_queries():
 
 @pytest.fixture
 def mock_savings_accounts():
-    """Mock savings accounts data."""
     return [
         {'id': 1, 'balance': 5000},
         {'id': 2, 'balance': 3000},
@@ -73,7 +71,6 @@ def mock_savings_accounts():
 
 @pytest.fixture
 def mock_savings_transactions():
-    """Mock transactions for savings accounts."""
     base_date = datetime.now() - timedelta(days=30)
     return [
         {'financialAccount_id': 1, 'amount': 100, 'date': base_date + timedelta(days=5)},
@@ -85,7 +82,6 @@ def mock_savings_transactions():
 
 @pytest.fixture
 def mock_incomeflow_transactions():
-    """Mock transactions for income flow (mix of income and expenses)."""
     base_date = datetime.now() - timedelta(days=30)
     return [
         # Income transactions
@@ -103,7 +99,6 @@ def mock_incomeflow_transactions():
 
 @pytest.fixture
 def mock_env_vars():
-    """Mock environment variables for testing."""
     with patch.dict(os.environ, {
         'JWT_SECRET': 'test_secret_key_12345',
         'MYSQL_HOST': 'localhost',
@@ -115,25 +110,21 @@ def mock_env_vars():
 
 @pytest.fixture
 def valid_token():
-    """Generate a valid JWT token for testing."""
     payload = {'sub': '123', 'user_id': '123', 'id': '123'}
     return jwt.encode(payload, 'test_secret_key_12345', algorithm='HS256')
 
 @pytest.fixture
 def expired_token():
-    """Generate an expired JWT token."""
     import time
     payload = {'sub': '123', 'exp': int(time.time()) - 3600}
     return jwt.encode(payload, 'test_secret_key_12345', algorithm='HS256')
 
 @pytest.fixture
 def invalid_token():
-    """Generate an invalid JWT token."""
     return "invalid.token.string"
 
 @pytest.fixture
 def mock_db_connection():
-    """Mock database connection."""
     mock_conn = MagicMock()
     mock_cursor = MagicMock()
     mock_conn.cursor.return_value = mock_cursor

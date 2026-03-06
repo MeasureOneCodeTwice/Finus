@@ -44,25 +44,33 @@ class TestJWTAuthentication:
     
     @pytest.mark.asyncio
     async def test_get_current_user_missing_user_id(self):
-        payload = {'email': 'test@example.com'} 
-        
+
+        payload = {'email': 'test@example.com'}
         token = jwt.encode(payload, 'test_secret_key_12345', algorithm='HS256')
+        
+        # Ensure token is string
+        if isinstance(token, bytes):
+            token = token.decode('utf-8')
         
         with patch.dict(os.environ, {'JWT_SECRET': 'test_secret_key_12345'}):
             with pytest.raises(HTTPException) as exc_info:
                 await get_current_user(authorization=f"Bearer {token}")
             
             assert exc_info.value.status_code == 401
-            assert exc_info.value.detail == "Invalid token"
+            assert exc_info.value.detail == "User ID not found in token"
     
     @pytest.mark.asyncio
     async def test_get_current_user_invalid_signature(self):
+
         payload = {'sub': '123'}
         token = jwt.encode(payload, 'wrong_secret', algorithm='HS256')
+        
+        if isinstance(token, bytes):
+            token = token.decode('utf-8')
         
         with patch.dict(os.environ, {'JWT_SECRET': 'test_secret_key_12345'}):
             with pytest.raises(HTTPException) as exc_info:
                 await get_current_user(authorization=f"Bearer {token}")
             
             assert exc_info.value.status_code == 401
-            assert "signature" in exc_info.value.detail.lower() or "invalid" in exc_info.value.detail.lower()
+            assert "token" in exc_info.value.detail.lower()

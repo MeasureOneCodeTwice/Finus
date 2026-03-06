@@ -16,5 +16,5 @@ services:
 
     analytics-test:
       build: 
-        context: services/python
-        dockerfile: analytics/Dockerfile.test
+        context: services/python/analytics
+        dockerfile: Dockerfile.test

@@ -35,7 +35,7 @@ def calculate_savings_over_time(
     else:
         df['year_month'] = df['date'].dt.to_period('M')
         monthly_groups = df.groupby('year_month')
-        for month in pd.date_range(start=start_date, end=end_date, freq='ME'):
+        for month in pd.date_range(start=start_date, end=end_date, freq='M'):
             month_str = month.strftime('%Y-%m')
             month_period = pd.Period(month_str, freq='M')
             if month_period in monthly_groups.groups:

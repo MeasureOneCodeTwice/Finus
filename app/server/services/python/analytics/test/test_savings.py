@@ -4,10 +4,9 @@ from datetime import datetime
 from unittest.mock import patch, MagicMock
 from src.logic.savings import calculate_savings_over_time
 
-class TestSavingsService:
+class TestSavings:
     
     def test_calculate_savings_over_time_weekly(self, mock_savings_accounts, mock_savings_transactions):
-        """Test savings calculation for weekly period."""
         end_date = pd.Timestamp('2024-03-15')
         start_date = end_date - pd.Timedelta(days=7)
         
@@ -30,7 +29,6 @@ class TestSavingsService:
             assert isinstance(value, (int, float))
     
     def test_calculate_savings_over_time_monthly(self, mock_savings_accounts, mock_savings_transactions):
-        """Test savings calculation for monthly period."""
         end_date = pd.Timestamp('2024-03-15')
         start_date = end_date - pd.Timedelta(days=30)
         
@@ -47,7 +45,6 @@ class TestSavingsService:
         assert len(result['labels']) > 0
     
     def test_calculate_savings_over_time_yearly(self, mock_savings_accounts, mock_savings_transactions):
-        """Test savings calculation for yearly period."""
         end_date = pd.Timestamp('2024-03-15')
         start_date = end_date - pd.Timedelta(days=365)
         
@@ -65,7 +62,6 @@ class TestSavingsService:
         assert all(len(label) == 7 for label in result['labels'])  # YYYY-MM format
     
     def test_calculate_savings_over_time_empty_transactions(self, mock_savings_accounts):
-        """Test savings calculation with no transactions."""
         end_date = pd.Timestamp('2024-03-15')
         start_date = end_date - pd.Timedelta(days=7)
         
@@ -86,7 +82,6 @@ class TestSavingsService:
         assert all(value == expected_initial for value in result['datasets'][0]['data'])
     
     def test_calculate_savings_over_time_no_accounts(self):
-        """Test savings calculation with no accounts."""
         end_date = pd.Timestamp('2024-03-15')
         start_date = end_date - pd.Timedelta(days=7)
         

@@ -99,7 +99,6 @@ class TestPeriodCalc:
         assert period_name == 'Yearly'
     
     def test_period_calc_with_time_component(self):
-        """Test that function handles timestamps with time components."""
         end_date = pd.Timestamp('2024-03-15 14:30:45')
         
         start, _, _, _ = period_calc('w', end_date)
@@ -112,7 +111,6 @@ class TestPeriodCalc:
         assert start.second == 45
     
     def test_period_calc_returns_tuple(self):
-        """Test that function returns the correct tuple type."""
         end_date = pd.Timestamp('2024-03-15')
         result = period_calc('w', end_date)
         
@@ -131,7 +129,6 @@ class TestPeriodCalc:
         ('y', 'M', '%Y-%m', 'Yearly'),
     ])
     def test_period_calc_parametrized(self, period, expected_freq, expected_format, expected_name):
-        """Parametrized test for all periods."""
         end_date = pd.Timestamp('2024-03-15')
         
         start, freq, date_format, period_name = period_calc(period, end_date)

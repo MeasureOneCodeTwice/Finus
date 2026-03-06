@@ -87,7 +87,6 @@ class TestBudgetPerformanceCalculator:
         sample_budget_response,
         mock_transactions
     ):
-        """Test full performance generation with proper mocking."""
         user_id = 123
         period = 'w'
         
@@ -117,7 +116,6 @@ class TestBudgetPerformanceCalculator:
         performance_calc,
         sample_budget_response
     ):
-        """Test performance generation with no transactions."""
         user_id = 123
         period = 'w'
         
@@ -139,7 +137,6 @@ class TestBudgetPerformanceCalculator:
         performance_calc,
         sample_budget_response
     ):
-        """Test performance generation with database error."""
         user_id = 123
         period = 'w'
         

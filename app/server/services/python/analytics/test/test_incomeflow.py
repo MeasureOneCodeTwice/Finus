@@ -6,7 +6,6 @@ from src.logic.incomeflow import build_sankey_data
 class TestIncomeflowService:
     
     def test_build_sankey_data_with_income_and_expenses(self, mock_incomeflow_transactions):
-        """Test building sankey data with both income and expenses."""
         result = build_sankey_data(mock_incomeflow_transactions)
         
         assert 'nodes' in result
@@ -33,7 +32,6 @@ class TestIncomeflowService:
             assert isinstance(link['value'], int)
     
     def test_build_sankey_data_with_overflow(self):
-        """Test sankey data when income exceeds expenses."""
         transactions = [
             {'amount': 5000, 'category': 'salary', 'date': '2024-03-01'},
             {'amount': 1000, 'category': 'freelance', 'date': '2024-03-02'},
@@ -59,7 +57,6 @@ class TestIncomeflowService:
         assert unspent_links[0]['value'] == 4000  # 6000 - 2000
     
     def test_build_sankey_data_with_overspending(self):
-        """Test sankey data when expenses exceed income."""
         transactions = [
             {'amount': 3000, 'category': 'salary', 'date': '2024-03-01'},
             {'amount': -1500, 'category': 'rent', 'date': '2024-03-03'},
@@ -92,7 +89,6 @@ class TestIncomeflowService:
         assert result['links'] == []
     
     def test_build_sankey_data_only_income(self):
-        """Test sankey data with only income transactions."""
         transactions = [
             {'amount': 5000, 'category': 'salary', 'date': '2024-03-01'},
             {'amount': 1000, 'category': 'freelance', 'date': '2024-03-02'},
@@ -113,7 +109,6 @@ class TestIncomeflowService:
         assert unspent_links[0]['value'] == 6000
     
     def test_build_sankey_data_only_expenses(self):
-        """Test sankey data with only expense transactions."""
         transactions = [
             {'amount': -1500, 'category': 'rent', 'date': '2024-03-03'},
             {'amount': -500, 'category': 'groceries', 'date': '2024-03-04'},
