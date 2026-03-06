@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CsvUpload from "./csvread/CsvUpload";
 import "./userForm.css";
 import { getUserAccounts } from "../api/Account";
@@ -63,7 +63,7 @@ export default function PopupForm({
         from: from,
         amount: transferAmount,
         category: selectedType,
-        date: selectedDate,
+        date: new Date(selectedDate),
       };
 
       if (edit && selectedTransaction) {
@@ -124,21 +124,25 @@ export default function PopupForm({
   //State of the user's account
   const [account, setAccount] = useState<Account[] | []>();
 
-  getUserAccounts(session)
-    .then((accounts) => {
-      console.log(accounts);
-      //Detemrine accounts exist
-      if (accounts) {
-        setAccount(accounts);
-      } else {
-        //alert("Failed to retrieve user's accounts, cannot make a transaction");
+  useEffect(() => {
+    getUserAccounts(session)
+      .then((accounts) => {
+        console.log(accounts);
+        //Detemrine accounts exist
+        if (accounts) {
+          setAccount(accounts);
+        } else {
+          alert(
+            "Failed to retrieve user's accounts, cannot make a transaction",
+          );
+          //toggle();
+        }
+      })
+      .catch(() => {
+        alert("Failed to retrieve user's accounts, cannot make a transaction");
         //toggle();
-      }
-    })
-    .catch(() => {
-      //alert("Failed to retrieve user's accounts, cannot make a transaction");
-      //toggle();
-    });
+      });
+  }, [session]);
 
   //Holds state of user input
   const [selectedAccount, setSelectedAccount] = useState<string[]>([]);

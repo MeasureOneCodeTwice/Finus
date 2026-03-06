@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getUserAccounts } from "../api/Account";
 import { type Account } from "../types/AccountType";
 import AccountListCard from "./AccountListCard";
@@ -16,7 +16,7 @@ export default function AccountList({ session }: listProp) {
   const [seen, setSeen] = useState<boolean>(false);
 
   //Try to get the accounts from the server
-  setInterval(async () => {
+  useEffect(() => {
     try {
       getUserAccounts(session).then((accounts) => {
         //Determine if we acquired the accounts
@@ -26,9 +26,9 @@ export default function AccountList({ session }: listProp) {
         }
       });
     } catch {
-      //alert("Failed to retrieve user accounts");
+      alert("Failed to retrieve user accounts");
     }
-  }, 60000);
+  }, [session]);
 
   //Adds a account to the list
   const addAccount = (newAccount: Account) => {

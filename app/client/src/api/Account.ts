@@ -103,7 +103,7 @@ export async function deleteUserAccount(
   const response = await fetch(requestUrl, {
     method: "DELETE",
     headers: {
-      "content-type": "/application/json",
+      "content-type": "application/json",
       Authorization: `Bearer ${session.token}`,
     },
     body: content,

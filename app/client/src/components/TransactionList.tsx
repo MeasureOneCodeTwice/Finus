@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getTransactions } from "../api/Transaction";
 import { type Transaction } from "../types/Transaction";
 import TransactionPopup from "./TransationForm";
@@ -19,7 +19,7 @@ export default function TransactionList({ session }: listProp) {
   );
   const [seen, setSeen] = useState<boolean>(false);
 
-  setInterval(async () => {
+  useEffect(() => {
     getUserAccounts(session)
       .then((accounts) => {
         console.log(accounts);
@@ -34,21 +34,23 @@ export default function TransactionList({ session }: listProp) {
       .catch(() => {
         //alert("Failed to get accounts");
       });
-  }, 60000);
+  }, [session]);
 
   //Try to get the account's transaction from the server
-  if (selectedAccount) {
-    getTransactions(session, selectedAccount)
-      .then((transactions) => {
-        //Determine if we acquired the accounts transaction
-        if (transactions) {
-          setAccountTransactions(transactions);
-        }
-      })
-      .catch(() => {
-        //alert("Failed to get transaction");
-      });
-  }
+  useEffect(() => {
+    if (selectedAccount) {
+      getTransactions(session, selectedAccount)
+        .then((transactions) => {
+          //Determine if we acquired the accounts transaction
+          if (transactions) {
+            setAccountTransactions(transactions);
+          }
+        })
+        .catch(() => {
+          alert("Failed to get transaction");
+        });
+    }
+  });
 
   //Adds a account to the list
   const addTransaction = (newTransaction: Transaction) => {

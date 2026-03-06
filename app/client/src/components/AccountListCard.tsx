@@ -46,7 +46,9 @@ export default function Card({
         <br></br>
 
         <div>
-          <p>{account.type + " " + account.subtype}</p>
+          <p>
+            {account.type + " " + (account.subtype ? " " + account.type : "")}
+          </p>
           <p>{account.balance}</p>
         </div>
 
@@ -61,6 +63,7 @@ export default function Card({
           session={session}
           setAccount={setAccount}
           edit={true}
+          selectedAccount={account}
         />
       ) : null}
     </>

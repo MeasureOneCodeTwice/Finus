@@ -65,9 +65,9 @@ export default function PopupForm({
         name: formInput.name,
         type: accountType,
         balance: accountBalance,
-        subtype: "",
+        subtype: subtype,
         value: 0,
-        last_updated: "",
+        last_updated: new Date(),
       };
       console.log(newAccount);
 
@@ -79,9 +79,9 @@ export default function PopupForm({
           //Put request to update the account
           putUserAccount(session, newAccount).then((response) => {
             //Determine if sucessfully updated the account
-            if (response && response.lastUpdated && addAccount) {
+            if (response && response.lastUpdated && setAccount) {
               newAccount.last_updated = response.lastUpdated;
-              addAccount(newAccount);
+              setAccount(newAccount);
             }
           });
         } catch {
@@ -99,9 +99,9 @@ export default function PopupForm({
             if (response.lastUpdated) {
               newAccount.last_updated = response.lastUpdated;
 
-              //Check if setAccount is undefined
-              if (setAccount) {
-                setAccount(newAccount);
+              //Check if addAcount is undefined
+              if (addAccount) {
+                addAccount(newAccount);
               }
             }
           });
@@ -132,13 +132,30 @@ export default function PopupForm({
         }
     }*/
 
-  const [formInput, setFormInput] = useState({
-    name: "",
-    subType: "",
-    interest: 0,
+  const [formInput, setFormInput] = useState(() => {
+    if (edit && selectedAccount) {
+      return {
+        name: selectedAccount.name,
+        subType: selectedAccount.subtype || "",
+        interest: 0,
+      };
+    } else {
+      return {
+        name: "",
+        subType: "",
+        interest: 0,
+      };
+    }
   });
   //const [file, setFile] = useState<File|undefined>(undefined)
-  const [balance, setBalance] = useState<string>("");
+  const [balance, setBalance] = useState<string>(() => {
+    if (edit && selectedAccount) {
+      return selectedAccount.balance.toString();
+    } else {
+      return "";
+    }
+  });
+
   const [accountType, setAccountType] = useState<typeofAccount | undefined>(
     undefined,
   );
@@ -146,18 +163,6 @@ export default function PopupForm({
   const accountCat: typeofAccount[] = Object.keys(
     accountCategory,
   ) as typeofAccount[];
-
-  //Determine if we're editting an account
-  if (edit && selectedAccount) {
-    setFormInput({ ...formInput, ["name"]: selectedAccount.name });
-
-    if (selectedAccount.subtype) {
-      setFormInput({ ...formInput, ["subType"]: selectedAccount.subtype });
-    }
-
-    setBalance(selectedAccount.balance.toString());
-    setAccountType(selectedAccount.type as typeofAccount);
-  }
 
   return (
     <>
@@ -169,6 +174,7 @@ export default function PopupForm({
           <input
             type="text"
             name="name"
+            value={formInput.name}
             onChange={handleChange}
             placeholder="Enter account name"
           />

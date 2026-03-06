@@ -6,5 +6,5 @@ export interface Account {
   balance: number;
   value: number;
   subtype?: string;
-  last_updated: string;
+  last_updated: Date;
 }

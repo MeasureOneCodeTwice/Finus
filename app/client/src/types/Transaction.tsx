@@ -3,7 +3,7 @@ export type Transaction = {
   financialAccount_id: number;
   amount: number;
   category: string;
-  date: string; // ISO format date string
+  date: Date; // ISO format date string
   from: string;
   to: string;
   description?: string;

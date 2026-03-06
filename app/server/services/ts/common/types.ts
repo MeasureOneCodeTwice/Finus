@@ -1,3 +1,5 @@
+import type { RowDataPacket } from "mysql2";
+
 export type User = {
   id: number;
   username: string;
@@ -10,7 +12,7 @@ export type User = {
   salt: string;
 };
 
-export type financialAccount = {
+export interface financialAccount extends RowDataPacket {
   id: number;
   name: string;
   type: string;
@@ -18,9 +20,9 @@ export type financialAccount = {
   value: number;
   last_updated: Date;
   subtype: string;
-};
+}
 
-export type Transaction = {
+export interface Transaction extends RowDataPacket {
   id: number;
   financialAccount_id: number;
   amount: number;
@@ -29,7 +31,7 @@ export type Transaction = {
   recipient: string;
   date: Date; // ISO format date string
   description?: string;
-};
+}
 
 export function validateType(obj: unknown, requiredKeys: string[]): void {
   if (!obj) {

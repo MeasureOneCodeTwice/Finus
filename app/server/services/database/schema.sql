@@ -74,10 +74,10 @@ CREATE TABLE finus.financialAccountSubtype(
 );
 
 CREATE TABLE finus.financialAccount (
-    id           INTEGER      NOT NULL,
+    id           INTEGER      NOT NULL AUTO_INCREMENT,
     name         VARCHAR(50)  NOT NULL,
     type         VARCHAR(50)  NOT NULL,
-    balance      INTEGER      NOT NULL,
+    balance      DECIMAL(12,2)      NOT NULL,
     value        INTEGER      NOT NULL,
     last_updated DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     subtype      VARCHAR(50), 
