@@ -3,6 +3,10 @@ export function generateDateRange(
   end: Date,
   period: string,
 ): string[] {
+  //check that dates are valid date objects
+  if (!start || !end || isNaN(start.getTime()) || isNaN(end.getTime())) {
+    throw new Error("Invalid start or end date");
+  }
   const dates: string[] = [];
   const current = new Date(start);
   current.setHours(0, 0, 0, 0);

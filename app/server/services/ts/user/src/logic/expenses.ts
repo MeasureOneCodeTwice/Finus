@@ -43,6 +43,7 @@ export async function getExpensesChartData(
   );
 
   const allLabels = generateDateRange(startDate, endDate, period);
+
   const dataMap = new Map();
 
   expenses.forEach((row) => {

@@ -8,3 +8,8 @@ services:
       build: 
         context: services/ts
         dockerfile: auth/Dockerfile.test
+
+    user-test:
+      build: 
+        context: services/ts
+        dockerfile: user/Dockerfile.test

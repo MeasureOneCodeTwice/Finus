@@ -26,15 +26,3 @@ export async function getTransactionsData(
 
   return transactions;
 }
-
-export async function getTransactionsDataSafe(
-  pool: Pool,
-  userId: string,
-): Promise<Transaction[] | null> {
-  try {
-    return await getTransactionsData(pool, userId);
-  } catch (error) {
-    console.error("Error in getTransactionsData:", error);
-    return null;
-  }
-}
