@@ -5,7 +5,7 @@ import { instance } from "./config";
 import type { BudgetWithExpenditure } from "@/types/BudgetWithExpenditure";
 import type { SnapshotData } from "@/types/AggregatedSnapshot";
 
-async function getTransactions(): Promise<Transaction[]> {
+async function getTransactions(): Promise<Transaction[] | null> {
   try {
     const response = await instance.get(`/table/trasactions`);
     //console.log(response);
@@ -14,7 +14,9 @@ async function getTransactions(): Promise<Transaction[]> {
         `Failed to fetch transactions table data: ${response.statusText}`,
       );
     }
-
+    if (!response.data) {
+      return null;
+    }
     const output: Transaction[] = [];
     for (let i = 0; i < response.data.length; i++) {
       output.push({
@@ -53,7 +55,7 @@ export async function getSnapshotData(): Promise<SnapshotData> {
 // Budget with actual expenditure and proposed budgets - returns category, budgetAmount, actualAmount
 async function getBudgetWithExpenditure(
   period: string,
-): Promise<BudgetWithExpenditure[]> {
+): Promise<BudgetWithExpenditure[] | null> {
   try {
     const response = await instance.get(
       `/charts/budget-expenditure?period=${period}`,
@@ -63,7 +65,9 @@ async function getBudgetWithExpenditure(
         `Failed to fetch budget with actual expenditure: ${response.statusText}`,
       );
     }
-
+    if (!response.data.categories) {
+      return null;
+    }
     const categories = response.data.categories || [];
     const budgetAmounts = response.data.budgetAmounts || [];
     const actualAmounts = response.data.actualAmounts || [];
@@ -87,7 +91,9 @@ async function getBudgetWithExpenditure(
 
 // Expenses over time chart
 // Accepted time periods are "w" for weekly, "m" for monthly, and "y" for yearly - the backend will handle the units
-async function getExpensesChartData(period: string): Promise<ChartData<"bar">> {
+async function getExpensesChartData(
+  period: string,
+): Promise<ChartData<"bar"> | null> {
   try {
     if (!["w", "m", "y"].includes(period)) {
       throw new Error(
@@ -100,7 +106,9 @@ async function getExpensesChartData(period: string): Promise<ChartData<"bar">> {
         `Failed to fetch expenses chart data: ${response.statusText}`,
       );
     }
-
+    if (!response.data.datasets) {
+      return null;
+    }
     return {
       labels: response.data["labels"],
       datasets: [
@@ -121,7 +129,7 @@ async function getExpensesChartData(period: string): Promise<ChartData<"bar">> {
 // Savings contribution chart
 async function getSavingsContribChartData(
   period: string,
-): Promise<ChartData<"line">> {
+): Promise<ChartData<"line"> | null> {
   try {
     if (!["w", "m", "y"].includes(period)) {
       throw new Error(
@@ -134,18 +142,22 @@ async function getSavingsContribChartData(
         `Failed to fetch savings contribution chart data: ${response.statusText}`,
       );
     }
-    //console.log("Received savings contribution chart data:", response.data);
-    return {
-      labels: response.data["labels"],
-      datasets: [
-        {
-          label: response.data["datasets"][0]["label"],
-          data: response.data["datasets"][0]["data"],
-          borderColor: "rgb(68, 255, 21)",
-          backgroundColor: "rgba(68, 255, 21, 0.5)",
-        },
-      ],
-    };
+
+    if (response && response.data.datasets > 0) {
+      return {
+        labels: response.data["labels"],
+        datasets: [
+          {
+            label: response.data["datasets"][0]["label"],
+            data: response.data["datasets"][0]["data"],
+            borderColor: "rgb(68, 255, 21)",
+            backgroundColor: "rgba(68, 255, 21, 0.5)",
+          },
+        ],
+      };
+    } else {
+      return null;
+    }
   } catch (error) {
     console.error("Error fetching savings contribution chart data:", error);
     throw error;
@@ -153,7 +165,9 @@ async function getSavingsContribChartData(
 }
 
 // Income flow - sankey chart data
-async function getIncomeFlowChartData(period: string): Promise<SankeyData> {
+async function getIncomeFlowChartData(
+  period: string,
+): Promise<SankeyData | null> {
   try {
     if (!["w", "m", "y"].includes(period)) {
       throw new Error(
@@ -165,6 +179,9 @@ async function getIncomeFlowChartData(period: string): Promise<SankeyData> {
       throw new Error(
         `Failed to fetch income flow chart data: ${response.statusText}`,
       );
+    }
+    if (!response.data) {
+      return null;
     }
     return response.data;
   } catch (error) {

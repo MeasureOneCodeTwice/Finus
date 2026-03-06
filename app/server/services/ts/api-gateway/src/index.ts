@@ -32,15 +32,15 @@ app.use(
   }),
 );
 
-const ANALYTICS_PATHS = ["charts/savings", "charts/incomeflow"];
-app.use(
-  createProxyMiddleware({
-    pathFilter: (path) => pathMatches(path, ANALYTICS_PATHS),
-    target: process.env.ANALYTICS_SERVICE_ADDR,
-    changeOrigin: true,
-    pathRewrite: { "^/api": "" },
-  }),
-);
+// const ANALYTICS_PATHS = ["charts/savings", "charts/incomeflow"];
+// app.use(
+//   createProxyMiddleware({
+//     pathFilter: (path) => pathMatches(path, ANALYTICS_PATHS),
+//     target: process.env.ANALYTICS_SERVICE_ADDR,
+//     changeOrigin: true,
+//     pathRewrite: { "^/api": "" },
+//   }),
+// );
 
 app.get("/health", async (req: express.Request, res: express.Response) => {
   const result: { [key: string]: string } = {};

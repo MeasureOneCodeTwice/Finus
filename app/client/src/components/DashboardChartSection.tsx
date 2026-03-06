@@ -88,7 +88,7 @@ function DashboardChartSection() {
   //Temporary test data for expenses - delete once API works. This is just to test graph components
   const getTestExpensesData = async (
     period: "w" | "m" | "y",
-  ): Promise<ChartData<"bar">> => {
+  ): Promise<ChartData<"bar"> | null> => {
     //Try to reach API first, get synthetic data if fails
     try {
       const response = await getExpensesChartData(period);
@@ -96,44 +96,24 @@ function DashboardChartSection() {
     } catch (error) {
       console.error("Error fetching expenses chart data:", error);
     }
-    return {
-      labels: ["Mon"],
-      datasets: [
-        {
-          label: "Placeholder Expenses",
-          data: [125],
-          borderColor: "rgb(53, 162, 235)",
-          backgroundColor: "rgba(53, 162, 235, 0.5)",
-        },
-      ],
-    };
+    return null;
   };
 
   const getTestSavingsContribData = async (
     period: "w" | "m" | "y",
-  ): Promise<ChartData<"line">> => {
+  ): Promise<ChartData<"line"> | null> => {
     try {
       const response = await getSavingsContribChartData(period);
       return response;
     } catch (error) {
       console.error("Error fetching savings contribution chart data:", error);
     }
-    return {
-      labels: ["Mon"],
-      datasets: [
-        {
-          label: "Placeholder Savings Contribution",
-          data: [125],
-          borderColor: "rgb(53, 162, 235)",
-          backgroundColor: "rgba(53, 162, 235, 0.5)",
-        },
-      ],
-    };
+    return null;
   };
 
   const getTestIncomeFlowData = async (
     period: "w" | "m" | "y",
-  ): Promise<SankeyData> => {
+  ): Promise<SankeyData | null> => {
     try {
       const response = await getIncomeFlowChartData(period);
       //console.log("Received income flow chart data:", response);
@@ -142,10 +122,7 @@ function DashboardChartSection() {
       console.error("Error fetching income flow chart data:", error);
     }
     //console.log("Using placeholder income flow chart data");
-    return {
-      nodes: [],
-      links: [],
-    };
+    return null;
   };
 
   const expensesBarOptions: ChartOptions<"bar"> = {
@@ -243,6 +220,14 @@ function DashboardChartSection() {
   ));
 
   let noTransactionReport = null;
+  console.log(
+    "rendering chart, the active chart is ",
+    activeChart,
+    "and the data is ",
+    expensesData,
+    savingsData,
+    incomeData,
+  );
   if (!isLoading) {
     if (activeChart === "expenses" && !expensesData) {
       noTransactionReport = (

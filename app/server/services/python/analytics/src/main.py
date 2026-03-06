@@ -97,6 +97,7 @@ async def get_savings(period: str, user_id: int = Depends(get_current_user)):
         connection = get_db_connection()
         if not connection:
             raise HTTPException(status_code=500, detail="Database connection failed")
+
         
         #get all savings accounts for user id
         cursor = connection.cursor(dictionary=True)
@@ -114,7 +115,7 @@ async def get_savings(period: str, user_id: int = Depends(get_current_user)):
 
         if not savings_accounts:
             return HTTPException(status_code=404, detail="No savings accounts found")#this should be visible to users
-        
+
         account_ids = [acc['id'] for acc in savings_accounts]
         placeholders = ','.join(['%s'] * len(account_ids))
 
@@ -130,6 +131,8 @@ async def get_savings(period: str, user_id: int = Depends(get_current_user)):
         """
         cursor.execute(query, account_ids)
         transactions = cursor.fetchall()
+        if len(transactions) == 0:
+            return None#doing this to make the icon show up correctly
         
         cursor.close()
         connection.close()
@@ -198,6 +201,8 @@ async def get_savings(period: str, user_id: int = Depends(get_current_user)):
         labels = [item['date'] for item in savings_over_time]
         data = [item['savings'] for item in savings_over_time]
         
+
+
         return {
             'labels': labels,
             'datasets': [{
@@ -247,7 +252,8 @@ async def get_income_flow(period: str = Query(default='w', enum=['w', 'm', 'y'])
         """
         cursor.execute(query, (user_id, start_date, end_date))
         transactions = cursor.fetchall()
-        
+        if len(transactions) == 0:
+            return None
         cursor.close()
         connection.close()
         

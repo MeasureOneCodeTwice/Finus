@@ -1,5 +1,5 @@
 type NoTransactionReportProps = {
-  icon: React.ReactNode;
+  icon: React.ReactElement;
   title: string;
   description: string;
 };

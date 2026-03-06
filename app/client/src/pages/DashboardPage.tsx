@@ -74,13 +74,6 @@ function DashboardPage({ session }: DashboardPageProps) {
       <p className="text-lg text-green-500">
         Here you can view your recent transactions and manage your finances.
       </p>
-      {/* <section className="flex flex-row items-center justify-center gap-12 my-10">
-        <AccountCard title="Total Balance" amount="$5,000" />
-        <AccountCard title="Current Income" amount="$5,000"/>
-        <AccountCard title="Average Expenses" amount="$100,000"/>
-        <AccountCard title="Current Debt" amount="$50,000"/>
-        <AccountCard title="Total Savings" amount="$100,000,000"/>
-      </section> */}
       <SnapshotSection />
       <DashboardChartSection />
       <BudgetExpenditureChart />
