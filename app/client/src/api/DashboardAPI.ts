@@ -32,7 +32,7 @@ async function getTransactions(): Promise<Transaction[] | null> {
 
     return output;
   } catch (error) {
-    console.error("Error fetching expenses chart data:", error);
+    console.error("Error fetching transactions data:", error);
     throw error;
   }
 }
@@ -106,7 +106,7 @@ async function getExpensesChartData(
         `Failed to fetch expenses chart data: ${response.statusText}`,
       );
     }
-    if (!response.data.datasets) {
+    if (!response.data) {
       return null;
     }
     return {
@@ -137,13 +137,14 @@ async function getSavingsContribChartData(
       );
     }
     const response = await instance.get(`/charts/savings?period=${period}`);
+    console.log("received savings data", response);
     if (response.status !== 200) {
       throw new Error(
         `Failed to fetch savings contribution chart data: ${response.statusText}`,
       );
     }
 
-    if (response && response.data.datasets > 0) {
+    if (response && response.data.datasets) {
       return {
         labels: response.data["labels"],
         datasets: [

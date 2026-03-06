@@ -49,6 +49,7 @@ function DashboardChartSection() {
     setIsLoading(true);
     try {
       const data = await getTestSavingsContribData(selectedPeriod);
+      console.log("data", data);
       setsavingsData(data);
     } catch (error) {
       console.error("Failed to fetch savings data:", error);
@@ -104,6 +105,7 @@ function DashboardChartSection() {
   ): Promise<ChartData<"line"> | null> => {
     try {
       const response = await getSavingsContribChartData(period);
+      console.log("Received savings contribution chart data:", response);
       return response;
     } catch (error) {
       console.error("Error fetching savings contribution chart data:", error);

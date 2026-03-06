@@ -28,7 +28,7 @@ def get_db_connection():
 
 # Configuration for mock data generation
 NUM_USERS = 1
-ACCOUNTS_PER_USER = 3  # Average number of financial accounts per user
+ACCOUNTS_PER_USER = 5  # Average number of financial accounts per user
 TRANSACTIONS_PER_ACCOUNT = 200
 START_DATE = datetime.now() - timedelta(days=365)
 
@@ -41,7 +41,7 @@ TEST_USER_PASSWORD = 'pwd'
 
 
 FINANCIAL_ACCOUNT_TYPES = ['chequing', 'savings', 'credit_card', 'investment']
-FINANCIAL_ACCOUNT_SUBTYPES = ['RRSP', 'TFSA', 'FHSA', 'RESP', 'RDSP', 'na']
+FINANCIAL_ACCOUNT_SUBTYPES = ['RRSP', 'TFSA', 'FHSA', 'RESP', 'RDSP', 'loan', 'na']
 INVESTMENT_TYPES = ['stocks', 'bonds', 'mutual funds', 'ETFs']
 GOAL_TYPES = ['money', 'debt']
 FIRST_NAMES = ['John', 'Jane', 'Alex', 'Emily', 'Michael', 'Sarah', 'David', 'Laura']
@@ -105,24 +105,34 @@ def create_financial_accounts(cursor, profile_ids):
             
             non_credit_account_types = [acc in FINANCIAL_ACCOUNT_TYPES for acc in FINANCIAL_ACCOUNT_TYPES if (acc != 'na' or acc != 'loan')]
 
-            # randomly assign subtype for savings accounts
             subtype = None
-            if acc_type == 'savings' and random.random() > 0.5:
-                subtype = random.choice(non_credit_account_types)
-            if acc_type == 'credit_card':
-                random.choice(['na','loan'])
+            if acc_type == 'savings':
+                if random.random() > 0.5:
+                    savings_subtypes = ['RRSP', 'TFSA', 'FHSA', 'RESP', 'RDSP']
+                    subtype = random.choice(savings_subtypes)
             
-            cursor.execute("""
-                INSERT INTO finus.financialAccount (id, name, type, balance, value, last_updated, subtype)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-            """, (financialAccount_id, name, acc_type, balance, value, last_updated, subtype))
+            elif acc_type == 'credit_card':
+                credit_subtypes = ['na', 'loan']
+                subtype = random.choice(credit_subtypes)
             
-            financialAccount_ids.append(financialAccount_id)
+            try:
+                cursor.execute("""
+                    INSERT INTO finus.financialAccount (id, name, type, balance, value, last_updated, subtype)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """, (financialAccount_id, name, acc_type, balance, value, last_updated, subtype))
+                
+                financialAccount_ids.append(financialAccount_id)
+                
+                cursor.execute("""
+                    INSERT INTO finus.profile_financialAccount (profile_id, financialAccount_id)
+                    VALUES (%s, %s)
+                """, (profile_id, financialAccount_id))
+
+            except Exception as e:
+                print(e)
             
-            cursor.execute("""
-                INSERT INTO finus.profile_financialAccount (profile_id, financialAccount_id)
-                VALUES (%s, %s)
-            """, (profile_id, financialAccount_id))
+            # financialAccount_ids.append(financialAccount_id)
+        
     
     return financialAccount_ids
 
