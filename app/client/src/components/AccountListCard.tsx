@@ -7,16 +7,10 @@ import type { AuthSession } from "@/pages/authTypes.ts";
 interface cardProp {
   account: Account;
   session: AuthSession;
-  setAccount: (editAccount: Account) => void;
   removeAccount: (removeAccount: Account) => void;
 }
 
-export default function Card({
-  account,
-  session,
-  setAccount,
-  removeAccount,
-}: cardProp) {
+export default function Card({ account, session, removeAccount }: cardProp) {
   //Stores the value that toggles thhe account popup form
   const [seen, setSeen] = useState(false);
 
@@ -61,7 +55,6 @@ export default function Card({
         <AccountPopup
           toggle={toggle}
           session={session}
-          setAccount={setAccount}
           edit={true}
           selectedAccount={account}
         />

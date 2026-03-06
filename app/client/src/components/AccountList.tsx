@@ -54,7 +54,6 @@ export default function AccountList({ session }: listProp) {
             <AccountListCard
               session={session}
               account={account}
-              setAccount={addAccount}
               removeAccount={removeAccount}
             />
           ))}

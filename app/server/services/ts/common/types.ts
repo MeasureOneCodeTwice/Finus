@@ -16,7 +16,7 @@ export interface financialAccount extends RowDataPacket {
   id: number;
   name: string;
   type: string;
-  balence: number;
+  balance: number;
   value: number;
   last_updated: Date;
   subtype: string;

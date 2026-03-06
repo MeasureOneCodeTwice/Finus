@@ -7,6 +7,7 @@ import type { ResultSetHeader } from "mysql2";
 import { getConnectionPool } from "@/sqlUtil";
 import type { financialAccount } from "@/types.js";
 import jwt from "jsonwebtoken";
+
 //import { authenticateJWT } from "../handleJWT.js";
 
 //import { error } from "node:console";
@@ -67,10 +68,14 @@ accountsRouter.get("/", async (req: Request, res: Response) => {
 
   if (userId) {
     try {
-      const [rows] = await db.query<financialAccount>(
-        `SELECT * FROM financialAccount WHERE id = ?`,
+      const [rows] = await db.query<financialAccount[]>(
+        `SELECT * FROM financialAccount JOIN profile_financialAccount pfa 
+        ON financialAccount.id = pfa.financialAccount_id
+        WHERE pfa.profile_id = ?`,
         [userId],
       );
+
+      console.log(rows);
 
       return res.status(200).json(rows);
     } catch (err) {
@@ -116,7 +121,7 @@ accountsRouter.put("/", async (req: Request, res: Response) => {
 
     await db.query<ResultSetHeader>(
       `UPDATE financialAccount 
-      SET name = ?, type = ?, balence = ?, value = ?, last_updated = ?, subtype = ?
+      SET name = ?, type = ?, balance = ?, value = ?, last_updated = ?, subtype = ?
       WHERE id= ?`,
       [name, type, balance, value, last_updated, subtype ?? null, id],
     );
@@ -238,7 +243,7 @@ function isAccount(reqBody: unknown): reqBody is financialAccount {
   //Checks if the fields match to an financial account
   return (
     typeof check.id === "number" &&
-    typeof check.balence === "number" &&
+    typeof check.balance === "number" &&
     typeof check.type === "string" &&
     typeof check.name === "string" &&
     typeof check.value === "number" &&
