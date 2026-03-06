@@ -7,10 +7,16 @@ import type { AuthSession } from "@/pages/authTypes.ts";
 interface cardProp {
   account: Account;
   session: AuthSession;
+  setAccount: (editAccount: Account) => void;
   removeAccount: (removeAccount: Account) => void;
 }
 
-export default function Card({ account, session, removeAccount }: cardProp) {
+export default function Card({
+  account,
+  session,
+  setAccount,
+  removeAccount,
+}: cardProp) {
   //Stores the value that toggles thhe account popup form
   const [seen, setSeen] = useState(false);
 
@@ -43,7 +49,7 @@ export default function Card({ account, session, removeAccount }: cardProp) {
           <p>
             {account.type + " " + (account.subtype ? " " + account.type : "")}
           </p>
-          <p>{account.balance}</p>
+          <p>{Number(account.balance).toFixed(2)}</p>
         </div>
 
         <div>
@@ -55,6 +61,7 @@ export default function Card({ account, session, removeAccount }: cardProp) {
         <AccountPopup
           toggle={toggle}
           session={session}
+          setAccount={setAccount}
           edit={true}
           selectedAccount={account}
         />

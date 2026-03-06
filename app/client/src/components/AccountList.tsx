@@ -42,6 +42,14 @@ export default function AccountList({ session }: listProp) {
     );
   };
 
+  const setAccount = (editAccount: Account) => {
+    setUserAccounts(
+      userAccounts.map((account) =>
+        account.id === editAccount.id ? { ...editAccount } : account,
+      ),
+    );
+  };
+
   const toggle = () => {
     setSeen(!seen);
   };
@@ -55,6 +63,7 @@ export default function AccountList({ session }: listProp) {
               session={session}
               account={account}
               removeAccount={removeAccount}
+              setAccount={setAccount}
             />
           ))}
         </div>

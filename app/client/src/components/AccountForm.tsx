@@ -13,6 +13,7 @@ import type { AuthSession } from "@/pages/authTypes.ts";
 interface popupProp {
   toggle: () => void;
   session: AuthSession;
+  setAccount?: (account: Account) => void;
   addAccount?: (account: Account) => void;
   edit: boolean;
   selectedAccount?: Account;
@@ -23,6 +24,7 @@ type typeofAccount = keyof typeof accountCategory;
 export default function PopupForm({
   toggle,
   session,
+  setAccount,
   addAccount,
   edit,
   selectedAccount,
@@ -77,11 +79,10 @@ export default function PopupForm({
           //Put request to update the account
           putUserAccount(session, newAccount).then((response) => {
             //Determine if sucessfully updated the account
-            if (response && response.lastUpdated) {
+            if (response && response.lastUpdated && setAccount) {
               newAccount.last_updated = response.lastUpdated;
-
-              //Update the values of the selected account
-              selectedAccount = { ...newAccount };
+              newAccount.balance = Number(newAccount.balance.toFixed(2));
+              setAccount(newAccount);
             }
           });
         } catch {
