@@ -2,7 +2,7 @@ import type { AuthSession } from "@/pages/authTypes";
 import type { updateResponse } from "../types/responseTypes";
 import { type Transaction } from "../types/Transaction";
 
-const requestUrl = "http://localhost:3000/api/transacitons";
+const requestUrl = "http://localhost:3000/api/transactions";
 
 //Sends a GET request to get the list of user transactions for the account
 export async function getTransactions(
