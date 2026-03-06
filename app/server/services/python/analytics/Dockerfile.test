@@ -1,0 +1,12 @@
+FROM measureonecodetwice/finus-analytics:local
+
+COPY analytics/test ./test
+COPY analytics/requirements-test.txt .
+
+RUN pip install -r requirements-test.txt
+
+WORKDIR /app
+
+ENV PYTHONPATH=/app
+
+CMD ["pytest", "test/", "-v", "--cov=src", "--cov-report=term-missing", "--cov-report=xml:coverage.xml"]

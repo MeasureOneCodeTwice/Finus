@@ -13,3 +13,8 @@ services:
       build: 
         context: services/ts
         dockerfile: user/Dockerfile.test
+
+    analytics-test:
+      build: 
+        context: services/python
+        dockerfile: analytics/Dockerfile.test

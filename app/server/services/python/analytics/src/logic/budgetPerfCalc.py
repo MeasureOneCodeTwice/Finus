@@ -50,9 +50,9 @@ class BudgetPerformanceCalculator:
             variance = actual - budget_amount
             percent_used = (actual / budget_amount * 100) if budget_amount > 0 else 0
             
-            if variance > 0:
+            if variance > 100:
                 status = 'overspent'
-            elif variance < 0:
+            elif variance < -100:
                 status = 'under_budget'
             else:
                 status = 'on_track'

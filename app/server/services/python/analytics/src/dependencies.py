@@ -10,6 +10,9 @@ SECRET_KEY = os.getenv('JWT_SECRET')
 ALGORITHM = 'HS256'
 
 def get_db_connection():
+    #check env vars
+    if not all([os.getenv("MYSQL_HOST"), os.getenv("MYSQL_USER"), os.getenv("MYSQL_PASSWORD"), os.getenv("DB_NAME")]):
+        raise HTTPException(status_code=500, detail="Missing environment variables")
     return mysql.connector.connect(
         host=os.getenv("MYSQL_HOST"),
         user=os.getenv("MYSQL_USER"),
@@ -27,11 +30,16 @@ async def get_current_user(authorization: Optional[str] = Header(None)):
             raise HTTPException(status_code=401, detail="Invalid authentication scheme")
         
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id = payload.get('sub') or payload.get('user_id') or payload.get('id')
+        user_id = payload.get('sub')
         
         if not user_id:
             raise HTTPException(status_code=401, detail="User ID not found in token")
         
         return int(user_id)
+        
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
     except ValueError:
         raise HTTPException(status_code=401, detail="Invalid authorization header format")

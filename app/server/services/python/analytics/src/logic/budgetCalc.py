@@ -56,7 +56,7 @@ class BudgetCalculator:
         
         if pool_actual > 0:
             return (avg_spent / pool_actual) * pool_total
-        return avg_spent * 0.9  # 10% reduction
+        return avg_spent * 0.9  # try to reduce spending by 10% if there is absolutely no income
     
     def scale_budget(self, amount: float, period: str) -> float:
         if period == 'w':
