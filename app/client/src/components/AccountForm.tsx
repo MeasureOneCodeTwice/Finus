@@ -141,6 +141,7 @@ export default function PopupForm({
         interest: 0,
       };
     } else {
+      //Default value
       return {
         name: "",
         subType: "",
@@ -153,12 +154,20 @@ export default function PopupForm({
     if (edit && selectedAccount) {
       return selectedAccount.balance.toString();
     } else {
+      //Default value
       return "";
     }
   });
 
   const [accountType, setAccountType] = useState<typeofAccount | undefined>(
-    undefined,
+    () => {
+      if (edit && selectedAccount) {
+        return selectedAccount.type as typeofAccount;
+      } else {
+        //Default value
+        return undefined;
+      }
+    },
   );
 
   const accountCat: typeofAccount[] = Object.keys(
