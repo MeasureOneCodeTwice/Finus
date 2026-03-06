@@ -54,7 +54,7 @@ async def get_current_user(authorization: Optional[str] = Header(None)):
         
         if not user_id:
             raise HTTPException(status_code=401, detail="User ID not found in token")
-        
+
         return int(user_id)
         
     except ValueError:

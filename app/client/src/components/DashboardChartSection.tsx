@@ -220,14 +220,6 @@ function DashboardChartSection() {
   ));
 
   let noTransactionReport = null;
-  console.log(
-    "rendering chart, the active chart is ",
-    activeChart,
-    "and the data is ",
-    expensesData,
-    savingsData,
-    incomeData,
-  );
   if (!isLoading) {
     if (activeChart === "expenses" && !expensesData) {
       noTransactionReport = (

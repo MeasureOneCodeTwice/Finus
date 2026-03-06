@@ -93,7 +93,7 @@ app.use(
 //transactions table in user service
 app.use(
   createProxyMiddleware({
-    pathFilter: ["/table/trasactions"],
+    pathFilter: ["/table/transactions"],
     target: process.env.USER_SERVICE_ADDR,
     changeOrigin: true,
   }),

@@ -7,8 +7,8 @@ import type { SnapshotData } from "@/types/AggregatedSnapshot";
 
 async function getTransactions(): Promise<Transaction[] | null> {
   try {
-    const response = await instance.get(`/table/trasactions`);
-    //console.log(response);
+    const response = await instance.get(`/table/transactions`);
+
     if (response.status !== 200) {
       throw new Error(
         `Failed to fetch transactions table data: ${response.statusText}`,
