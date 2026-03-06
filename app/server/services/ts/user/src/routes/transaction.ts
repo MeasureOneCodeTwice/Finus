@@ -7,6 +7,27 @@ import { getConnectionPool } from "@/sqlUtil";
 export const transactionsRouter = Router();
 
 const db = getConnectionPool();
+// Get all transactions for a specific financial account
+transactionsRouter.get("/", async (req: Request, res: Response) => {
+  try {
+    const { account_id } = req.query;
+
+    if (!account_id) {
+      return res.status(400).json({ error: "Missing account_id" });
+    }
+
+    const [rows] = await db.query(
+      `SELECT * FROM transaction WHERE financialAccount_id = ?`,
+      [account_id],
+    );
+
+    res.json(rows);
+  } catch (err) {
+    console.error("Failed to fetch transactions", err);
+    res.status(500).json({ error: "Failed to fetch transactions" });
+  }
+});
+
 //creating a new transaction
 
 transactionsRouter.post("/", async (req: Request, res: Response) => {
@@ -68,6 +89,20 @@ transactionsRouter.put("/:id", async (req: Request, res: Response) => {
     res.json({ message: "Transaction successfully updated" });
   } catch (err) {
     console.error("Transaction update failed", err);
+  }
+});
+
+// DELETE /transactions/:id
+transactionsRouter.delete("/:id", async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id;
+
+    await db.query(`DELETE FROM transaction WHERE id=?`, [id]);
+
+    res.json({ message: "Transaction deleted" });
+  } catch (err) {
+    console.error("Transaction deletion failed", err);
+    res.status(500).json({ error: "Transaction deletion failed" });
   }
 });
 

@@ -36,20 +36,29 @@ export function normalizeRow(raw: unknown): NormalizedRow {
 // helper to normalize date formats into YYYY-MM-DD
 function normalizeDate(input: string | null): string | null {
   if (!input) return null;
+
   const data = input.replace(/[.\s]/g, "-").replace(/\//g, "-");
-  if (/^\d{4}-\d{2}-\d{2}$/.test(data)) return data; // already in YYYY-MM-DD
 
+  // Already normalized
+  if (/^\d{4}-\d{2}-\d{2}$/.test(data)) return data;
+
+  // Matches DD-MM-YYYY or MM-DD-YYYY
   if (/^\d{2}-\d{2}-\d{4}$/.test(data)) {
-    // if MM-DD-YYYY or DD-MM-YYYY, convert to YYYY-MM-DD
-    const [m, d, y] = data.split("-");
+    const [a, b, y] = data.split("-");
+
+    if (Number(a) > 12) {
+      const d = a;
+      const m = b;
+      return `${y}-${m}-${d}`;
+    }
+
+    //assume MM-DD-YYYY
+    const m = a;
+    const d = b;
     return `${y}-${m}-${d}`;
   }
-  if (/^\d{2}-\d{2}-\d{4}$/.test(data)) {
-    const [d, m, y] = data.split("-");
-    return `${y}-${m}-${d}`;
-  }
 
-  return null; // invalid date
+  return null;
 }
 
 // helper to normalize amount fields

@@ -1,0 +1,100 @@
+import { describe, it, expect } from "vitest";
+import { normalizeRow } from "../src/utils/NormalizeRow";
+//tests for normalizeRow function we can run with vitest
+describe("normalizeRow", () => {
+  it("normalizes a fully valid row", () => {
+    const raw = {
+      date: "2024-01-15",
+      description: " Test transaction ",
+      amount: "100.50",
+      sender: " Joe ",
+      recipient: " Bob ",
+      category: " Food ",
+    };
+
+    const result = normalizeRow(raw);
+
+    expect(result).toEqual({
+      date: "2024-01-15",
+      description: "Test transaction",
+      amount: 100.5,
+      sender: "Joe",
+      recipient: "Bob",
+      category: "Food",
+    });
+  });
+
+  it("handles null and undefined fields", () => {
+    const raw = {
+      date: null,
+      description: undefined,
+      amount: null,
+      sender: undefined,
+      recipient: null,
+      category: undefined,
+    };
+
+    const result = normalizeRow(raw);
+
+    expect(result).toEqual({
+      date: null,
+      description: null,
+      amount: null,
+      sender: null,
+      recipient: null,
+      category: null,
+    });
+  });
+  //tests for different date formats
+  it("normalizes MM-DD-YYYY date format", () => {
+    const raw = { date: "01-31-2024" };
+    const result = normalizeRow(raw);
+    expect(result.date).toBe("2024-01-31");
+  });
+  //tests for DD-MM-YYYY date format
+  it("normalizes DD-MM-YYYY date format", () => {
+    const raw = { date: "31-01-2024" };
+    const result = normalizeRow(raw);
+    expect(result.date).toBe("2024-01-31");
+  });
+  //tests for invalid date formats
+  it("returns null for invalid dates", () => {
+    const raw = { date: "not-a-date" };
+    const result = normalizeRow(raw);
+    expect(result.date).toBeNull();
+  });
+  //tests for amount normalization
+  it("normalizes positive amounts", () => {
+    const raw = { amount: "1,234.56" };
+    const result = normalizeRow(raw);
+    expect(result.amount).toBe(1234.56);
+  });
+  //tests for negative amounts with minus sign
+  it("normalizes negative amounts in parentheses", () => {
+    const raw = { amount: "(500.00)" };
+    const result = normalizeRow(raw);
+    expect(result.amount).toBe(-500);
+  });
+  //tests for null amount
+  it("returns null for invalid amounts", () => {
+    const raw = { amount: "abc" };
+    const result = normalizeRow(raw);
+    expect(result.amount).toBeNull();
+  });
+  //tests for trimming string fields
+  it("trims all string fields", () => {
+    const raw = {
+      description: "   rent payment   ",
+      sender: "   joe   ",
+      recipient: "   bob   ",
+      category: "   misc   ",
+    };
+
+    const result = normalizeRow(raw);
+
+    expect(result.description).toBe("rent payment");
+    expect(result.sender).toBe("joe");
+    expect(result.recipient).toBe("bob");
+    expect(result.category).toBe("misc");
+  });
+});
