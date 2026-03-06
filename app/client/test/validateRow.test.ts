@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { validateRow } from "../src/utils/ValidateRow";
 import type { NormalizedRow } from "../src/utils/NormalizeRow";
-
+//tests for validateRow function
 describe("validateRow", () => {
   it("returns no errors for a fully valid row", () => {
     const row: NormalizedRow = {

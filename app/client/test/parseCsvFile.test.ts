@@ -9,7 +9,7 @@ import Papa, {
 import { normalizeRow } from "../src/utils/NormalizeRow";
 import { convertDraft } from "../src/utils/ConvertTransaction";
 
-// Extend PapaParse types to match real runtime behavior
+// Extend PapaParse types to match real runtime behavior, this ensures our mocks are correctly typed and we can call the complete and error callbacks in our tests without type issues.
 type FixedParseConfig<T> = ParseConfig<T> & {
   error?: (err: Error, file?: File) => void;
   complete?: (results: ParseResult<T>, file?: File) => void;

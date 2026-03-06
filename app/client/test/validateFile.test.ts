@@ -32,7 +32,7 @@ describe("validateFile", () => {
       tooManyInvalid: true, // 100% invalid
     });
   });
-
+  //here we check the case where 20% or more of rows are invalid
   it("detects when more than 20% of rows are invalid", () => {
     const rows: TransactionDraft[] = [
       { date: "2024-01-01", description: "A", amount: 10, errors: [] },
@@ -44,9 +44,10 @@ describe("validateFile", () => {
 
     expect(result.validCount).toBe(2);
     expect(result.invalidCount).toBe(1);
-    expect(result.tooManyInvalid).toBe(true); // more then 20% invalid
+    expect(result.tooManyInvalid).toBe(true);
   });
 
+  //here we check the case where exactly 20% of rows are invalid
   it("does not flag tooManyInvalid when invalid rows are 20% or less", () => {
     const rows: TransactionDraft[] = [
       { date: "2024-01-01", description: "A", amount: 10, errors: [] },
@@ -60,7 +61,7 @@ describe("validateFile", () => {
 
     expect(result.validCount).toBe(4);
     expect(result.invalidCount).toBe(1);
-    expect(result.tooManyInvalid).toBe(false); // 1/5 = 20%
+    expect(result.tooManyInvalid).toBe(false);
   });
 
   it("handles an empty file", () => {
