@@ -25,7 +25,7 @@ export default function IncomeList({ session }: listProp) {
     alert("Failed to get user income");
   }
 
-  //Adds a account to the list
+  //Adds income to the list
   const addIncome = (newIncome: Income) => {
     setUsersIncomes((userIncomes) => [...userIncomes, newIncome]);
   };
@@ -50,6 +50,7 @@ export default function IncomeList({ session }: listProp) {
               income={income}
               setIncome={addIncome}
               removeIncome={removeIncome}
+              session={session}
             />
           ))}
         </div>
@@ -60,7 +61,12 @@ export default function IncomeList({ session }: listProp) {
       </div>
 
       {seen ? (
-        <IncomePopup toggle={toggle} addIncome={addIncome} edit={false} />
+        <IncomePopup
+          session={session}
+          toggle={toggle}
+          addIncome={addIncome}
+          edit={false}
+        />
       ) : null}
     </>
   );

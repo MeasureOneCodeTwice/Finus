@@ -16,17 +16,19 @@ export default function AccountList({ session }: listProp) {
   const [seen, setSeen] = useState<boolean>(false);
 
   //Try to get the accounts from the server
-  try {
-    getUserAccounts(session).then((accounts) => {
-      //Determine if we acquired the accounts
-      if (accounts) {
-        console.log(accounts);
-        setUserAccounts(accounts);
-      }
-    });
-  } catch {
-    //alert("Failed to retrieve user accounts");
-  }
+  setInterval(async () => {
+    try {
+      getUserAccounts(session).then((accounts) => {
+        //Determine if we acquired the accounts
+        if (accounts) {
+          console.log(accounts);
+          setUserAccounts(accounts);
+        }
+      });
+    } catch {
+      //alert("Failed to retrieve user accounts");
+    }
+  }, 60000);
 
   //Adds a account to the list
   const addAccount = (newAccount: Account) => {

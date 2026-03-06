@@ -6,6 +6,8 @@ import type { Request, Response } from "express";
 import type { ResultSetHeader } from "mysql2";
 import { getConnectionPool } from "@/sqlUtil";
 import type { financialAccount } from "@/types.js";
+import { authenticateJWT } from "../handleJWT.js";
+
 //import { error } from "node:console";
 
 export const accountsRouter = Router();
@@ -37,24 +39,33 @@ accountsRouter.post("/", async (req: Request, res: Response) => {
 });
 
 accountsRouter.get("/", async (req: Request, res: Response) => {
-  const { id } = req.body;
+  let userId = 0;
 
   try {
-    const [result] = await db.query(
-      `SELECT * FROM financialAccount WHERE id = ?`,
-      [id],
-    );
-
-    const accounts: financialAccount[] = new Array(result.length);
-
-    for (let i = 0; i < result.length; i++) {
-      accounts[i] = result[i];
-    }
-
-    res.json(accounts);
+    userId = authenticateJWT(req);
   } catch (err) {
-    console.error("Failed to retrieve user's account", err);
-    res.status(500).json({ error: "Failed to retrieve account(s)" });
+    console.log(err);
+    res.status(401).json({ error: err });
+  }
+
+  if (userId) {
+    try {
+      const [result] = await db.query(
+        `SELECT * FROM financialAccount WHERE id = ?`,
+        [userId],
+      );
+
+      const accounts: financialAccount[] = new Array(result.length);
+
+      for (let i = 0; i < result.length; i++) {
+        accounts[i] = result[i];
+      }
+
+      res.json(accounts);
+    } catch (err) {
+      console.error("Failed to retrieve user's account", err);
+      res.status(500).json({ error: "Failed to retrieve account(s)" });
+    }
   }
 });
 

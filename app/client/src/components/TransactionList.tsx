@@ -19,20 +19,22 @@ export default function TransactionList({ session }: listProp) {
   );
   const [seen, setSeen] = useState<boolean>(false);
 
-  getUserAccounts(session)
-    .then((accounts) => {
-      console.log(accounts);
+  setInterval(async () => {
+    getUserAccounts(session)
+      .then((accounts) => {
+        console.log(accounts);
 
-      //Detemrine accounts exist
-      if (accounts) {
-        setUserAccounts(accounts);
-      } else {
+        //Detemrine accounts exist
+        if (accounts) {
+          setUserAccounts(accounts);
+        } else {
+          //alert("Failed to get accounts");
+        }
+      })
+      .catch(() => {
         //alert("Failed to get accounts");
-      }
-    })
-    .catch(() => {
-      //alert("Failed to get accounts");
-    });
+      });
+  }, 60000);
 
   //Try to get the account's transaction from the server
   if (selectedAccount) {

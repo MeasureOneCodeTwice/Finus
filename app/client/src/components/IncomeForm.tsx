@@ -43,7 +43,7 @@ export default function PopupForm({
       } else {
         postIncome(session, name, inputAmount, description).then((data) => {
           const newIncome: Income = {
-            id: "",
+            id: 0,
             name: name,
             income: inputAmount,
             description: description,
