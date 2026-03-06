@@ -25,12 +25,14 @@ describe("getExpensesChartData", () => {
   const mockGenerateDateRange = dates.generateDateRange as vi.Mock;
 
   const mockDate = new Date("2024-03-15T12:00:00Z");
-  const RealDate = Date;
+  const RealDate = global.Date;
 
   beforeEach(() => {
     vi.resetAllMocks();
-    vi.useFakeTimers();
-    vi.setSystemTime?.(mockDate);
+    //GitHub actions does not support fake timers for some reason so the tests just rely on the mocked Date
+    //vi.useFakeTimers();
+    //vi.setSystemTime?.(mockDate);
+
     //this tedious hack is needed to mock Date.now()
     global.Date = class extends RealDate {
       constructor(...args: unknown[]) {
