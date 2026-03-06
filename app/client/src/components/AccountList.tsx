@@ -4,7 +4,7 @@ import { type Account } from "../types/AccountType";
 import AccountListCard from "./AccountListCard";
 import AccountPopup from "./AccountForm";
 import type { AuthSession } from "@/pages/authTypes";
-
+import "./userForm.css";
 interface listProp {
   session: AuthSession;
 }
@@ -56,7 +56,7 @@ export default function AccountList({ session }: listProp) {
 
   return (
     <>
-      <div>
+      <div className="popupForm">
         <div>
           {userAccounts.map((account) => (
             <AccountListCard

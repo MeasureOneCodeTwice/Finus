@@ -3,7 +3,7 @@ import { useState } from "react";
 import AccountPopup from "./AccountForm.tsx";
 import { type Account } from "../types/AccountType.ts";
 import type { AuthSession } from "@/pages/authTypes.ts";
-
+import "./userForm.css";
 interface cardProp {
   account: Account;
   session: AuthSession;
@@ -41,8 +41,8 @@ export default function Card({
 
   return (
     <>
-      <div>
-        <h2>{account.name}</h2>
+      <div className="popupForm">
+        <h2 className="">{account.name}</h2>
         <br></br>
 
         <div>

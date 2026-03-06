@@ -6,7 +6,7 @@ import TransactionCard from "./TransactionCard";
 import type { AuthSession } from "@/pages/authTypes";
 import { type Account } from "@/types/AccountType";
 import { getUserAccounts } from "@/api/Account";
-
+import "./userForm.css";
 interface listProp {
   session: AuthSession;
 }
@@ -67,13 +67,23 @@ export default function TransactionList({ session }: listProp) {
     );
   };
 
+  const setTransaction = (editTransaction: Transaction) => {
+    setAccountTransactions(
+      accountTransactions.map((transaction) =>
+        transaction.id === editTransaction.id
+          ? { ...editTransaction }
+          : transaction,
+      ),
+    );
+  };
+
   const toggle = () => {
     setSeen(!seen);
   };
 
   return (
     <>
-      <div>
+      <div className="popupForm">
         <div>
           <label htmlFor="selectAccount">User Account:</label>
           <select
@@ -112,6 +122,7 @@ export default function TransactionList({ session }: listProp) {
           toggle={toggle}
           session={session}
           addTransaction={addTransaction}
+          setTransaction={setTransaction}
           edit={false}
         />
       ) : null}

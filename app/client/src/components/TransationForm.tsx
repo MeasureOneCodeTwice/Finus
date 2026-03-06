@@ -41,24 +41,40 @@ export default function PopupForm({
     if (
       selectedType &&
       validateTransactionForm(
-        selectedAccount[0],
+        selectedAccount,
         selectedType,
         transferAmount,
         selectedDate,
         undefined,
       )
     ) {
-      if (selectedType === transactionCategory.INCOME) {
-        to = selectedAccount[1];
-        from = other;
-      } else {
-        to = other;
-        from = selectedAccount[1];
+      let target;
+
+      if (account) {
+        if (selectedType === transactionCategory.INCOME) {
+          target = account.find(
+            (account) => account.id === selectedAccount,
+          )?.name;
+          if (target) {
+            to = target;
+          }
+
+          from = other;
+        } else {
+          to = other;
+
+          target = account.find(
+            (account) => account.id === selectedAccount,
+          )?.name;
+          if (target) {
+            from = target;
+          }
+        }
       }
 
       userTransaction = {
         id: 0,
-        financialAccount_id: Number(selectedAccount[0]),
+        financialAccount_id: Number(selectedAccount),
         to: to,
         from: from,
         amount: transferAmount,
@@ -73,7 +89,7 @@ export default function PopupForm({
 
           //Send a request to update the transaction
           putTranscations(session, userTransaction).then((result) => {
-            //Determine if the
+            //Determine if we're able to able to edit the transaction
             if (result && setTransaction) {
               setTransaction(userTransaction);
             }
@@ -145,11 +161,11 @@ export default function PopupForm({
   }, [session]);
 
   //Holds state of user input
-  const [selectedAccount, setSelectedAccount] = useState<string[]>(() => {
+  const [selectedAccount, setSelectedAccount] = useState<number>(() => {
     if (edit && selectedTransaction) {
-      return [selectedTransaction.id.toString()];
+      return selectedTransaction.id;
     } else {
-      return [];
+      return 0;
     }
   });
 
@@ -195,18 +211,15 @@ export default function PopupForm({
           <label htmlFor="sellectAccount">User Account:</label>
           <select
             id="selectAccount"
-            value={selectedAccount[0]}
-            onChange={(event) =>
-              setSelectedAccount(event.target.value.split(","))
-            }
+            value={selectedAccount}
+            onChange={(event) => {
+              setSelectedAccount(Number(event.target.value));
+            }}
           >
             <option value="">Select Account</option>
             {account &&
               account.map((account) => (
-                <option
-                  key={account.id}
-                  value={[account.id.toString(), account.name]}
-                >
+                <option key={account.id} value={account.id}>
                   {account.name} ({account.type})
                 </option>
               ))}

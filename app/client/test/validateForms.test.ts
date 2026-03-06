@@ -77,7 +77,7 @@ describe("validateTransactionForm", () => {
   it("returns true when CSV file is provided", () => {
     const file = mockFile();
     const result = validateTransactionForm(
-      "123",
+      123,
       "Deposit",
       100,
       "2024-01-01",
@@ -89,20 +89,20 @@ describe("validateTransactionForm", () => {
   it("returns true for valid manual transaction input", () => {
     const validType = Object.values(transactionCategory)[0];
 
-    const result = validateTransactionForm("123", validType, 50, "2024-01-01");
+    const result = validateTransactionForm(123, validType, 50, "2024-01-01");
     expect(result).toBe(true);
   });
 
   it("returns false when account_id is missing", () => {
     const validType = Object.values(transactionCategory)[0];
 
-    const result = validateTransactionForm("", validType, 50, "2024-01-01");
+    const result = validateTransactionForm(0, validType, 50, "2024-01-01");
     expect(result).toBe(false);
   });
 
   it("returns false for invalid transaction type", () => {
     const result = validateTransactionForm(
-      "123",
+      123,
       "INVALID_TYPE",
       50,
       "2024-01-01",
@@ -113,14 +113,14 @@ describe("validateTransactionForm", () => {
   it("returns false for non-positive amount", () => {
     const validType = Object.values(transactionCategory)[0];
 
-    const result = validateTransactionForm("123", validType, 0, "2024-01-01");
+    const result = validateTransactionForm(123, validType, 0, "2024-01-01");
     expect(result).toBe(false);
   });
 
   it("returns false when date is missing", () => {
     const validType = Object.values(transactionCategory)[0];
 
-    const result = validateTransactionForm("123", validType, 50, "");
+    const result = validateTransactionForm(123, validType, 50, "");
     expect(result).toBe(false);
   });
 });
