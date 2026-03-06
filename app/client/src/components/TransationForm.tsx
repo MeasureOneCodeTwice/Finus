@@ -145,33 +145,46 @@ export default function PopupForm({
   }, [session]);
 
   //Holds state of user input
-  const [selectedAccount, setSelectedAccount] = useState<string[]>([]);
-  const [selectedType, setSelectedType] = useState("");
-  const [amount, setAmount] = useState<string>("");
+  const [selectedAccount, setSelectedAccount] = useState<string[]>(() => {
+    if (edit && selectedTransaction) {
+      return [selectedTransaction.id.toString()];
+    } else {
+      return [];
+    }
+  });
+
+  const [selectedType, setSelectedType] = useState(() => {
+    if (edit && selectedTransaction) {
+      return selectedTransaction.category;
+    } else {
+      return "";
+    }
+  });
+
+  const [amount, setAmount] = useState<string>(() => {
+    if (edit && selectedTransaction) {
+      return selectedTransaction.amount.toFixed(2);
+    } else {
+      return "";
+    }
+  });
   //const [file, setFile] = useState<File | undefined>(undefined)
-  const [selectedDate, setSelectedDate] = useState<string>("");
+
+  const [selectedDate, setSelectedDate] = useState<string>(() => {
+    if (edit && selectedTransaction) {
+      return selectedTransaction.date.toISOString();
+    } else {
+      //Default
+      return "";
+    }
+  });
+
   const [other, setOther] = useState("");
 
   //Holds the types of transfers
   const transCat: typeOfTransaction[] = Object.keys(
     transactionCategory,
   ) as typeOfTransaction[];
-
-  if (edit && selectedTransaction) {
-    setSelectedType(selectedTransaction.category);
-    setAmount(selectedTransaction.amount.toString());
-
-    //Depending the transaction, the user can be the recipient or sender
-    if (selectedTransaction.category === transactionCategory.INCOME) {
-      setSelectedAccount([
-        selectedTransaction.id.toString(),
-        selectedTransaction.to,
-      ]);
-      setOther(selectedTransaction.from);
-    } else {
-      setOther(selectedTransaction.to);
-    }
-  }
 
   return (
     <>
