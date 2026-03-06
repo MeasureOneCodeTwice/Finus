@@ -60,7 +60,7 @@ export async function postTranscations(
     throw error;
   }
 }
-
+// PUT /api/transactions/:id
 export async function putTranscations(
   session: AuthSession,
   trans: Transaction,
@@ -75,16 +75,13 @@ export async function putTranscations(
       body: JSON.stringify(trans),
     });
 
-    if (response.ok) {
-      alert("Updated the transaction");
-    } else {
-      alert("Failed to update transaction");
-      console.error(response.status);
+    if (!response.ok) {
+      console.error("Failed to update transaction", response.status);
     }
 
     return response.ok;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     throw error;
   }
 }
@@ -118,6 +115,29 @@ export async function deleteTransaction(
     return response.ok;
   } catch (error) {
     console.log(error);
+    throw error;
+  }
+}
+
+// POST /api/transactions/csvTransaction
+export async function uploadCsvTransactions(
+  session: AuthSession,
+  financialAccount_id: string,
+  transactions: Transaction[],
+) {
+  try {
+    const response = await fetch(requestUrl, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        Authorization: `Bearer ${session.token}`,
+      },
+      body: JSON.stringify({ financialAccount_id, transactions }),
+    });
+
+    return response.json();
+  } catch (error) {
+    console.error(error);
     throw error;
   }
 }
