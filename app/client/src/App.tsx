@@ -8,12 +8,12 @@ import {
 import "./App.css";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
-import type { AuthSession, AuthUser } from "./types/authTypes";
+import type { AuthSession, AuthUser, AuthApiResponse } from "./types/authTypes";
 import DashboardPage from "./pages/DashboardPage.tsx";
 import AppLayout from "./components/AppLayout.tsx";
-import { loadSession, saveSession, clearSession } from "./utils/storage.ts";
-import { requestAuth } from "./api/AuthAPI";
-import { resolveUserFromToken } from "./utils/token";
+//import { loadSession, saveSession, clearSession } from "./utils/storage.ts";
+//import { requestAuth } from "./api/AuthAPI";
+//import { resolveUserFromToken } from "./utils/token";
 // import type { AuthApiResponse, AuthSession, AuthUser } from "./pages/authTypes";
 
 const SESSION_STORAGE_KEY = "finus-session";

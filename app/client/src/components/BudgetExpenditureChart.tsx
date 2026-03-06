@@ -47,6 +47,7 @@ function BudgetExpenditureChart() {
   useEffect(() => {
     const fetchData = async (period: "w" | "m" | "y") => {
       const data = await getBudgetWithExpenditure(period);
+      if (!data) return;
       const labels = data.map((item) => formatCategoryLabel(item.category));
       const budgetAmounts = data.map((item) => item.budgetAmount);
       const expenditureAmounts = data.map((item) => item.actualAmount);

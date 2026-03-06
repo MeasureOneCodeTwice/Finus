@@ -14,6 +14,7 @@ function Header() {
         <NavBar
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
+          onLogout={() => setIsSidebarOpen(false)} // Add the onLogout prop
         />
       )}
       <header className="flex items-center justify-between p-4 pl-10 pr-10 bg-gray-800 text-white">
