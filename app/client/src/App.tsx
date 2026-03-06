@@ -8,8 +8,13 @@ import {
 import "./App.css";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
-import type { AuthApiResponse, AuthSession, AuthUser } from "./pages/authTypes";
+import type { AuthSession, AuthUser } from "./types/authTypes";
 import DashboardPage from "./pages/DashboardPage.tsx";
+import AppLayout from "./components/AppLayout.tsx";
+import { loadSession, saveSession, clearSession } from "./utils/storage.ts";
+import { requestAuth } from "./api/AuthAPI";
+import { resolveUserFromToken } from "./utils/token";
+// import type { AuthApiResponse, AuthSession, AuthUser } from "./pages/authTypes";
 
 const SESSION_STORAGE_KEY = "finus-session";
 const API_BASE_URL =
@@ -152,8 +157,18 @@ function App() {
   return (
     <Router>
       <div className="auth-shell">
-        <div className="auth-glow auth-glow-left" />
-        <div className="auth-glow auth-glow-right" />
+        <div
+          className="fixed w-[28rem] h-[28rem] rounded-full opacity-25
+            blur-[90px] pointer-events-none animate-[float_9s_ease-in-out_infinite]
+            bg-[radial-gradient(circle,_#18cc5f_0%,_#0d4d26_70%,_transparent_100%)]
+            -top-32 -left-32"
+        />
+        <div
+          className="fixed w-[28rem] h-[28rem] rounded-full opacity-25
+            blur-[90px] pointer-events-none animate-[float_9s_ease-in-out_infinite]
+            bg-[radial-gradient(circle,_#27a552_0%,_#0f411d_65%,_transparent_100%)]
+            -right-32 -bottom-32"
+        />
 
         <Routes>
           <Route
@@ -188,17 +203,21 @@ function App() {
               )
             }
           />
-          <Route
-            path="/dashboard"
-            element={
-              session ? (
-                <DashboardPage session={session} onLogout={handleLogout} />
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            }
-          />
+          {session && (
+            <Route element={<AppLayout onLogout={handleLogout} />}>
+              <Route
+                path="/dashboard"
+                element={<DashboardPage session={session} />}
+              />
+            </Route>
+          )}
           <Route path="*" element={<Navigate to="/" replace />} />
+
+          {/**Code below is only used for dashboard development purposes */}
+          {/*<Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route element={<AppLayout onLogout={() => {console.log("Logout clicked")}}/>} >
+            <Route path="/dashboard" element={<DashboardPage />} />
+          </Route>*/}
         </Routes>
       </div>
     </Router>

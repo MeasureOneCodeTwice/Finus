@@ -1,7 +1,8 @@
 import type { UserWithPassword } from "./types";
+import type { Pool } from "mysql2/promise";
 export async function getUserByEmail(
   email: string,
-  pool,
+  pool: Pool,
 ): Promise<UserWithPassword> {
   const [rows] = await pool.execute<UserWithPassword[]>(
     `

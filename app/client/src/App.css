@@ -219,6 +219,16 @@
   text-decoration: underline;
 }
 
+.dash-hover-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(8, 22, 12, 0.55) rgba(8, 22, 12, 0.55);
+}
+
+.dash-hover-scrollbar:hover {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(34, 197, 94, 0.3) rgba(8, 22, 12, 0.55);
+}
+
 @media (max-width: 640px) {
   .auth-grid {
     grid-template-columns: 1fr;

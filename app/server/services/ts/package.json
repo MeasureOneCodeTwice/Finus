@@ -19,7 +19,9 @@
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
+  "type": "module",
   "dependencies": {
+    "@types/cors": "^2.8.19",
     "@vitest/coverage-v8": "^4.0.18",
     "cors": "^2.8.6",
     "express": "^5.2.1",

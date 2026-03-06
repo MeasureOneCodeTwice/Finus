@@ -3,6 +3,8 @@ import { createUser, getUserByEmail, accountWithEmailExists } from "./queries";
 import { validateSignupBody } from "./validation";
 import { passwordMatchesHash, generateJWT, hashPassword } from "./secrets.ts";
 import { type User } from "@/types";
+import express from "express";
+import { Pool } from "mysql2/promise";
 
 export async function signup(body: SignupBody, res, pool) {
   try {
@@ -28,7 +30,11 @@ export async function signup(body: SignupBody, res, pool) {
   res.status(201).json({ ok: true });
 }
 
-export async function login(body: LoginBody, res, pool): void {
+export async function login(
+  body: LoginBody,
+  res: express.Response,
+  pool: Pool,
+): Promise<void> {
   let user: User;
   try {
     user = await getUserByEmail(body.email, pool);

@@ -33,6 +33,7 @@ export function SankeyChart({ data }: SankeyChartProps) {
         link={{ stroke: "#9ca3af", strokeOpacity: 0.5 }}
         nodePadding={20}
         nodeWidth={15}
+        linkCurvature={1}
         margin={{ top: 20, bottom: 20, left: 20, right: 20 }}
         align="justify"
         sort={true}
@@ -57,7 +58,7 @@ function CustomNode({ x, y, width, height, index, payload }: SankeyNodeProps) {
         y={y}
         width={width}
         height={height}
-        fill="#5192ca"
+        fill="#00f615"
         fillOpacity="1"
       />
       <text
@@ -65,7 +66,7 @@ function CustomNode({ x, y, width, height, index, payload }: SankeyNodeProps) {
         x={isOut ? x - TEXT_OFFSET : x + width + TEXT_OFFSET}
         y={y + height / 2}
         fontSize="14"
-        stroke="#333"
+        fill="#ffffff"
       >
         {payload.name}
       </text>
@@ -74,10 +75,10 @@ function CustomNode({ x, y, width, height, index, payload }: SankeyNodeProps) {
         x={isOut ? x - TEXT_OFFSET : x + width + TEXT_OFFSET}
         y={y + height / 2 + 13}
         fontSize="12"
-        stroke="#333"
+        fill="#ffffff"
         strokeOpacity="0.5"
       >
-        {`${payload.value}k`}
+        {`$${payload.value}`}
       </text>
     </Layer>
   );

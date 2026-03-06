@@ -11,7 +11,12 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MAX_AGE, MIN_AGE, type AuthUser, type RequestAuth } from "./authTypes";
+import {
+  MAX_AGE,
+  MIN_AGE,
+  type AuthUser,
+  type RequestAuth,
+} from "../types/authTypes";
 
 type SignUpPageProps = {
   onSignup: (token: string, fallbackUser: Partial<AuthUser>) => void;

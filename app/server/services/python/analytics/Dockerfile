@@ -3,7 +3,14 @@ FROM python:3.11-slim
 #cache pip packages
 RUN --mount=type=cache,target=/root/.cache
 
-WORKDIR /app
+WORKDIR /app/server/services/python/analytics
+
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+
 COPY requirements.txt .
 
 RUN --mount=type=cache,target=/root/.cache/pip \
