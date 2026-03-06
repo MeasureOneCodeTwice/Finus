@@ -1,6 +1,6 @@
 import type { AuthSession } from "@/pages/authTypes";
 import type { updateResponse } from "../types/responseTypes";
-import { type Transaction } from "../types/Transaction";
+import type { Transaction } from "../types/Transaction";
 
 const requestUrl = "http://localhost:3000/api/transactions";
 
@@ -66,7 +66,7 @@ export async function putTranscations(
   trans: Transaction,
 ): Promise<boolean> {
   try {
-    const response = await fetch(requestUrl, {
+    const response = await fetch(`${requestUrl}/${trans.id}`, {
       method: "PUT",
       headers: {
         "content-type": "application/json",
@@ -86,35 +86,27 @@ export async function putTranscations(
   }
 }
 
+//DELETE /api/transactions/:id
+
 export async function deleteTransaction(
   session: AuthSession,
   selectedTransaction: Transaction,
-) {
+): Promise<boolean> {
   try {
-    const content = JSON.stringify({
-      id: selectedTransaction.id,
-      financialAccount_id: selectedTransaction.financialAccount_id,
-    });
-    //Create delete request to delete the account
-    const response = await fetch(requestUrl, {
+    const response = await fetch(`${requestUrl}/${selectedTransaction.id}`, {
       method: "DELETE",
       headers: {
-        "content-type": "application/json",
         Authorization: `Bearer ${session.token}`,
       },
-      body: content,
     });
 
-    if (response.ok) {
-      alert("Transaction has been deleted");
-    } else {
-      alert("Failed to delete transaction");
-      console.error(response.status);
+    if (!response.ok) {
+      console.error("Failed to delete transaction", response.status);
     }
 
     return response.ok;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     throw error;
   }
 }
@@ -126,7 +118,7 @@ export async function uploadCsvTransactions(
   transactions: Transaction[],
 ) {
   try {
-    const response = await fetch(requestUrl, {
+    const response = await fetch(`${requestUrl}/csvTransaction`, {
       method: "POST",
       headers: {
         "content-type": "application/json",
