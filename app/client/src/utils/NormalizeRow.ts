@@ -37,24 +37,22 @@ export function normalizeRow(raw: unknown): NormalizedRow {
 function normalizeDate(input: string | null): string | null {
   if (!input) return null;
 
+  // Replace separators with hyphens
   const data = input.replace(/[.\s]/g, "-").replace(/\//g, "-");
 
-  // Already normalized
+  // Already normalized YYYY-MM-DD
   if (/^\d{4}-\d{2}-\d{2}$/.test(data)) return data;
 
-  // Matches DD-MM-YYYY or MM-DD-YYYY
-  if (/^\d{2}-\d{2}-\d{4}$/.test(data)) {
-    const [a, b, y] = data.split("-");
+  // Match M-D-YYYY or MM-DD-YYYY
+  const mdY = /^(\d{1,2})-(\d{1,2})-(\d{4})$/;
+  const match = data.match(mdY);
 
-    if (Number(a) > 12) {
-      const d = a;
-      const m = b;
-      return `${y}-${m}-${d}`;
-    }
+  if (match) {
+    const [, mRaw, dRaw, y] = match;
 
-    //assume MM-DD-YYYY
-    const m = a;
-    const d = b;
+    const m = mRaw.padStart(2, "0");
+    const d = dRaw.padStart(2, "0");
+
     return `${y}-${m}-${d}`;
   }
 

@@ -33,6 +33,7 @@ export default function CsvPreviewTable({ rows }: Props) {
             <th style={cell}>Amount</th>
             <th style={cell}>Sender</th>
             <th style={cell}>Recipient</th>
+            <th style={cell}>Category</th>
             <th style={cell}>Errors</th>
           </tr>
         </thead>
@@ -53,6 +54,7 @@ export default function CsvPreviewTable({ rows }: Props) {
                 <td style={cell}>{row.amount}</td>
                 <td style={cell}>{row.sender}</td>
                 <td style={cell}>{row.recipient}</td>
+                <td style={cell}>{row.category}</td>
                 <td style={cell}>{isInvalid ? row.errors.join(", ") : "—"}</td>
               </tr>
             );

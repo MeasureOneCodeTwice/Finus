@@ -12,6 +12,8 @@ export function parseCsvFile(file: File): Promise<TransactionDraft[]> {
       header: true,
       skipEmptyLines: true,
       dynamicTyping: true,
+      beforeFirstChunk: (chunk) => chunk.replace(/^\uFEFF/, ""),
+      transformHeader: (header) => header.trim().toLowerCase(),
 
       complete: (result: ParseResult<unknown>) => {
         // handle parsing errors
