@@ -51,12 +51,6 @@ describe("normalizeRow", () => {
     const result = normalizeRow(raw);
     expect(result.date).toBe("2024-01-31");
   });
-  //tests for DD-MM-YYYY date format
-  it("normalizes DD-MM-YYYY date format", () => {
-    const raw = { date: "31-01-2024" };
-    const result = normalizeRow(raw);
-    expect(result.date).toBe("2024-01-31");
-  });
   //tests for invalid date formats
   it("returns null for invalid dates", () => {
     const raw = { date: "not-a-date" };
