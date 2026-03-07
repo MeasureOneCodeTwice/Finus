@@ -8,9 +8,11 @@ import {
   handleCurrencyBlur,
 } from "../utils/handleInput.ts";
 import { accountCategory } from "@/enum/AccountCategory.ts";
+import type { AuthSession } from "@/types/authTypes.ts";
 
 interface popupProp {
   toggle: () => void;
+  session: AuthSession;
   setAccount?: (account: Account) => void;
   addAccount?: (account: Account) => void;
   edit: boolean;
@@ -21,6 +23,7 @@ type typeofAccount = keyof typeof accountCategory;
 
 export default function PopupForm({
   toggle,
+  session,
   setAccount,
   addAccount,
   edit,
@@ -62,23 +65,24 @@ export default function PopupForm({
         name: formInput.name,
         type: accountType,
         balance: accountBalance,
-        subtype: "",
+        subtype: subtype,
         value: 0,
         last_updated: new Date(),
       };
       console.log(newAccount);
 
-      //Determine if we edding an account info
+      //Determine if we editing an account info
       if (edit && selectedAccount) {
         newAccount.id = selectedAccount.id;
 
         try {
-          //Put reques to update the account
-          putUserAccount(newAccount).then((response) => {
-            //Determine if sucessfully post
-            if (response && response.lastUpdated && addAccount) {
+          //Put request to update the account
+          putUserAccount(session, newAccount).then((response) => {
+            //Determine if sucessfully updated the account
+            if (response && response.lastUpdated && setAccount) {
               newAccount.last_updated = response.lastUpdated;
-              addAccount(newAccount);
+              newAccount.balance = Number(newAccount.balance.toFixed(2));
+              setAccount(newAccount);
             }
           });
         } catch {
@@ -86,17 +90,19 @@ export default function PopupForm({
         }
       } else {
         try {
-          //Send a post request to create or edit the account
-          postUserAccount(newAccount).then((response) => {
+          //Send a post request to create
+          postUserAccount(session, newAccount).then((response) => {
             //When creating new account, id and lastupdated is returned for that account
-            if (response && response.id) newAccount.id = response.id;
+            if (response && response.id) {
+              newAccount.id = response.id;
+            }
 
             if (response.lastUpdated) {
               newAccount.last_updated = response.lastUpdated;
 
-              //Check if setAccount is undefined
-              if (setAccount) {
-                setAccount(newAccount);
+              //Check if addAcount is undefined
+              if (addAccount) {
+                addAccount(newAccount);
               }
             }
           });
@@ -127,32 +133,46 @@ export default function PopupForm({
         }
     }*/
 
-  const [formInput, setFormInput] = useState({
-    name: "",
-    subType: "",
-    interest: 0,
+  const [formInput, setFormInput] = useState(() => {
+    if (edit && selectedAccount) {
+      return {
+        name: selectedAccount.name,
+        subType: selectedAccount.subtype || "",
+        interest: 0,
+      };
+    } else {
+      //Default value
+      return {
+        name: "",
+        subType: "",
+        interest: 0,
+      };
+    }
   });
   //const [file, setFile] = useState<File|undefined>(undefined)
-  const [balance, setBalance] = useState<string>("");
+  const [balance, setBalance] = useState<string>(() => {
+    if (edit && selectedAccount) {
+      return selectedAccount.balance.toString();
+    } else {
+      //Default value
+      return "";
+    }
+  });
+
   const [accountType, setAccountType] = useState<typeofAccount | undefined>(
-    undefined,
+    () => {
+      if (edit && selectedAccount) {
+        return selectedAccount.type as typeofAccount;
+      } else {
+        //Default value
+        return undefined;
+      }
+    },
   );
 
   const accountCat: typeofAccount[] = Object.keys(
     accountCategory,
   ) as typeofAccount[];
-
-  //Determine if we're editting an account
-  if (edit && selectedAccount) {
-    setFormInput({ ...formInput, ["name"]: selectedAccount.name });
-
-    if (selectedAccount.subtype) {
-      setFormInput({ ...formInput, ["subType"]: selectedAccount.subtype });
-    }
-
-    setBalance(selectedAccount.balance.toString());
-    setAccountType(selectedAccount.type as typeofAccount);
-  }
 
   return (
     <>
@@ -164,6 +184,7 @@ export default function PopupForm({
           <input
             type="text"
             name="name"
+            value={formInput.name}
             onChange={handleChange}
             placeholder="Enter account name"
           />

@@ -1,26 +1,34 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getUserAccounts } from "../api/Account";
 import { type Account } from "../types/AccountType";
 import AccountListCard from "./AccountListCard";
 import AccountPopup from "./AccountForm";
+import type { AuthSession } from "@/types/authTypes";
+import "./userForm.css";
+interface listProp {
+  session: AuthSession;
+}
 
-export default function AccountList() {
+export default function AccountList({ session }: listProp) {
   //Stores a lits of the user's account
   const [userAccounts, setUserAccounts] = useState<Account[]>([]);
 
   const [seen, setSeen] = useState<boolean>(false);
 
   //Try to get the accounts from the server
-  try {
-    getUserAccounts().then((accounts) => {
-      //Determine if we acquired the accounts
-      if (accounts) {
-        setUserAccounts(accounts);
-      }
-    });
-  } catch {
-    alert("Failed to retrieve user accounts");
-  }
+  useEffect(() => {
+    try {
+      getUserAccounts(session).then((accounts) => {
+        //Determine if we acquired the accounts
+        if (accounts) {
+          console.log(accounts);
+          setUserAccounts(accounts);
+        }
+      });
+    } catch {
+      alert("Failed to retrieve user accounts");
+    }
+  }, [session]);
 
   //Adds a account to the list
   const addAccount = (newAccount: Account) => {
@@ -34,6 +42,14 @@ export default function AccountList() {
     );
   };
 
+  const setAccount = (editAccount: Account) => {
+    setUserAccounts(
+      userAccounts.map((account) =>
+        account.id === editAccount.id ? { ...editAccount } : account,
+      ),
+    );
+  };
+
   const toggle = () => {
     setSeen(!seen);
   };
@@ -44,9 +60,10 @@ export default function AccountList() {
         <div>
           {userAccounts.map((account) => (
             <AccountListCard
+              session={session}
               account={account}
-              setAccount={addAccount}
               removeAccount={removeAccount}
+              setAccount={setAccount}
             />
           ))}
         </div>
@@ -57,7 +74,12 @@ export default function AccountList() {
       </div>
 
       {seen ? (
-        <AccountPopup toggle={toggle} addAccount={addAccount} edit={false} />
+        <AccountPopup
+          toggle={toggle}
+          session={session}
+          addAccount={addAccount}
+          edit={false}
+        />
       ) : null}
     </>
   );

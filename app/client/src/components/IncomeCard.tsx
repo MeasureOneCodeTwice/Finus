@@ -2,14 +2,21 @@ import { useState } from "react";
 import { deleteIncome } from "../api/Income";
 import { type Income } from "../types/IncomeType";
 import IncomePopup from "./IncomeForm";
+import type { AuthSession } from "@/types/authTypes";
 
 interface cardProp {
   income: Income;
+  session: AuthSession;
   setIncome: (editIncome: Income) => void;
   removeIncome: (removeIncome: Income) => void;
 }
 
-export default function Card({ income, setIncome, removeIncome }: cardProp) {
+export default function Card({
+  session,
+  income,
+  setIncome,
+  removeIncome,
+}: cardProp) {
   const [seen, setSeen] = useState(false);
 
   const toggle = () => {
@@ -20,7 +27,7 @@ export default function Card({ income, setIncome, removeIncome }: cardProp) {
   const deleteUserIncome = () => {
     try {
       //Send a request to delete user's income
-      deleteIncome(income).then((result) => {
+      deleteIncome(session, income).then((result) => {
         //Sucessfully deleted income
         if (result) {
           removeIncome(income);
@@ -48,7 +55,12 @@ export default function Card({ income, setIncome, removeIncome }: cardProp) {
       </div>
 
       {seen ? (
-        <IncomePopup toggle={toggle} edit={true} setIncome={setIncome} />
+        <IncomePopup
+          session={session}
+          toggle={toggle}
+          edit={true}
+          setIncome={setIncome}
+        />
       ) : null}
     </>
   );

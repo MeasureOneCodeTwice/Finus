@@ -1,9 +1,10 @@
 export type Transaction = {
-  id: string;
+  id: number;
+  financialAccount_id: number;
   amount: number;
   category: string;
-  date: string; // ISO format date string
-  from: string;
-  to: string;
+  date: Date; // ISO format date string
+  sender: string;
+  recipient: string;
   description?: string;
 };

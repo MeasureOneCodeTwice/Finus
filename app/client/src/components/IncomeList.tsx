@@ -3,14 +3,19 @@ import { getIncome } from "../api/Income";
 import { type Income } from "../types/IncomeType";
 import IncomePopup from "./IncomeForm";
 import IncomeCard from "./IncomeCard";
+import type { AuthSession } from "@/types/authTypes";
 
-export default function IncomeList() {
+interface listProp {
+  session: AuthSession;
+}
+
+export default function IncomeList({ session }: listProp) {
   const [userIncomes, setUsersIncomes] = useState<Income[]>([]);
   const [seen, setSeen] = useState<boolean>(false);
 
   //Try to get the account's transaction from the server
   try {
-    getIncome().then((incomes) => {
+    getIncome(session).then((incomes) => {
       //Determine if we acquired the accounts transaction
       if (incomes) {
         setUsersIncomes(incomes);
@@ -20,7 +25,7 @@ export default function IncomeList() {
     alert("Failed to get user income");
   }
 
-  //Adds a account to the list
+  //Adds income to the list
   const addIncome = (newIncome: Income) => {
     setUsersIncomes((userIncomes) => [...userIncomes, newIncome]);
   };
@@ -45,6 +50,7 @@ export default function IncomeList() {
               income={income}
               setIncome={addIncome}
               removeIncome={removeIncome}
+              session={session}
             />
           ))}
         </div>
@@ -55,7 +61,12 @@ export default function IncomeList() {
       </div>
 
       {seen ? (
-        <IncomePopup toggle={toggle} addIncome={addIncome} edit={false} />
+        <IncomePopup
+          session={session}
+          toggle={toggle}
+          addIncome={addIncome}
+          edit={false}
+        />
       ) : null}
     </>
   );

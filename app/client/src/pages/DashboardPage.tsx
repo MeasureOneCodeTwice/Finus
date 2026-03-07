@@ -15,6 +15,10 @@ import DashboardChartSection from "@/components/DashboardChartSection";
 import type { AuthSession } from "../types/authTypes";
 import BudgetExpenditureChart from "@/components/BudgetExpenditureChart";
 import SnapshotSection from "@/components/SnapshotSection";
+
+import AccountList from "@/components/AccountList";
+import TransactionList from "@/components/TransactionList";
+
 Chart.register(
   PointElement,
   LineElement,
@@ -79,6 +83,12 @@ function DashboardPage({ session }: DashboardPageProps) {
       <BudgetExpenditureChart />
       <h2 className="text-2xl font-bold mb-4">Recent Transactions</h2>
       <TransactionTable />
+
+      <h2 className="text-2xl font-bold mb-4">Account List</h2>
+      {session && <AccountList session={session} />}
+
+      <h2 className="text-2xl font-bold mb-4">Transaction List</h2>
+      {session && <TransactionList session={session} />}
     </section>
   );
 }

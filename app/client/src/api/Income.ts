@@ -1,13 +1,14 @@
 import type { updateResponse } from "../types/responseTypes";
 import { type Income } from "../types/IncomeType";
+import type { AuthSession } from "@/types/authTypes";
 
 const requestUrl = "http://localhost:3000/api/income";
 
-export async function getIncome(): Promise<Income[]> {
+export async function getIncome(session: AuthSession): Promise<Income[]> {
   try {
     const response = await fetch(requestUrl, {
       method: "GET",
-      credentials: "include",
+      headers: { Authorization: `Bearer ${session.token}` },
     });
 
     if (!response.ok) {
@@ -24,6 +25,7 @@ export async function getIncome(): Promise<Income[]> {
 }
 
 export async function postIncome(
+  session: AuthSession,
   name: string,
   income: number,
   description: string,
@@ -33,8 +35,9 @@ export async function postIncome(
       method: "POST",
       headers: {
         "content-type": "application/json",
+        Authorization: `Bearer ${session.token}`,
       },
-      credentials: "include",
+
       body: JSON.stringify({
         name: name,
         income: income,
@@ -57,6 +60,7 @@ export async function postIncome(
 }
 
 export async function putIncome(
+  session: AuthSession,
   name: string,
   income: number,
   description: string,
@@ -66,6 +70,7 @@ export async function putIncome(
       method: "POST",
       headers: {
         "content-type": "applicaton/json",
+        Authorization: `Bearer ${session.token}`,
       },
       credentials: "include",
       body: JSON.stringify({
@@ -89,7 +94,10 @@ export async function putIncome(
   }
 }
 
-export async function deleteIncome(selectedIncome: Income) {
+export async function deleteIncome(
+  session: AuthSession,
+  selectedIncome: Income,
+) {
   const content = JSON.stringify({ id: selectedIncome.id });
   try {
     //Create delete request to delete the income
@@ -97,8 +105,8 @@ export async function deleteIncome(selectedIncome: Income) {
       method: "DELETE",
       headers: {
         "content-type": "/application/json",
+        Authorization: `Bearer ${session.token}`,
       },
-      credentials: "include",
       body: content,
     });
 

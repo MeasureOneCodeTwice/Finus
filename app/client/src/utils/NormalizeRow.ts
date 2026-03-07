@@ -6,6 +6,7 @@ export interface NormalizedRow {
   amount: number | null;
   sender?: string | null;
   recipient?: string | null;
+  category?: string | null;
 }
 
 export function normalizeRow(raw: unknown): NormalizedRow {
@@ -28,26 +29,34 @@ export function normalizeRow(raw: unknown): NormalizedRow {
     amount,
     sender: clean(record.sender),
     recipient: clean(record.recipient),
+    category: clean(record.category),
   };
 }
 
 // helper to normalize date formats into YYYY-MM-DD
 function normalizeDate(input: string | null): string | null {
   if (!input) return null;
+
+  // Replace separators with hyphens
   const data = input.replace(/[.\s]/g, "-").replace(/\//g, "-");
-  if (/^\d{4}-\d{2}-\d{2}$/.test(data)) return data; // already in YYYY-MM-DD
 
-  if (/^\d{2}-\d{2}-\d{4}$/.test(data)) {
-    // if MM-DD-YYYY or DD-MM-YYYY, convert to YYYY-MM-DD
-    const [m, d, y] = data.split("-");
+  // Already normalized YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(data)) return data;
+
+  // Match M-D-YYYY or MM-DD-YYYY
+  const mdY = /^(\d{1,2})-(\d{1,2})-(\d{4})$/;
+  const match = data.match(mdY);
+
+  if (match) {
+    const [, mRaw, dRaw, y] = match;
+
+    const m = mRaw.padStart(2, "0");
+    const d = dRaw.padStart(2, "0");
+
     return `${y}-${m}-${d}`;
   }
-  if (/^\d{2}-\d{2}-\d{4}$/.test(data)) {
-    const [d, m, y] = data.split("-");
-    return `${y}-${m}-${d}`;
-  }
 
-  return null; // invalid date
+  return null;
 }
 
 // helper to normalize amount fields

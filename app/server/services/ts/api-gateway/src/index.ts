@@ -22,13 +22,22 @@ app.use(
   }),
 );
 
-const USER_PATHS = ["accounts", "profile", "tranasctions", "charts/expenses"];
+const USER_PATHS = ["accounts", "profiles", "charts/expenses"];
 app.use(
   createProxyMiddleware({
     pathFilter: (path) => pathMatches(path, USER_PATHS),
     target: process.env.USER_SERVICE_ADDR,
     changeOrigin: true,
     pathRewrite: { "^/api": "" },
+  }),
+);
+
+app.use(
+  createProxyMiddleware({
+    pathFilter: "/api/transactions",
+    target: process.env.USER_SERVICE_ADDR,
+    changeOrigin: true,
+    pathRewrite: { "^/api/transactions": "/transactions" },
   }),
 );
 

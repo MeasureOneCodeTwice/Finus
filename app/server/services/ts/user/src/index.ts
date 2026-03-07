@@ -47,6 +47,39 @@ app.use((req, res, next) => {
   next();
 });
 
+/*
+function verifyToken(
+  req: express.Request,
+  res: express.Response,
+  next: NextFunction,
+) {
+  const authHeader = req.headers.authorization;
+  console.log(authHeader)
+  //Determine if jwt header was passed
+  if (authHeader) {
+    const token = authHeader.split(" ")[1];
+    try {
+      const payload = jwt.verify(token, process.env.JWT_SECRET);
+
+      console.log(payload);
+      
+      next();
+    } catch (err) {
+      console.error(err);
+      res.status(401).json({ error: "Invalid token" });
+    }
+  } else {
+    res
+      .status(401)
+      .json({
+        error: "Failed to pass token, user not authorized to send request",
+      });
+  }
+}
+*/
+
+//app.use(verifyToken);
+
 //test endpoint
 // app.get("/health", (req: express.Request, res: express.Response) => {
 //   res.send("ok");

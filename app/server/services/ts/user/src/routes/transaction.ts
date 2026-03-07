@@ -3,13 +3,57 @@ import { Router } from "express";
 import type { Request, Response } from "express";
 import type { ResultSetHeader } from "mysql2";
 import { getConnectionPool } from "@/sqlUtil";
+import { authenticateJWT } from "../handleJWT.js";
+import type { Transaction } from "@/types.js";
 
 export const transactionsRouter = Router();
 
 const db = getConnectionPool();
+// Get all transactions for a specific financial account
+transactionsRouter.get("/", async (req: Request, res: Response) => {
+  let userId;
+
+  try {
+    const financialAccount_id = Number(req.query.financialAccount_id);
+
+    if (!financialAccount_id) {
+      return res.status(400).json({ error: "Missing financialAccount_id" });
+    }
+
+    try {
+      userId = authenticateJWT(req);
+    } catch (error) {
+      console.error(error);
+      return res
+        .status(401)
+        .json({ error: "User not authorized to create a transaction" });
+    }
+
+    if (!(await checkUserId(userId, financialAccount_id))) {
+      console.error(
+        "User is not authorized to create a transaction on this account",
+      );
+      return res.status(401).json({
+        error: "User not authorized to create transaction on this account",
+      });
+    }
+
+    const [rows] = await db.query<Transaction>(
+      `SELECT * FROM transaction WHERE financialAccount_id = ?`,
+      [financialAccount_id],
+    );
+
+    res.status(200).json(rows);
+  } catch (err) {
+    console.error("Failed to fetch transactions", err);
+    return res.status(500).json({ error: "Failed to fetch transactions" });
+  }
+});
+
 //creating a new transaction
 
 transactionsRouter.post("/", async (req: Request, res: Response) => {
+  let userId;
   try {
     const {
       financialAccount_id,
@@ -18,22 +62,44 @@ transactionsRouter.post("/", async (req: Request, res: Response) => {
       sender,
       recipient,
       date,
+      category,
     } = req.body;
 
+    const sqlDate = convertToDateTime(date);
+
+    try {
+      userId = authenticateJWT(req);
+    } catch (error) {
+      console.error(error);
+      return res
+        .status(401)
+        .json({ error: "User not authorized to create a transaction" });
+    }
+
+    if (!(await checkUserId(userId, financialAccount_id))) {
+      console.error(
+        "User is not authorized to create a transaction on this account",
+      );
+      return res.status(401).json({
+        error: "User not authorized to create transaction on this account",
+      });
+    }
+
     const [result] = await db.query<ResultSetHeader>(
-      `INSERT INTO transaction (financialAccount_id, amount, description, sender, recipient, date)
-       VALUES (?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO transaction (financialAccount_id, amount, description, sender, recipient, date, category )
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
         financialAccount_id,
         amount,
         description ?? null,
         sender ?? null,
         recipient ?? null,
-        date,
+        sqlDate,
+        category ?? null,
       ],
     );
 
-    res.json({
+    res.status(200).json({
       message: "Transaction successfully created",
       id: result.insertId,
     });
@@ -44,10 +110,39 @@ transactionsRouter.post("/", async (req: Request, res: Response) => {
 });
 
 // Update an existing transaction
-transactionsRouter.put("/:id", async (req: Request, res: Response) => {
+transactionsRouter.put("/", async (req: Request, res: Response) => {
+  let userId;
+
   try {
-    const id = req.params.id;
-    const { amount, description, sender, recipient, date } = req.body;
+    const {
+      id,
+      financialAccount_id,
+      amount,
+      description,
+      sender,
+      recipient,
+      date,
+    } = req.body;
+
+    const sqlDate = convertToDateTime(date);
+
+    try {
+      userId = authenticateJWT(req);
+    } catch (error) {
+      console.error(error);
+      return res
+        .status(401)
+        .json({ error: "User not authorized to create a transaction" });
+    }
+
+    if (!(await checkUserId(userId, financialAccount_id))) {
+      console.error(
+        "User is not authorized to create a transaction on this account",
+      );
+      return res.status(401).json({
+        error: "User not authorized to create transaction on this account",
+      });
+    }
 
     await db.query(
       `UPDATE transaction
@@ -58,7 +153,7 @@ transactionsRouter.put("/:id", async (req: Request, res: Response) => {
         description ?? null,
         sender ?? null,
         recipient ?? null,
-        date,
+        sqlDate,
         id,
       ],
     );
@@ -69,10 +164,48 @@ transactionsRouter.put("/:id", async (req: Request, res: Response) => {
   }
 });
 
+// DELETE /transactions/:id
+transactionsRouter.delete("/", async (req: Request, res: Response) => {
+  try {
+    const { id, financialAccount_id } = req.body;
+    let userId;
+
+    if (!(id && financialAccount_id)) {
+      console.error("Failed to delete transaction, parameter not recieved");
+      return res.status(400).json({ error: "Bad request" });
+    }
+
+    try {
+      userId = authenticateJWT(req);
+    } catch (error) {
+      console.error(error);
+      return res
+        .status(401)
+        .json({ error: "User not authorized to delete transaction" });
+    }
+
+    if (!(await checkUserId(userId, financialAccount_id))) {
+      console.error("User is not authorized to delete this transaction");
+      return res
+        .status(401)
+        .json({ error: "User not authorized to delete this transaction" });
+    }
+
+    await db.query(`DELETE FROM transaction WHERE id=?`, [id]);
+
+    res.status(200).json({ message: "Transaction deleted" });
+  } catch (err) {
+    console.error("Transaction deletion failed", err);
+    res.status(500).json({ error: "Transaction deletion failed" });
+  }
+});
+
 // CSV Transaction
 transactionsRouter.post(
   "/csvTransaction",
   async (req: Request, res: Response) => {
+    let userId;
+
     try {
       const { financialAccount_id, transactions } = req.body;
 
@@ -80,8 +213,42 @@ transactionsRouter.post(
         return res.status(400).json({ error: "Invalid request payload" });
       }
 
+      // Authenticate user
+      try {
+        userId = authenticateJWT(req);
+      } catch (error) {
+        console.error(error);
+        return res
+          .status(401)
+          .json({ error: "User not authorized to import transactions" });
+      }
+
+      // Check account ownership
+      if (!(await checkUserId(userId, financialAccount_id))) {
+        console.error("User is not authorized to import into this account");
+        return res.status(401).json({
+          error: "User not authorized to import into this account",
+        });
+      }
+
+      // CSV row shape
+      interface CsvRow {
+        amount: number | null;
+        description: string | null;
+        sender?: string | null;
+        recipient?: string | null;
+        date: string | null;
+        category?: string | null;
+        errors: string[];
+      }
+
+      // Filter valid rows
       const validRows = transactions.filter(
-        (t: unknown) => t.errors?.length === 0,
+        (t: unknown): t is CsvRow =>
+          typeof t === "object" &&
+          t !== null &&
+          Array.isArray((t as { errors?: unknown }).errors) &&
+          (t as { errors: unknown[] }).errors.length === 0,
       );
 
       if (validRows.length === 0) {
@@ -96,16 +263,20 @@ transactionsRouter.post(
         await connection.beginTransaction();
 
         for (const row of validRows) {
+          const sqlDate = row.date ? convertToDateTime(row.date) : null;
+
           await connection.query(
-            `INSERT INTO transaction (financialAccount_id, amount, description, sender, recipient, date)
-           VALUES (?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO transaction 
+              (financialAccount_id, amount, description, sender, recipient, \`date\`, category)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [
               financialAccount_id,
               row.amount,
               row.description ?? null,
               row.sender ?? null,
               row.recipient ?? null,
-              row.date,
+              sqlDate,
+              row.category ?? "Uncategorized",
             ],
           );
         }
@@ -130,3 +301,31 @@ transactionsRouter.post(
     }
   },
 );
+//Checks the user is the owner of the account
+async function checkUserId(
+  userId: number,
+  accountId: number,
+): Promise<boolean> {
+  let result = false;
+  try {
+    //Checks if the profile has an account with that id
+    const [rows] = await db.query(
+      `SELECT 1 FROM profile_financialAccount 
+      WHERE profile_id =? AND financialAccount_id =?`,
+      [userId, accountId],
+    );
+
+    console.log(rows.length);
+    if (rows.length > 0) {
+      result = true;
+    }
+  } catch (error) {
+    console.error(error);
+  }
+
+  return result;
+}
+
+function convertToDateTime(date: string) {
+  return date.slice(0, 19).replace("T", " ");
+}

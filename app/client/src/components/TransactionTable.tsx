@@ -89,10 +89,10 @@ function TransactionTable() {
                 </div>
 
                 {/* From */}
-                <div className="text-gray-400 truncate">{tx.from}</div>
+                <div className="text-gray-400 truncate">{tx.sender}</div>
 
                 {/* To */}
-                <div className="text-gray-400 truncate">{tx.to}</div>
+                <div className="text-gray-400 truncate">{tx.recipient}</div>
               </div>
             ))}
           </div>

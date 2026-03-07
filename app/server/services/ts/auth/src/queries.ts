@@ -66,6 +66,17 @@ export async function createUser(user: UserWithPassword, pool): void {
       [accountInsert.insertId, user.pw_hash],
     );
 
+    const [result] = await connection.query(
+      "INSERT INTO profile (name) VALUE (?)",
+      [user.first_name],
+    );
+
+    await connection.query(
+      `INSERT INTO finusAccount_profile (account_id, profile_id) 
+      VALUE(?,?)`,
+      [accountInsert.insertId, result.insertId],
+    );
+
     console.log("User created with ID:", accountInsert.insertId);
 
     await connection.commit();

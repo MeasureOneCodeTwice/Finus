@@ -20,12 +20,13 @@ async function getTransactions(): Promise<Transaction[] | null> {
     const output: Transaction[] = [];
     for (let i = 0; i < response.data.length; i++) {
       output.push({
-        id: `transaction-${i}-${Date.now()}`,
+        id: response.data[i]["id"],
+        financialAccount_id: response.data[i]["financialAccount_id"],
         amount: response.data[i]["amount"],
         category: response.data[i]["category"],
         date: response.data[i]["date"],
-        from: response.data[i]["sender"],
-        to: response.data[i]["recipient"],
+        sender: response.data[i]["sender"],
+        recipient: response.data[i]["recipient"],
         description: response.data[i]["description"],
       });
     }

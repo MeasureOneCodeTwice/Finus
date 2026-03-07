@@ -1,16 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CsvUpload from "./csvread/CsvUpload";
 import "./userForm.css";
 import { getUserAccounts } from "../api/Account";
 import { validateTransactionForm } from "../utils/ValidateForms";
 import { postTranscations, putTranscations } from "../api/Transaction";
 import { handleCurrencyChange, handleCurrencyBlur } from "../utils/handleInput";
-import { type Transaction } from "../types/TransactionType";
-import { type Account } from "../types/AccountType";
+import { type Transaction } from "../types/Transaction";
+import { type Account } from "@/types/AccountType";
 import { transactionCategory } from "@/enum/TransactionCategory";
+import type { AuthSession } from "@/types/authTypes";
 
 interface popupProp {
   toggle: () => void;
+  session: AuthSession;
   setTransaction?: (editedTransaction: Transaction) => void;
   addTransaction?: (newTransaction: Transaction) => void;
   edit: boolean;
@@ -23,6 +25,7 @@ type typeOfTransaction = keyof typeof transactionCategory;
 //Returns a form of for the user to enter their info
 export default function PopupForm({
   toggle,
+  session,
   setTransaction,
   addTransaction,
   edit,
@@ -30,25 +33,52 @@ export default function PopupForm({
 }: popupProp) {
   //Handles the submiting the form
   const handleSubmit = () => {
-    const accountId = Number(selectedAccount);
     const transferAmount = Number(amount);
     let userTransaction: Transaction;
+    let recipient = "";
+    let sender = "";
 
     if (
       selectedType &&
       validateTransactionForm(
-        accountId,
+        selectedAccount,
         selectedType,
         transferAmount,
         selectedDate,
         undefined,
       )
     ) {
+      let target;
+
+      if (account) {
+        if (selectedType === transactionCategory.INCOME) {
+          target = account.find(
+            (account) => account.id === selectedAccount,
+          )?.name;
+          if (target) {
+            recipient = target;
+          }
+
+          sender = other;
+        } else {
+          recipient = other;
+
+          target = account.find(
+            (account) => account.id === selectedAccount,
+          )?.name;
+          if (target) {
+            sender = target;
+          }
+        }
+      }
+
       userTransaction = {
         id: 0,
-        financialAccount_id: accountId,
+        financialAccount_id: Number(selectedAccount),
+        recipient: recipient,
+        sender: sender,
         amount: transferAmount,
-        type: selectedType,
+        category: selectedType,
         date: new Date(selectedDate),
       };
 
@@ -58,8 +88,8 @@ export default function PopupForm({
           userTransaction.id = selectedTransaction.id;
 
           //Send a request to update the transaction
-          putTranscations(userTransaction).then((result) => {
-            //Determine if the
+          putTranscations(session, userTransaction).then((result) => {
+            //Determine if we're able to able to edit the transaction
             if (result && setTransaction) {
               setTransaction(userTransaction);
             }
@@ -70,16 +100,14 @@ export default function PopupForm({
       } else {
         try {
           //Send a request to create the transaction
-          postTranscations([userTransaction]).then((response) => {
+          postTranscations(session, userTransaction).then((response) => {
             //Successful put if response is returned
-            if (response && response[0].id) {
-              userTransaction.id = response[0].id;
+            if (response && response.id) {
+              userTransaction.id = response.id;
 
               if (addTransaction) {
                 addTransaction(userTransaction);
               }
-            } else {
-              alert("Failed to create transaction");
             }
           });
         } catch {
@@ -110,32 +138,78 @@ export default function PopupForm({
   //State of the user's account
   const [account, setAccount] = useState<Account[] | []>();
 
-  getUserAccounts().then((accounts) => {
-    console.log(accounts);
+  useEffect(() => {
+    getUserAccounts(session)
+      .then((accounts) => {
+        console.log(accounts);
+        //Detemrine accounts exist
+        if (accounts) {
+          setAccount(accounts);
+        } else {
+          alert(
+            "Failed to retrieve user's accounts, cannot make a transaction",
+          );
+          //toggle();
+        }
+      })
+      .catch(() => {
+        alert("Failed to retrieve user's accounts, cannot make a transaction");
+        //toggle();
+      });
+  }, [session]);
 
-    //Detemrine accounts exist
-    if (accounts) {
-      setAccount(accounts);
+  //Holds state of user input
+  const [selectedAccount, setSelectedAccount] = useState<number>(() => {
+    if (edit && selectedTransaction) {
+      return selectedTransaction.financialAccount_id;
+    } else {
+      return 0;
     }
   });
 
-  //Holds state of user input
-  const [selectedAccount, setSelectedAccount] = useState("");
-  const [selectedType, setSelectedType] = useState("");
-  const [amount, setAmount] = useState<string>("");
+  const [selectedType, setSelectedType] = useState(() => {
+    if (edit && selectedTransaction) {
+      return selectedTransaction.category;
+    } else {
+      return "";
+    }
+  });
+
+  const [amount, setAmount] = useState<string>(() => {
+    if (edit && selectedTransaction) {
+      return selectedTransaction.amount.toFixed(2);
+    } else {
+      return "";
+    }
+  });
   //const [file, setFile] = useState<File | undefined>(undefined)
-  const [selectedDate, setSelectedDate] = useState<string>("");
+
+  const [selectedDate, setSelectedDate] = useState<string>(() => {
+    if (edit && selectedTransaction) {
+      return new Date(selectedTransaction.date).toISOString().slice(0, 10);
+    } else {
+      //Default
+      return "";
+    }
+  });
+
+  const [other, setOther] = useState<string>(() => {
+    if (edit && selectedTransaction) {
+      if (selectedType === transactionCategory.INCOME) {
+        return selectedTransaction.sender;
+      } else {
+        return selectedTransaction.recipient;
+      }
+    } else {
+      //Default
+      return "";
+    }
+  });
 
   //Holds the types of transfers
   const transCat: typeOfTransaction[] = Object.keys(
     transactionCategory,
   ) as typeOfTransaction[];
-
-  if (edit && selectedTransaction) {
-    setSelectedAccount(selectedTransaction.amount.toString());
-    setSelectedType(selectedTransaction.type);
-    setAmount(selectedTransaction.amount.toString());
-  }
 
   return (
     <>
@@ -143,8 +217,14 @@ export default function PopupForm({
         <div className="popupForm">
           {edit ? <h2>Edit Transaction</h2> : <h2>Create Transaction</h2>}
 
-          <label>User Account:</label>
-          <select onChange={(event) => setSelectedAccount(event.target.value)}>
+          <label htmlFor="sellectAccount">User Account:</label>
+          <select
+            id="selectAccount"
+            value={selectedAccount}
+            onChange={(event) => {
+              setSelectedAccount(Number(event.target.value));
+            }}
+          >
             <option value="">Select Account</option>
             {account &&
               account.map((account) => (
@@ -153,7 +233,19 @@ export default function PopupForm({
                 </option>
               ))}
           </select>
+          <br></br>
 
+          {selectedType == transactionCategory.INCOME ? (
+            <label htmlFor="other">Sender: </label>
+          ) : (
+            <label htmlFor="other">Recipient:</label>
+          )}
+          <input
+            id="other"
+            type="text"
+            value={other}
+            onChange={(event) => setOther(event.target.value)}
+          ></input>
           <br></br>
 
           <label>Type</label>

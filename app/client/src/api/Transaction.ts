@@ -1,25 +1,27 @@
+import type { AuthSession } from "@/types/authTypes";
 import type { updateResponse } from "../types/responseTypes";
-import { type Transaction } from "../types/TransactionType";
+import type { Transaction } from "../types/Transaction";
 
-const requestUrl = "http://localhost:3000/api/transacitons";
+const requestUrl = "http://localhost:3000/api/transactions";
 
 //Sends a GET request to get the list of user transactions for the account
 export async function getTransactions(
-  account_id: number,
+  session: AuthSession,
+  financialAccount_id: string,
 ): Promise<Transaction[]> {
   try {
-    //Put as object to convert to json when sent in the body
-    const content = { id: account_id };
-
-    const response = await fetch(requestUrl, {
-      method: "GET",
-      credentials: "include",
-      body: JSON.stringify(content),
-    });
+    const response = await fetch(
+      `${requestUrl}/?financialAccount_id=${financialAccount_id}`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${session.token}` },
+      },
+    );
 
     if (!response.ok) {
       alert("Failed to retrieve account's transaction\n");
       console.error(response.status);
+      return [];
     }
 
     return response.json();
@@ -31,15 +33,16 @@ export async function getTransactions(
 
 //Can send multiple transactions in a push request
 export async function postTranscations(
-  trans: Transaction[],
-): Promise<updateResponse[]> {
+  session: AuthSession,
+  trans: Transaction,
+): Promise<updateResponse> {
   try {
     const response = await fetch(requestUrl, {
       method: "POST",
       headers: {
         "content-type": "application/json",
+        Authorization: `Bearer ${session.token}`,
       },
-      credentials: "include",
       body: JSON.stringify(trans),
     });
 
@@ -56,58 +59,81 @@ export async function postTranscations(
     throw error;
   }
 }
-
-export async function putTranscations(trans: Transaction): Promise<boolean> {
+// PUT /api/transactions/
+export async function putTranscations(
+  session: AuthSession,
+  trans: Transaction,
+): Promise<boolean> {
   try {
     const response = await fetch(requestUrl, {
       method: "PUT",
       headers: {
         "content-type": "application/json",
+        Authorization: `Bearer ${session.token}`,
       },
-      credentials: "include",
       body: JSON.stringify(trans),
     });
 
-    if (response.ok) {
-      alert("Updated the transaction");
-    } else {
-      alert("Failed to update transaction");
-      console.error(response.status);
+    if (!response.ok) {
+      console.error("Failed to update transaction", response.status);
     }
 
     return response.ok;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     throw error;
   }
 }
 
-export async function deleteTransaction(selectedTransaction: Transaction) {
+//DELETE /api/transactions/:id
+
+export async function deleteTransaction(
+  session: AuthSession,
+  selectedTransaction: Transaction,
+): Promise<boolean> {
   try {
-    const content = JSON.stringify({
-      id: selectedTransaction.id,
-      financialAccount_id: selectedTransaction.financialAccount_id,
-    });
-    //Create delete request to delete the account
     const response = await fetch(requestUrl, {
       method: "DELETE",
       headers: {
         "content-type": "application/json",
+        Authorization: `Bearer ${session.token}`,
       },
-      credentials: "include",
-      body: content,
+      body: JSON.stringify({
+        id: selectedTransaction.id,
+        financialAccount_id: selectedTransaction.financialAccount_id,
+      }),
     });
 
-    if (response.ok) {
-      alert("Transaction has been deleted");
-    } else {
-      alert("Failed to delete transaction");
-      console.error(response.status);
+    if (!response.ok) {
+      console.error("Failed to delete transaction", response.status);
     }
 
     return response.ok;
   } catch (error) {
-    console.log(error);
+    console.error(error);
+    throw error;
+  }
+}
+
+// POST /api/transactions/csvTransaction
+export async function uploadCsvTransactions(
+  session: AuthSession,
+  financialAccount_id: number,
+  transactions: Transaction[],
+) {
+  try {
+    const response = await fetch(`${requestUrl}/csvTransaction`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        Authorization: `Bearer ${session.token}`,
+      },
+      body: JSON.stringify({ financialAccount_id, transactions }),
+    });
+
+    return response.json();
+  } catch (error) {
+    console.error(error);
     throw error;
   }
 }
