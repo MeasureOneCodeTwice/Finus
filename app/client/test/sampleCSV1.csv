@@ -1,0 +1,11 @@
+date,description,amount,sender,recipient,category
+3/1/2024,Coffee Shop,25.5,Me,Starbucks,Food
+03/01/2024,Rent Payment,1000,Me,Landlord,Housing
+2024-03-03,Grocery Run,45.2,Me,Superstore,Food
+3/4/2024,Internet Bill,95,Me,Bell MTS,Utilities
+3/5/2024,Gas,60,Me,Shell,Transport
+3/6/2024,Restaurant,75,Me,Earls,Food
+3/7/2024,Phone Bill,70,Me,Rogers,Utilities
+3/8/2024,Gift Received,150,Aunt,,Gifts
+3/9/2024,Freelance Payment,600,Client,,Income
+3/10/2024,Gym Membership,45,Me,Gym,Fitness

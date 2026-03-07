@@ -1,6 +1,7 @@
 import type { AuthSession } from "@/types/authTypes";
 import type { updateResponse } from "../types/responseTypes";
 import type { Transaction } from "../types/Transaction";
+import type { TransactionDraft } from "@/utils/ConvertTransaction";
 
 const requestUrl = "http://localhost:3000/api/transactions";
 
@@ -119,21 +120,20 @@ export async function deleteTransaction(
 export async function uploadCsvTransactions(
   session: AuthSession,
   financialAccount_id: number,
-  transactions: Transaction[],
-) {
-  try {
-    const response = await fetch(`${requestUrl}/csvTransaction`, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        Authorization: `Bearer ${session.token}`,
-      },
-      body: JSON.stringify({ financialAccount_id, transactions }),
-    });
+  transactions: TransactionDraft[],
+): Promise<{
+  inserted: number;
+  skipped: number;
+  transactions: Transaction[];
+}> {
+  const response = await fetch(`${requestUrl}/csvTransaction`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      Authorization: `Bearer ${session.token}`,
+    },
+    body: JSON.stringify({ financialAccount_id, transactions }),
+  });
 
-    return response.json();
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
+  return response.json();
 }

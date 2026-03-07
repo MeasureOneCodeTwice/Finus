@@ -293,7 +293,15 @@ export default function PopupForm({
             <>
               <label htmlFor="statement">Bank statement(CVS)</label>
               {!edit && selectedAccount && (
-                <CsvUpload accountId={Number(selectedAccount)} />
+                <CsvUpload
+                  accountId={Number(selectedAccount)}
+                  session={session}
+                  onImported={(newTxs) => {
+                    if (addTransaction) {
+                      newTxs.forEach((tx) => addTransaction(tx));
+                    }
+                  }}
+                />
               )}
             </>
           )}

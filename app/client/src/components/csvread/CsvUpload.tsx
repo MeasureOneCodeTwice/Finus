@@ -9,8 +9,19 @@ import CsvConfirmation from "./CsvConfirm";
 import { parseCsvFile } from "../../utils/ParseCsv";
 import type { TransactionDraft } from "../../utils/ConvertTransaction";
 import SuccessScreen from "./csvSuccess";
+import { uploadCsvTransactions } from "@/api/Transaction";
+import type { AuthSession } from "@/pages/authTypes";
+import type { Transaction } from "@/types/Transaction";
 
-export default function CsvUpload({ accountId }: { accountId: number }) {
+export default function CsvUpload({
+  accountId,
+  session,
+  onImported,
+}: {
+  accountId: number;
+  session: AuthSession;
+  onImported: (txs: Transaction[]) => void;
+}) {
   const [file, setFile] = useState<File | null>(null); // selected CSV file
   const [error, setError] = useState<string | null>(null); // validation errors
   const [parsedData, setParsedData] = useState<TransactionDraft[] | null>(null); // state for parsed and validated data
@@ -92,25 +103,24 @@ export default function CsvUpload({ accountId }: { accountId: number }) {
     if (!parsedData) return;
 
     try {
-      const response = await fetch("/api/transactions/csvTransaction", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          financialAccount_id: accountId,
-          transactions: parsedData,
-        }),
-      });
+      const response = await uploadCsvTransactions(
+        session,
+        accountId,
+        parsedData,
+      );
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        setError(result.error || "Import failed");
+      if ("error" in response) {
+        const err = response.error;
+        setError(typeof err === "string" ? err : "Unknown error");
         return;
       }
 
+      // Notify parent (PopupForm)
+      onImported(response.transactions);
+
       setImportResult({
-        inserted: result.inserted,
-        skipped: result.skipped,
+        inserted: response.inserted,
+        skipped: response.skipped,
       });
     } catch (error) {
       console.error("Import failed:", error);
