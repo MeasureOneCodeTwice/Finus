@@ -113,7 +113,7 @@ Test levels define the Types of Testing to be executed on the Application Under 
 
 | Test Level | Scope & Requirement | Methodology (How will you do this?) |
 | :---- | :---- | :---- |
-| **Unit Testing** | **User Authentication:** 20 tests <br> **User Input:** 30 tests <br> Visualization Dashboard:** 50 in Python, 46 in TypeScript <br> **Total:** 146 tests | *We use Vitest for TS-based microservices and the client. We use PyTest for python-based microservices.* |
+| **Unit Testing** | **User Authentication:** 20 tests <br> **User Input:** 30 tests <br> **Visualization Dashboard:** 50 in Python, 46 in TypeScript <br> **Total:** 146 tests | *We use Vitest for TS-based microservices and the client. We use PyTest for python-based microservices.* |
 | **Integration Testing** | **10 tests total** covering interactions between features. | *Running tests in their environment with microservices fully operational and communicating with each other.* |
 | **Acceptance Testing** | **End-user testing** for every user story. | *Team members/external users will perform Manual Walkthroughs based on User Story criteria. Deficiencies and potential improvements will be documented.* |
 | **Regression Testing** | Unit \+ Integration tests executed on **every push to main branch**. | *We have configured a GitHub Actions CI pipeline to run all tests automatically.* |
