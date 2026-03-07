@@ -242,6 +242,18 @@ transactionsRouter.post(
         errors: string[];
       }
 
+      // Returned transaction shape
+      interface CreatedTransaction {
+        id: number;
+        financialAccount_id: number;
+        amount: number;
+        category: string;
+        date: Date;
+        sender: string;
+        recipient: string;
+        description: string;
+      }
+
       // Filter valid rows
       const validRows = transactions.filter(
         (t: unknown): t is CsvRow =>
@@ -262,10 +274,12 @@ transactionsRouter.post(
       try {
         await connection.beginTransaction();
 
+        const created: CreatedTransaction[] = [];
+
         for (const row of validRows) {
           const sqlDate = row.date ? convertToDateTime(row.date) : null;
 
-          await connection.query(
+          const [result] = await connection.query<ResultSetHeader>(
             `INSERT INTO transaction 
               (financialAccount_id, amount, description, sender, recipient, \`date\`, category)
              VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -279,14 +293,26 @@ transactionsRouter.post(
               row.category ?? "Uncategorized",
             ],
           );
+
+          created.push({
+            id: result.insertId,
+            financialAccount_id,
+            amount: row.amount ?? 0,
+            category: row.category ?? "Uncategorized",
+            date: new Date(sqlDate ?? ""),
+            sender: row.sender ?? "",
+            recipient: row.recipient ?? "",
+            description: row.description ?? "",
+          });
         }
 
         await connection.commit();
 
         res.json({
           message: "CSV transactions imported successfully",
-          inserted: validRows.length,
-          skipped: transactions.length - validRows.length,
+          inserted: created.length,
+          skipped: transactions.length - created.length,
+          transactions: created,
         });
       } catch (err) {
         await connection.rollback();
@@ -301,6 +327,7 @@ transactionsRouter.post(
     }
   },
 );
+
 //Checks the user is the owner of the account
 async function checkUserId(
   userId: number,
