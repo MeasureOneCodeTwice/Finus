@@ -4,7 +4,7 @@ export type Transaction = {
   amount: number;
   category: string;
   date: Date; // ISO format date string
-  from: string;
-  to: string;
+  sender: string;
+  recipient: string;
   description?: string;
 };

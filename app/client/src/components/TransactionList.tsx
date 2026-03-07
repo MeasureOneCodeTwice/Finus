@@ -34,7 +34,7 @@ export default function TransactionList({ session }: listProp) {
       .catch(() => {
         //alert("Failed to get accounts");
       });
-  }, [session]);
+  }, [session, selectedAccount]);
 
   //Try to get the account's transaction from the server
   useEffect(() => {
@@ -50,7 +50,7 @@ export default function TransactionList({ session }: listProp) {
           alert("Failed to get transaction");
         });
     }
-  });
+  }, [session, selectedAccount]);
 
   //Adds a account to the list
   const addTransaction = (newTransaction: Transaction) => {
@@ -106,7 +106,7 @@ export default function TransactionList({ session }: listProp) {
             <TransactionCard
               transaction={transaction}
               session={session}
-              setTransaction={addTransaction}
+              setTransaction={setTransaction}
               removeTransaction={removeTransaction}
             />
           ))}

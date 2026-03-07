@@ -35,8 +35,8 @@ export default function PopupForm({
   const handleSubmit = () => {
     const transferAmount = Number(amount);
     let userTransaction: Transaction;
-    let to = "";
-    let from = "";
+    let recipient = "";
+    let sender = "";
 
     if (
       selectedType &&
@@ -56,18 +56,18 @@ export default function PopupForm({
             (account) => account.id === selectedAccount,
           )?.name;
           if (target) {
-            to = target;
+            recipient = target;
           }
 
-          from = other;
+          sender = other;
         } else {
-          to = other;
+          recipient = other;
 
           target = account.find(
             (account) => account.id === selectedAccount,
           )?.name;
           if (target) {
-            from = target;
+            sender = target;
           }
         }
       }
@@ -75,8 +75,8 @@ export default function PopupForm({
       userTransaction = {
         id: 0,
         financialAccount_id: Number(selectedAccount),
-        to: to,
-        from: from,
+        recipient: recipient,
+        sender: sender,
         amount: transferAmount,
         category: selectedType,
         date: new Date(selectedDate),
@@ -100,16 +100,14 @@ export default function PopupForm({
       } else {
         try {
           //Send a request to create the transaction
-          postTranscations(session, [userTransaction]).then((response) => {
+          postTranscations(session, userTransaction).then((response) => {
             //Successful put if response is returned
-            if (response && response[0].id) {
-              userTransaction.id = response[0].id;
+            if (response && response.id) {
+              userTransaction.id = response.id;
 
               if (addTransaction) {
                 addTransaction(userTransaction);
               }
-            } else {
-              alert("Failed to create transaction");
             }
           });
         } catch {
@@ -163,7 +161,7 @@ export default function PopupForm({
   //Holds state of user input
   const [selectedAccount, setSelectedAccount] = useState<number>(() => {
     if (edit && selectedTransaction) {
-      return selectedTransaction.id;
+      return selectedTransaction.financialAccount_id;
     } else {
       return 0;
     }
@@ -188,14 +186,25 @@ export default function PopupForm({
 
   const [selectedDate, setSelectedDate] = useState<string>(() => {
     if (edit && selectedTransaction) {
-      return selectedTransaction.date.toISOString();
+      return new Date(selectedTransaction.date).toISOString().slice(0, 10);
     } else {
       //Default
       return "";
     }
   });
 
-  const [other, setOther] = useState("");
+  const [other, setOther] = useState<string>(() => {
+    if (edit && selectedTransaction) {
+      if (selectedType === transactionCategory.INCOME) {
+        return selectedTransaction.sender;
+      } else {
+        return selectedTransaction.recipient;
+      }
+    } else {
+      //Default
+      return "";
+    }
+  });
 
   //Holds the types of transfers
   const transCat: typeOfTransaction[] = Object.keys(
@@ -227,13 +236,14 @@ export default function PopupForm({
           <br></br>
 
           {selectedType == transactionCategory.INCOME ? (
-            <label htmlFor="other">Recipient: </label>
+            <label htmlFor="other">Sender: </label>
           ) : (
-            <label htmlFor="other">Sender:</label>
+            <label htmlFor="other">Recipient:</label>
           )}
           <input
             id="other"
             type="text"
+            value={other}
             onChange={(event) => setOther(event.target.value)}
           ></input>
           <br></br>

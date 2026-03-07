@@ -60,6 +60,7 @@ export default function Card({
           session={session}
           edit={true}
           setTransaction={setTransaction}
+          selectedTransaction={transaction}
         />
       ) : null}
     </>

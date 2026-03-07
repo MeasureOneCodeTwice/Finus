@@ -7,17 +7,16 @@ const requestUrl = "http://localhost:3000/api/transactions";
 //Sends a GET request to get the list of user transactions for the account
 export async function getTransactions(
   session: AuthSession,
-  account_id: string,
+  financialAccount_id: string,
 ): Promise<Transaction[]> {
   try {
-    //Put as object to convert to json when sent in the body
-    const content = { id: account_id };
-
-    const response = await fetch(requestUrl, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${session.token}` },
-      body: JSON.stringify(content),
-    });
+    const response = await fetch(
+      `${requestUrl}/?financialAccount_id=${financialAccount_id}`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${session.token}` },
+      },
+    );
 
     if (!response.ok) {
       alert("Failed to retrieve account's transaction\n");
@@ -35,8 +34,8 @@ export async function getTransactions(
 //Can send multiple transactions in a push request
 export async function postTranscations(
   session: AuthSession,
-  trans: Transaction[],
-): Promise<updateResponse[]> {
+  trans: Transaction,
+): Promise<updateResponse> {
   try {
     const response = await fetch(requestUrl, {
       method: "POST",
@@ -66,7 +65,7 @@ export async function putTranscations(
   trans: Transaction,
 ): Promise<boolean> {
   try {
-    const response = await fetch(`${requestUrl}/${trans.id}`, {
+    const response = await fetch(requestUrl, {
       method: "PUT",
       headers: {
         "content-type": "application/json",
@@ -93,11 +92,16 @@ export async function deleteTransaction(
   selectedTransaction: Transaction,
 ): Promise<boolean> {
   try {
-    const response = await fetch(`${requestUrl}/${selectedTransaction.id}`, {
+    const response = await fetch(requestUrl, {
       method: "DELETE",
       headers: {
+        "content-type": "application/json",
         Authorization: `Bearer ${session.token}`,
       },
+      body: JSON.stringify({
+        id: selectedTransaction.id,
+        financialAccount_id: selectedTransaction.financialAccount_id,
+      }),
     });
 
     if (!response.ok) {
@@ -114,7 +118,7 @@ export async function deleteTransaction(
 // POST /api/transactions/csvTransaction
 export async function uploadCsvTransactions(
   session: AuthSession,
-  financialAccount_id: string,
+  financialAccount_id: number,
   transactions: Transaction[],
 ) {
   try {
