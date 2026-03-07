@@ -1,0 +1,30 @@
+{
+  "scripts": {
+    "format": "prettier --write \"**/src/*.ts|**/*.ts\"",
+    "prepare": "cd ../../../../ && husky hooks/.husky"
+  },
+  "devDependencies": {
+    "@eslint/css": "^0.14.1",
+    "@eslint/js": "^10.0.1",
+    "@eslint/json": "^1.0.0",
+    "eslint": "^9",
+    "globals": "^17.3.0",
+    "husky": "^9.1.7",
+    "jiti": "^2.6.1",
+    "minimatch": "5",
+    "prettier": "3.8.1",
+    "typescript-eslint": "^8.55.0",
+    "vitest": "^4.0.18"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "type": "module",
+  "dependencies": {
+    "@types/cors": "^2.8.19",
+    "@vitest/coverage-v8": "^4.0.18",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "mysql2": "^3.18.1"
+  }
+}

@@ -1,0 +1,17 @@
+FROM measureonecodetwice/finus-analytics:local
+
+WORKDIR /app/server/services/python/analytics
+
+COPY test ./test
+COPY requirements.txt .
+
+RUN pip install -r requirements.txt
+
+ENV PYTHONPATH=/app/server/services/python/analytics
+ENV JWT_SECRET=test_secret_key_12345
+ENV CI=true
+
+CMD ["python", "-m", "pytest", "test/", "-v", "--cov=src"]
+
+
+

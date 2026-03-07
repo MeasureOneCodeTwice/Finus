@@ -1,0 +1,89 @@
+services:
+    api-gateway:
+      build:
+        context: services/ts
+        dockerfile: api-gateway/Dockerfile
+      image: $DOCKER_HUB_USERNAME/finus-api-gateway:$RELEASE_VERSION
+      env_file: 
+      - path: ./default_container.env
+      environment:
+        - NODE_ENV=development
+      ports:
+        - "3000:8000"
+      depends_on:
+        - auth
+        - user
+        - analytics
+        - market
+  
+    auth:
+      build: 
+        context: services/ts
+        dockerfile: auth/Dockerfile
+      image: $DOCKER_HUB_USERNAME/finus-auth:$RELEASE_VERSION
+      env_file: 
+      - path: ./default_container.env
+      environment: 
+      - MYSQL_USER
+      - MYSQL_PASSWORD
+      - JWT_SECRET
+      depends_on:
+      - database
+
+        
+    user:
+      build:
+        context: services/ts
+        dockerfile: user/Dockerfile
+      image: $DOCKER_HUB_USERNAME/finus-user:$RELEASE_VERSION
+      env_file: 
+      - path: ./default_container.env
+      environment: 
+      - MYSQL_USER
+      - MYSQL_PASSWORD
+      - JWT_SECRET
+      depends_on:
+      - database
+    
+    analytics:
+      build:
+        context: services/python/analytics
+        dockerfile: Dockerfile
+      image: $DOCKER_HUB_USERNAME/finus-analytics:$RELEASE_VERSION
+      env_file: 
+      - path: ./default_container.env
+      environment: 
+      - MYSQL_USER
+      - MYSQL_PASSWORD
+      - JWT_SECRET
+      depends_on:
+      - database
+      
+    market:
+      build: 
+        context: services/python/market
+        dockerfile: Dockerfile
+      image: $DOCKER_HUB_USERNAME/finus-market:$RELEASE_VERSION
+      env_file: 
+      - path: ./default_container.env
+  
+    #connect manually with `mysql -h 127.0.0.1 -P 3306 -u root -p`
+    database:
+      image: mysql:8.0-debian
+      cap_add:
+      #this is needed to avoid mbind operation not permitted errors when users keep requesting a ton of charts over and over
+      - SYS_NICE
+      volumes: 
+      - db_data:/var/lib/mysql
+      #startup scripts are executed in alphabetical order
+      - ./services/database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./services/database/grantPrivileges.sh:/docker-entrypoint-initdb.d/02-grantPrivileges.sh
+      environment:
+        - MYSQL_ROOT_PASSWORD
+        - MYSQL_USER
+        - MYSQL_PASSWORD
+      ports:
+        - "3306:3306"
+
+volumes: 
+  db_data: 

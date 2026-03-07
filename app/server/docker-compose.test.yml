@@ -1,0 +1,20 @@
+#This compose file runs all the tests. 
+#It depends on the main compose file being built
+#as all the test images inherit from the regular images.
+#you can use the following command to run the tests
+#docker compose build -q && docker compose -f docker-compose.test.yml build -q && docker compose -f docker-compose.test.yml up --abort-on-container-failure
+services:
+    auth-test:
+      build: 
+        context: services/ts
+        dockerfile: auth/Dockerfile.test
+
+    user-test:
+      build: 
+        context: services/ts
+        dockerfile: user/Dockerfile.test
+
+    analytics-test:
+      build: 
+        context: services/python/analytics
+        dockerfile: Dockerfile.test

@@ -1,0 +1,17 @@
+%%use mermaid.live to generate visualization
+sequenceDiagram
+    user->>server: POST /signup
+    server->>database: Verify account does not exist
+    database-->>server: Success
+    server->>database: Create account
+    database-->>server: 
+    server-->>user: Success
+
+    user->>server: POST /login
+    server->>server: hash password
+    server->>database: Verify email with password hash
+    database-->>server: 
+    server->>database: Get account info
+    database-->>server: 
+    server->>server: generate JWT
+    server-->>user: JWT

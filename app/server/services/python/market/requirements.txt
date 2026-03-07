@@ -1,0 +1,5 @@
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+yfinance==0.2.33
+pandas==2.1.4
+requests==2.31.0
