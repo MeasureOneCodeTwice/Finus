@@ -204,6 +204,8 @@ transactionsRouter.delete("/", async (req: Request, res: Response) => {
 transactionsRouter.post(
   "/csvTransaction",
   async (req: Request, res: Response) => {
+    let userId;
+
     try {
       const { financialAccount_id, transactions } = req.body;
 
@@ -211,7 +213,25 @@ transactionsRouter.post(
         return res.status(400).json({ error: "Invalid request payload" });
       }
 
-      // expected shape of a validated CSV row
+      // Authenticate user
+      try {
+        userId = authenticateJWT(req);
+      } catch (error) {
+        console.error(error);
+        return res
+          .status(401)
+          .json({ error: "User not authorized to import transactions" });
+      }
+
+      // Check account ownership
+      if (!(await checkUserId(userId, financialAccount_id))) {
+        console.error("User is not authorized to import into this account");
+        return res.status(401).json({
+          error: "User not authorized to import into this account",
+        });
+      }
+
+      // CSV row shape
       interface CsvRow {
         amount: number | null;
         description: string | null;
@@ -222,6 +242,7 @@ transactionsRouter.post(
         errors: string[];
       }
 
+      // Filter valid rows
       const validRows = transactions.filter(
         (t: unknown): t is CsvRow =>
           typeof t === "object" &&
@@ -242,8 +263,11 @@ transactionsRouter.post(
         await connection.beginTransaction();
 
         for (const row of validRows) {
+          const sqlDate = row.date ? convertToDateTime(row.date) : null;
+
           await connection.query(
-            `INSERT INTO transaction (financialAccount_id, amount, description, sender, recipient, date, category)
+            `INSERT INTO transaction 
+              (financialAccount_id, amount, description, sender, recipient, \`date\`, category)
              VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [
               financialAccount_id,
@@ -251,7 +275,7 @@ transactionsRouter.post(
               row.description ?? null,
               row.sender ?? null,
               row.recipient ?? null,
-              row.date,
+              sqlDate,
               row.category ?? "Uncategorized",
             ],
           );
@@ -277,7 +301,6 @@ transactionsRouter.post(
     }
   },
 );
-
 //Checks the user is the owner of the account
 async function checkUserId(
   userId: number,
