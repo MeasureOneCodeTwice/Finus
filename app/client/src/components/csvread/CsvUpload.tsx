@@ -10,7 +10,7 @@ import { parseCsvFile } from "../../utils/ParseCsv";
 import type { TransactionDraft } from "../../utils/ConvertTransaction";
 import SuccessScreen from "./csvSuccess";
 import { uploadCsvTransactions } from "@/api/Transaction";
-import type { AuthSession } from "@/pages/authTypes";
+import type { AuthSession } from "@/types/authTypes";
 import type { Transaction } from "@/types/Transaction";
 
 export default function CsvUpload({
