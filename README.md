@@ -1,4 +1,5 @@
 # About
+a
 Our project provides users with basic personal financial tracking and analytics via a web-based dashboard. 
 
 We target users past the age of 16, who are looking to gain better awareness of their financial situation. Our UI prioritizes intuitive design and meaningful analytics.
