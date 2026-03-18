@@ -32,6 +32,16 @@ app.use(
   }),
 );
 
+const MARKET_PATHS = ["markets/search", "markets/quote", "markets/history"];
+app.use(
+  createProxyMiddleware({
+    pathFilter: (path) => pathMatches(path, MARKET_PATHS),
+    target: process.env.MARKET_SERVICE_ADDR,
+    changeOrigin: true,
+    pathRewrite: { "^/api": "" },
+  }),
+);
+
 app.use(
   createProxyMiddleware({
     pathFilter: "/api/transactions",
@@ -140,6 +150,15 @@ app.use(
   createProxyMiddleware({
     pathFilter: ["/charts/budget-expenditure"],
     target: process.env.ANALYTICS_SERVICE_ADDR,
+    changeOrigin: true,
+  }),
+);
+
+// market search, quote, and history endpoints from market service
+app.use(
+  createProxyMiddleware({
+    pathFilter: ["/markets/search", "/markets/quote", "/markets/history"],
+    target: process.env.MARKET_SERVICE_ADDR,
     changeOrigin: true,
   }),
 );
