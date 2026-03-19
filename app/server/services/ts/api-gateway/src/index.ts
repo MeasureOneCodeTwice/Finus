@@ -143,3 +143,31 @@ app.use(
     changeOrigin: true,
   }),
 );
+//get predicted debt payoff data from analytics service
+app.use(
+  createProxyMiddleware({
+    pathFilter: "/api/analytics/debt/predicted-payoff",
+    target: process.env.ANALYTICS_SERVICE_ADDR,
+    changeOrigin: true,
+    pathRewrite: { "^/api/analytics/debts/predicted-payoff": "/analytics/debts/predicted-payoff" },
+  }),
+);
+
+//debt-related request
+app.use(
+  createProxyMiddleware({
+    pathFilter: "/api/debts",
+    target: process.env.USER_SERVICE_ADDR,
+    changeOrigin: true,
+    pathRewrite: { "^/api/debts": "/debts" },
+  }),
+);
+//savings-related request
+app.use(
+  createProxyMiddleware({
+    pathFilter: "/api/savings",
+    target: process.env.USER_SERVICE_ADDR,
+    changeOrigin: true,
+    pathRewrite: { "^/api/savings": "/savings" },
+  }),
+);

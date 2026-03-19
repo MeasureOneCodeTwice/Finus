@@ -1,3 +1,4 @@
+from numpy import number
 from pydantic import BaseModel
 from typing import List, Literal, Optional
 from datetime import datetime
@@ -52,3 +53,20 @@ class BudgetPerformanceResponse(BaseModel):
     categories: List[str]
     budgetAmounts: List[float]
     actualAmounts: List[float]
+
+class DebtPayoffRequest(BaseModel):
+    id: number
+    category: str
+    minimumPayment: float
+    remainingAmount: float
+    nextDueDate: str
+    period: number  # in days
+class DebtStage(BaseModel):
+    paidAmount: float
+    remainingDebt: float
+    installmentDate: str
+class DebtPayoffResponse(BaseModel):
+    id: number
+    category: str
+    minimumPayment: float
+    debtStages: List[DebtStage]

@@ -4,11 +4,14 @@ import pandas as pd
 import uvicorn
 import os
 
+
 from src.dependencies import get_db_connection, get_current_user
 from src.utils.dates import period_calc
 from src.logic.budget import generate_budget, generate_budget_performance
 from src.queries import savings as savings_queries, incomeflow as incomeflow_queries
 from src.logic import savings as savings_service, incomeflow as incomeflow_service
+from src.logic.debt import calculateExpectedPayOffDate
+from src.models.schemas import DebtPayoffRequest
 
 
 app = FastAPI()
@@ -113,6 +116,19 @@ async def get_budget(
         performance = await generate_budget_performance(user_id, budget, period)
         print(f'generated performance: {performance}')
         return performance
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@app.post('/analytics/debts/predicted-payoff')
+async def predict_debt_payoff(
+    requestBody: DebtPayoffRequest,
+    user_id: int = Depends(get_current_user),
+):
+    try:
+       print(f"Generating predicted debt payoff for user {user_id}")
+       print(requestBody)
+       return calculateExpectedPayOffDate(requestBody)
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail=str(e))

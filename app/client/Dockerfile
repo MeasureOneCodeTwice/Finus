@@ -2,9 +2,9 @@ FROM oven/bun:1.3.9-slim AS builder
 
 WORKDIR /app
 
-COPY package.json bun.lockb .
+COPY package.json bun.lockb ./
 RUN --mount=type=cache,target=/root/.bun/install/cache \
-bun install
+    bun install
 
 COPY tsconfig.* .
 COPY vite.config.ts .

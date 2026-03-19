@@ -14,6 +14,8 @@ import { PORT } from "@/port";
 import { accountsRouter } from "./routes/account.js";
 import { profilesRouter } from "./routes/profile.js";
 import { transactionsRouter } from "./routes/transaction.js";
+import { debtRouter } from "./routes/debt.ts";
+import { savingRouter } from "./routes/saving.ts";
 // import { PORT } from "@/port";
 // import { onExit } from "@/hooks";
 // import { buildCorsConfig } from "@/expressUtils";
@@ -88,6 +90,8 @@ function verifyToken(
 app.use("/accounts", accountsRouter);
 app.use("/transactions", transactionsRouter);
 app.use("/profiles", profilesRouter);
+app.use("/debts", debtRouter);
+app.use("/savings", savingRouter);
 
 const server = app.listen(PORT, () => {
   console.log(`User Service running on port ${PORT}`);
