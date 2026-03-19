@@ -9,9 +9,8 @@ from src.dependencies import get_db_connection, get_current_user
 from src.utils.dates import period_calc
 from src.logic.budget import generate_budget, generate_budget_performance
 from src.queries import savings as savings_queries, incomeflow as incomeflow_queries
-from src.logic import savings as savings_service, incomeflow as incomeflow_service
-from src.logic.debt import calculateExpectedPayOffDate
-from src.models.schemas import DebtPayoffRequest
+from src.logic import savings as savings_service, incomeflow as incomeflow_service, debt as debt_service
+from src.models.schemas import DebtPayoffRequest, ProjectedSavingsRequest, ProjectedSavingsResponse
 
 
 app = FastAPI()
@@ -120,7 +119,7 @@ async def get_budget(
         print(e)
         raise HTTPException(status_code=500, detail=str(e))
     
-@app.post('/analytics/debts/predicted-payoff')
+@app.post('/predicted-payoff')
 async def predict_debt_payoff(
     requestBody: DebtPayoffRequest,
     user_id: int = Depends(get_current_user),
@@ -128,7 +127,20 @@ async def predict_debt_payoff(
     try:
        print(f"Generating predicted debt payoff for user {user_id}")
        print(requestBody)
-       return calculateExpectedPayOffDate(requestBody)
+       return debt_service.calculateExpectedPayOffDate(requestBody)
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post('/projected-savings')
+async def predict_projected_savings(
+    requestBody: ProjectedSavingsRequest,
+    user_id: int = Depends(get_current_user),
+) -> ProjectedSavingsResponse:
+    try:
+       print(f"Generating projected savings for user {user_id}")
+       print(requestBody)
+       return savings_service.calculate_compound_interest(requestBody)
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail=str(e))

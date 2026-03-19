@@ -146,10 +146,10 @@ app.use(
 //get predicted debt payoff data from analytics service
 app.use(
   createProxyMiddleware({
-    pathFilter: "/api/analytics/debt/predicted-payoff",
+    pathFilter: "/predicted-payoff",
     target: process.env.ANALYTICS_SERVICE_ADDR,
     changeOrigin: true,
-    pathRewrite: { "^/api/analytics/debts/predicted-payoff": "/analytics/debts/predicted-payoff" },
+    //pathRewrite: { "^/api/predicted-payoff": "/predicted-payoff" },
   }),
 );
 
@@ -171,3 +171,12 @@ app.use(
     pathRewrite: { "^/api/savings": "/savings" },
   }),
 );
+//savings-related request
+/*app.use(
+  createProxyMiddleware({
+    pathFilter: "/api/projected-savings",
+    target: process.env.ANALYTICS_SERVICE_ADDR,
+    changeOrigin: true,
+    pathRewrite: { "^/api/projected-savings": "/projected-savings" },
+  }),
+);*/

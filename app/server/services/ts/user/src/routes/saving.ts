@@ -35,3 +35,19 @@ savingRouter.post("/", async (req: Request, res: Response) => {
         }
     }
 });
+savingRouter.post("/projected", async (req: Request, res: Response) => {
+    try {
+        const userId = authenticateJWT(req);
+        console.log(req.body)
+        res.status(200).json({ data: "Projected savings calculated successfully" });
+    } catch (err: any) {
+        switch (err.constructor) {
+            case UnauthorizedAccessError:
+                console.error("User is not authorized to create saving", err);
+                return res.status(401).json({ error: "User is not authorized to create saving" });
+            default:
+                console.error("Saving creation failed", err);
+                res.status(500).json({ error: "Saving creation failed" });
+        }
+    }
+});
