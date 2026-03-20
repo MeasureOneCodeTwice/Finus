@@ -54,35 +54,35 @@ class BudgetPerformanceResponse(BaseModel):
     budgetAmounts: List[float]
     actualAmounts: List[float]
 
-class DebtPayoffRequest(BaseModel):
-    id: number
-    category: str
-    minimumPayment: float
-    remainingAmount: float
-    nextDueDate: str
-    period: number  # in days
-class DebtStage(BaseModel):
-    paidAmount: float
-    remainingDebt: float
-    installmentDate: str
-class DebtPayoffResponse(BaseModel):
-    id: number
-    category: str
-    minimumPayment: float
-    debtStages: List[DebtStage]
-class ProjectedSavingsRequest(BaseModel):
-    balance: float
-    monthly_contribution: float
-    interest_rate: float | None  # annual interest rate in percentage
-    time_frame: int  # in years
-class StatItem(BaseModel):
-    year: int
-    best_case: float
-    projected_balance: float
-    worst_case: float
-class ProjectedSavingsResponse(BaseModel):
-    balance: float
-    monthly_contribution: float
-    interest_rate: float | None  # annual interest rate in percentage
-    time_frame: int  # in years
-    stat: List[StatItem]
+# class DebtPayoffRequest(BaseModel):
+#     id: number
+#     category: str
+#     minimumPayment: float
+#     remainingAmount: float
+#     nextDueDate: str
+#     period: number  # in days
+# class DebtStage(BaseModel):
+#     paidAmount: float
+#     remainingDebt: float
+#     installmentDate: str
+# class DebtPayoffResponse(BaseModel):
+#     id: number
+#     category: str
+#     minimumPayment: float
+#     debtStages: List[DebtStage]
+# class ProjectedSavingsRequest(BaseModel):
+#     balance: float
+#     monthly_contribution: float
+#     interest_rate: float | None  # annual interest rate in percentage
+#     time_frame: int  # in years
+# class StatItem(BaseModel):
+#     year: int
+#     best_case: float
+#     projected_balance: float
+#     worst_case: float
+# class ProjectedSavingsResponse(BaseModel):
+#     balance: float
+#     monthly_contribution: float
+#     interest_rate: float | None  # annual interest rate in percentage
+#     time_frame: int  # in years
+#     stat: List[StatItem]

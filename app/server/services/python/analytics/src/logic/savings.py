@@ -1,7 +1,7 @@
 import pandas as pd
 from typing import List, Dict
 # from ..queries import savings as savings_queries
-from src.models.schemas import ProjectedSavingsRequest, ProjectedSavingsResponse
+#from src.models.schemas import ProjectedSavingsRequest, ProjectedSavingsResponse
 
 def calculate_savings_over_time(
     accounts: List[Dict],
@@ -52,5 +52,5 @@ def calculate_savings_over_time(
         }]
     }
 
-def calculate_compound_interest(request: ProjectedSavingsRequest) -> ProjectedSavingsResponse:
-    return None
+# def calculate_compound_interest(request: ProjectedSavingsRequest) -> ProjectedSavingsResponse:
+#    return None
