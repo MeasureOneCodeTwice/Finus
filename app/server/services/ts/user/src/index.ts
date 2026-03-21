@@ -96,7 +96,16 @@ app.use("/savings", savingRouter);
 const server = app.listen(PORT, () => {
   console.log(`User Service running on port ${PORT}`);
 });
-process.on("SIGTERM", () => server.close());
+process.on("SIGTERM", () => cleanup);
+
+ async function cleanup() {
+  try{
+    server.close()
+    await pool.end()
+  } catch(error){
+    console.log(error)
+  }
+}
 
 // interface Transaction extends RowDataPacket {
 //   id: number;

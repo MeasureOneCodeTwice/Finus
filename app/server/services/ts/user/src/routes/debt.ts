@@ -1,14 +1,13 @@
 import { Router } from "express";
 import type { Request, Response } from "express";
 import type { ResultSetHeader } from "mysql2";
-import { getConnectionPool } from "@/sqlUtil";
+import { pool } from "../db.ts"; 
 import type { financialAccount } from "@/types.js";
 import { authenticateJWT } from "../handleJWT.js";
 import { UnauthorizedAccessError } from "../types/UnauthorizedAccess.ts";
 import { advancedPayoffCalculation, calculateExpectedPayOffDates, createNewDebt } from "../logic/debt.ts";
 export const debtRouter = Router();
 
-const db = getConnectionPool();
 
 debtRouter.get("/", async (req: Request, res: Response) => {
     try {

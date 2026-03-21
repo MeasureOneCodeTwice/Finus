@@ -43,7 +43,8 @@ export default function Card({
       <div>
         <h2>{transaction.id}</h2>
         <div>
-          <p>{transaction.amount + " " + transaction.date}</p>
+          <p>{"$" + transaction.amount.toFixed(2)}</p>
+          <p>{"Date:" + transaction.date}</p>
           <br></br>
           <p>{transaction.description}</p>
         </div>

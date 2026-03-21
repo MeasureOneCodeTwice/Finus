@@ -3,4 +3,5 @@ export const accountCategory = {
   CHEQUING: "Chequing",
   INVESTMENT: "Investment",
   DEBT: "Debt",
+  CREDIT_CARD:"Credit Card"
 };
