@@ -11,6 +11,7 @@ import SignUpPage from "./pages/SignUpPage";
 import type { AuthSession, AuthUser, AuthApiResponse } from "./types/authTypes";
 import DashboardPage from "./pages/DashboardPage.tsx";
 import AppLayout from "./components/AppLayout.tsx";
+import ProjectionPage from "./pages/ProjectionPage.tsx";
 //import { loadSession, saveSession, clearSession } from "./utils/storage.ts";
 //import { requestAuth } from "./api/AuthAPI";
 //import { resolveUserFromToken } from "./utils/token";
@@ -203,6 +204,8 @@ function App() {
               )
             }
           />
+
+
           {session && (
             <Route element={<AppLayout onLogout={handleLogout} />}>
               <Route
@@ -211,6 +214,16 @@ function App() {
               />
             </Route>
           )}
+
+          {session && (
+            <Route element={<AppLayout onLogout={handleLogout} />}>
+              <Route
+                path="/projection"
+                element={<ProjectionPage session={session} />}
+              />
+            </Route>
+          )}
+          
           <Route path="*" element={<Navigate to="/" replace />} />
 
           {/**Code below is only used for dashboard development purposes */}

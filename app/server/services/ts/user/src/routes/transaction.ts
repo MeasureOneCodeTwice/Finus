@@ -4,21 +4,19 @@ import type { Request, Response } from "express";
 import type { PoolConnection, ResultSetHeader } from "mysql2/promise";
 import { authenticateJWT } from "../handleJWT.js";
 import type { Transaction } from "@/types.js";
-import {checkUserId} from "../CheckUser.ts"
+import { checkUserId } from "../CheckUser.ts";
 import { convertToDateTime } from "../DataConversion.ts";
 import { pool as connection, pool } from "../db.ts";
-import { connect } from "node:http2";
 
 export const transactionsRouter = Router();
-
 
 // Get all transactions for a specific financial account
 transactionsRouter.get("/", async (req: Request, res: Response) => {
   let userId;
-  let connection: PoolConnection | undefined
+  let connection: PoolConnection | undefined;
 
   try {
-    connection = await pool.getConnection()
+    connection = await pool.getConnection();
     const financialAccount_id = Number(req.query.financialAccount_id);
 
     if (!financialAccount_id) {
@@ -34,7 +32,7 @@ transactionsRouter.get("/", async (req: Request, res: Response) => {
         .json({ error: "User not authorized to create a transaction" });
     }
 
-    if (!(await checkUserId(connection,userId, financialAccount_id))) {
+    if (!(await checkUserId(connection, userId, financialAccount_id))) {
       console.error(
         "User is not authorized to create a transaction on this account",
       );
@@ -59,9 +57,9 @@ transactionsRouter.get("/", async (req: Request, res: Response) => {
 
 transactionsRouter.post("/", async (req: Request, res: Response) => {
   let userId;
-  let connection: PoolConnection | undefined
+  let connection: PoolConnection | undefined;
   try {
-    connection = await pool.getConnection()
+    connection = await pool.getConnection();
     const {
       financialAccount_id,
       amount,
@@ -113,9 +111,9 @@ transactionsRouter.post("/", async (req: Request, res: Response) => {
   } catch (err) {
     console.error("Transaction creation failed", err);
     res.status(500).json({ error: "Transaction creation failed" });
-  } finally{
-    if(connection){
-      connection.release()
+  } finally {
+    if (connection) {
+      connection.release();
     }
   }
 });
@@ -123,10 +121,10 @@ transactionsRouter.post("/", async (req: Request, res: Response) => {
 // Update an existing transaction
 transactionsRouter.put("/", async (req: Request, res: Response) => {
   let userId;
-  let connection: PoolConnection | undefined
+  let connection: PoolConnection | undefined;
 
   try {
-    connection = await pool.getConnection()
+    connection = await pool.getConnection();
     const {
       id,
       financialAccount_id,
@@ -174,9 +172,9 @@ transactionsRouter.put("/", async (req: Request, res: Response) => {
     res.json({ message: "Transaction successfully updated" });
   } catch (err) {
     console.error("Transaction update failed", err);
-  } finally{
-    if(connection){
-      connection.release()
+  } finally {
+    if (connection) {
+      connection.release();
     }
   }
 });
@@ -222,9 +220,9 @@ transactionsRouter.post(
   "/csvTransaction",
   async (req: Request, res: Response) => {
     let userId;
-    let connection: PoolConnection | undefined
+    let connection: PoolConnection | undefined;
     try {
-      connection = await pool.getConnection()
+      connection = await pool.getConnection();
       const { financialAccount_id, transactions } = req.body;
 
       if (!financialAccount_id || !Array.isArray(transactions)) {
@@ -340,13 +338,10 @@ transactionsRouter.post(
     } catch (err) {
       console.error("CSV transaction import failed", err);
       res.status(500).json({ error: "CSV transaction import failed" });
-    } finally{
-      if(connection) {
-        connection.release()
+    } finally {
+      if (connection) {
+        connection.release();
       }
     }
   },
 );
-
-
-

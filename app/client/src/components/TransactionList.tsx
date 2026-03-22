@@ -6,6 +6,7 @@ import TransactionCard from "./TransactionCard";
 import type { AuthSession } from "@/types/authTypes";
 import { type Account } from "@/types/AccountType";
 import { getUserAccounts } from "@/api/Account";
+import SelectAccount from "./SelectAccount";
 
 interface listProp {
   session: AuthSession;
@@ -13,7 +14,7 @@ interface listProp {
 
 export default function TransactionList({ session }: listProp) {
   const [userAccounts, setUserAccounts] = useState<Account[]>([]);
-  const [selectedAccount, setSelectedAccount] = useState<string>("");
+  const [selectedAccount, setSelectedAccount] = useState<number>(0);
   const [accountTransactions, setAccountTransactions] = useState<Transaction[]>(
     [],
   );
@@ -85,20 +86,7 @@ export default function TransactionList({ session }: listProp) {
     <>
       <div>
         <div>
-          <label htmlFor="selectAccount">User Account:</label>
-          <select
-            id="selectAccount"
-            value={selectedAccount}
-            onChange={(event) => setSelectedAccount(event.target.value)}
-          >
-            <option value="">Select Account</option>
-            {userAccounts &&
-              userAccounts.map((account) => (
-                <option key={account.id} value={account.id}>
-                  {account.name} ({account.type})
-                </option>
-              ))}
-          </select>
+        <SelectAccount accounts={userAccounts} selectedAccount={selectedAccount} setSelectedAccount={setSelectedAccount}/>
         </div>
 
         <div>

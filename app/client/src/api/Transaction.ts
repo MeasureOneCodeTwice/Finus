@@ -8,7 +8,7 @@ const requestUrl = "http://localhost:3000/api/transactions";
 //Sends a GET request to get the list of user transactions for the account
 export async function getTransactions(
   session: AuthSession,
-  financialAccount_id: string,
+  financialAccount_id: number,
 ): Promise<Transaction[]> {
   try {
     const response = await fetch(
@@ -86,7 +86,7 @@ export async function putTranscations(
   }
 }
 
-//DELETE /api/transactions/:id
+//DELETE /api/transactions/
 
 export async function deleteTransaction(
   session: AuthSession,

@@ -9,6 +9,7 @@ import { type Transaction } from "../types/Transaction";
 import { type Account } from "@/types/AccountType";
 import { transactionCategory } from "@/enum/TransactionCategory";
 import type { AuthSession } from "@/types/authTypes";
+import SelectAccount from "@/components/SelectAccount"
 
 interface popupProp {
   toggle: () => void;
@@ -217,22 +218,8 @@ export default function PopupForm({
         <div className="popupForm">
           {edit ? <h2>Edit Transaction</h2> : <h2>Create Transaction</h2>}
 
-          <label htmlFor="sellectAccount">User Account:</label>
-          <select
-            id="selectAccount"
-            value={selectedAccount}
-            onChange={(event) => {
-              setSelectedAccount(Number(event.target.value));
-            }}
-          >
-            <option value="">Select Account</option>
-            {account &&
-              account.map((account) => (
-                <option key={account.id} value={account.id}>
-                  {account.name} ({account.type})
-                </option>
-              ))}
-          </select>
+          {account && <SelectAccount accounts={account} selectedAccount={selectedAccount} setSelectedAccount={setSelectedAccount}/>}
+         
           <br></br>
 
           {selectedType == transactionCategory.INCOME ? (
