@@ -5,9 +5,7 @@ export interface BaseGoal {
   type: GoalType;
   category: string;
   target_amount: number;
-  current_amount: number;
-  created_at: Date;
-  updated_at: Date;
+  current_amount: number; //this is the amount that has been saved or spent depending on goal type. This is aggregated on the server, and is not actually stored in DBs
 }
 
 export interface SpendingLimitGoal extends BaseGoal {

@@ -9,12 +9,9 @@ import mysql
 import mysql.connector
 from mysql.connector import Error
 import random
-import hashlib
-import os
 from datetime import datetime, timedelta
 import argparse
 import bcrypt
-import subprocess
 
 
 def get_db_connection():
@@ -43,7 +40,7 @@ TEST_USER_PASSWORD = 'pwd'
 FINANCIAL_ACCOUNT_TYPES = ['chequing', 'savings', 'credit_card', 'investment']
 FINANCIAL_ACCOUNT_SUBTYPES = ['RRSP', 'TFSA', 'FHSA', 'RESP', 'RDSP', 'loan', 'na']
 INVESTMENT_TYPES = ['stocks', 'bonds', 'mutual funds', 'ETFs']
-GOAL_TYPES = ['money', 'debt']
+GOAL_TYPES = ['save', 'reduce_spending']
 FIRST_NAMES = ['John', 'Jane', 'Alex', 'Emily', 'Michael', 'Sarah', 'David', 'Laura']
 LAST_NAMES = ['Smith', 'Finus', 'Williams', 'Brown', 'Jones']
 GOAL_NAMES = ['Emergency Fund', 'New Car', 'House Down Payment', 'Vacation', 'Retirement', 'Pay off Credit Card']
@@ -67,14 +64,13 @@ def create_goals(cursor, profile_ids):
         for _ in range(random.randint(1, 3)):
             name = random.choice(GOAL_NAMES)
             goal_type = random.choice(GOAL_TYPES)
-            objective = random.choice(GOAL_OBJECTIVES)
-            description = f"Goal: {objective}"
-            deadline = datetime.now() + timedelta(days=random.randint(30, 365*3))  # 1 month to 3 years
-            
+            category = random.choice(TRANSACTION_CATEGORIES)
+            target = random.randint(100, 50000)
+
             cursor.execute("""
-                INSERT INTO finus.goal (name, type, objective, description, deadline)
-                VALUES (%s, %s, %s, %s, %s)
-            """, (name, goal_type, objective, description, deadline))
+                INSERT INTO finus.goal (name, type, category, target)
+                VALUES (%s, %s, %s, %s)
+            """, (name, goal_type, category, target))
             
             goal_id = cursor.lastrowid
 
@@ -355,11 +351,11 @@ def populate_lookup_tables(cursor):
             (inv_type,)
         )
     
-    for goal_type in GOAL_TYPES:
-        cursor.execute(
-            "INSERT IGNORE INTO finus.goalType (type) VALUES (%s)",
-            (goal_type,)
-        )
+    # for goal_type in GOAL_TYPES:
+    #     cursor.execute(
+    #         "INSERT IGNORE INTO finus.goalType (type) VALUES (%s)",
+    #         (goal_type,)
+    #     )
 
 
 

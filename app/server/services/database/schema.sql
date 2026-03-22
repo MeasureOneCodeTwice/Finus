@@ -34,21 +34,14 @@ CREATE TABLE finus.finusAccount_profile (
     FOREIGN KEY (account_id) REFERENCES finus.finusAccount(id) ON DELETE CASCADE  -- this used to mention financialAccount, but should be mentioning finusAccount
 );
 
-CREATE TABLE finus.goalType (
-    type VARCHAR(50) NOT NULL,
-    PRIMARY KEY (type)
-);
 
 CREATE TABLE finus.goal (
     id          INTEGER         NOT NULL AUTO_INCREMENT,
     name        VARCHAR(50)     NOT NULL,
     type        VARCHAR(50)     NOT NULL,
-    objective   VARCHAR(500)    NOT NULL,
-    description VARCHAR(500),
-    deadline    DATETIME, 
-    PRIMARY KEY (id),
-    FOREIGN KEY (type) REFERENCES finus.goalType(type) ON DELETE CASCADE
-
+    category    VARCHAR(50),
+    target      DECIMAL(12,2)   NOT NULL, -- this is the monetary amount that we are trying to reach, there is no current amount to track, as that is just recalculated from the transactions
+    PRIMARY KEY (id)
 );
 
 CREATE TABLE finus.profile_goal (
@@ -164,4 +157,4 @@ INSERT INTO finus.financialAccountType    (type) VALUES ('chequing'), ('savings'
 INSERT INTO finus.financialAccountSubtype (subtype) VALUES ('RRSP'), ('TFSA'), ('FHSA'), ('RESP'), ('RDSP'), ('loan'), ('na');
 -- loan is used for credit_card accounts that are for loans like mortgage and etc, this is used to track debt
 INSERT  INTO finus.investmentType          (type) VALUES ('fixedInterest'), ('stock'); #These have to match table names
-INSERT  INTO finus.goalType                (type) VALUES ('money'), ('debt');
+
