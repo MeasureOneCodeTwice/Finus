@@ -10,6 +10,7 @@ import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
 import type { AuthSession, AuthUser, AuthApiResponse } from "./types/authTypes";
 import DashboardPage from "./pages/DashboardPage.tsx";
+import MarketsPage from "./pages/MarketsPage";
 import AppLayout from "./components/AppLayout.tsx";
 //import { loadSession, saveSession, clearSession } from "./utils/storage.ts";
 //import { requestAuth } from "./api/AuthAPI";
@@ -209,6 +210,7 @@ function App() {
                 path="/dashboard"
                 element={<DashboardPage session={session} />}
               />
+              <Route path="/markets" element={<MarketsPage session={session} />} />
             </Route>
           )}
           <Route path="*" element={<Navigate to="/" replace />} />
