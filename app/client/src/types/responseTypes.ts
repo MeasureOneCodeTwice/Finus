@@ -6,5 +6,5 @@ export interface updateResponse {
 
 export interface projecteDataResponse {
   dataPoint: number[];
-  range: Date[];
+  dateLabel: string[];
 }

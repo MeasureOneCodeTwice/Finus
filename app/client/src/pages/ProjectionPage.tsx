@@ -21,6 +21,9 @@ import SelectDebt from "@/components/SelectDebt";
 import { getDebt } from "@/api/Debt";
 import { type Debt } from "@/types/Debt";
 import { type projecteDataResponse } from "@/types/responseTypes";
+import ProjectionGraph from "@/components/ProjectionGraph";
+import { TbGraph } from "react-icons/tb";
+import NoItemState from "@/components/NoItemState";
 
 Chart.register(
   PointElement,
@@ -46,8 +49,8 @@ function ProjectionPage({ session }: ProjectionProp) {
   const [, setRange] = useState<string>("");
   const [selectedType, setSelectedType] = useState<"Saving" | "Debt">("Saving");
   //savingData and debtData
-  const [,] = useState<projecteDataResponse | undefined>(undefined);
-  const [,] = useState<projecteDataResponse | undefined>(undefined);
+  const [savingData] = useState<projecteDataResponse | undefined>(undefined);
+  const [debtData] = useState<projecteDataResponse | undefined>(undefined);
 
   const calculateProjection = () => {};
 
@@ -172,6 +175,40 @@ function ProjectionPage({ session }: ProjectionProp) {
         >
           Calculate
         </button>
+      </div>
+
+      <div>
+        {selectedType === "Saving" ? (
+          savingData ? (
+            <>
+              <ProjectionGraph data={savingData} />
+            </>
+          ) : (
+            <>
+              <NoItemState
+                title="No Projection Available"
+                description="Currenlty there is no saving account selected to have it's data projected"
+                icon={<TbGraph className="w-10 h-10 text-green-400" />}
+              />
+            </>
+          )
+        ) : null}
+
+        {selectedType === "Debt" ? (
+          debtData ? (
+            <>
+              <ProjectionGraph data={debtData} />
+            </>
+          ) : (
+            <>
+              <NoItemState
+                title="No Projection Available"
+                description="Currently there is not debt selected to have it's data projected"
+                icon={<TbGraph className="w-10 h-10 text-green-400" />}
+              />
+            </>
+          )
+        ) : null}
       </div>
     </section>
   );
