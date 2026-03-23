@@ -20,3 +20,26 @@ export async function getAllTransactionsQuery(
   const [rows] = await pool.query<Transaction[]>(query, [userId]);
   return rows;
 }
+
+export async function getDateCategoryTransactionsQuery(
+  pool: Pool,
+  prfoileId: number,
+  category: string,
+  from: Date,
+  to: Date
+): Promise<Transaction[]> {
+  const query = `
+    SELECT t.*, u.first_name, u.last_name
+    FROM finus.transaction t
+    JOIN finus.financialAccount fa ON t.financialAccount_id = fa.id
+    JOIN finus.profile_financialAccount pfa ON fa.id = pfa.financialAccount_id
+    JOIN finus.profile p ON pfa.profile_id = p.id
+    JOIN finus.finusAccount_profile uap ON p.id = uap.profile_id
+    JOIN finus.finusAccount u ON uap.account_id = u.id
+    WHERE p.id = ? AND t.category = ? AND t.date >= ? AND t.date <= ?
+    ORDER BY t.date DESC
+  `;
+
+  const [rows] = await pool.query<Transaction[]>(query, [prfoileId, category, from, to]);
+  return rows;
+}

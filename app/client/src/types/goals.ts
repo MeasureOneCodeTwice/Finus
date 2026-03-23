@@ -1,21 +1,23 @@
-export type GoalType = "spending_limit" | "savings_target"; // just two for simplicity, but can expand
+export type GoalType = "reduce_spending" | "save"; // just two for simplicity, but can expand
 
 export interface BaseGoal {
   id: string;
+  name: string;
   type: GoalType;
   category: string;
-  target_amount: number;
-  current_amount: number; //this is the amount that has been saved or spent depending on goal type. This is aggregated on the server, and is not actually stored in DBs
+  target: number;
+  period: "m" | "w";
+  progress: number;
+  current_amount: number; //this is the amount that has been saved or spent depending on goal type. This is aggregated on the server, and is not actually stored in DB
 }
 
 export interface SpendingLimitGoal extends BaseGoal {
-  type: "spending_limit";
-  period: "monthly" | "weekly";
+  type: "reduce_spending";
+  period: "m" | "w";
 }
 
 export interface SavingsTargetGoal extends BaseGoal {
-  type: "savings_target";
-  target_date: Date;
+  type: "save";
 }
 
 export type Goal = SpendingLimitGoal | SavingsTargetGoal;

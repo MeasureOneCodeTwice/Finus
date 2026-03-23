@@ -40,6 +40,7 @@ CREATE TABLE finus.goal (
     name        VARCHAR(50)     NOT NULL,
     type        VARCHAR(50)     NOT NULL,
     category    VARCHAR(50),
+    period      VARCHAR(1)      NOT NULL,
     target      DECIMAL(12,2)   NOT NULL, -- this is the monetary amount that we are trying to reach, there is no current amount to track, as that is just recalculated from the transactions
     PRIMARY KEY (id)
 );

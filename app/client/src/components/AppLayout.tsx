@@ -42,11 +42,12 @@ export default function AppLayout({ onLogout }: AppLayoutProps) {
   const handleAddGoal = async () => {
     // need a modal or a form for this placeholder
     const newGoal: Partial<Goal> = {
-      type: "spending_limit",
-      category: "New Goal",
-      target_amount: 100,
-      current_amount: 0,
-      period: "monthly",
+      type: "reduce_spending",
+      name: "New Goal",
+      category: "Restaurants",
+      target: 100,
+      current_amount: 2,
+      period: "m",
     };
 
     try {
@@ -60,6 +61,7 @@ export default function AppLayout({ onLogout }: AppLayoutProps) {
   const handleEditGoal = async (goalId: string, updates: Partial<Goal>) => {
     try {
       const updated = await updateGoal(goalId, updates);
+      // console.log("Updated goal:", updated);
       setGoals(goals.map((g) => (g.id === goalId ? updated : g)));
     } catch (error) {
       console.error("Failed to update goal:", error);

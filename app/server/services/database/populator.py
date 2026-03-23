@@ -66,11 +66,11 @@ def create_goals(cursor, profile_ids):
             goal_type = random.choice(GOAL_TYPES)
             category = random.choice(TRANSACTION_CATEGORIES)
             target = random.randint(100, 50000)
-
+            period = random.choice(['w', 'm'])
             cursor.execute("""
-                INSERT INTO finus.goal (name, type, category, target)
-                VALUES (%s, %s, %s, %s)
-            """, (name, goal_type, category, target))
+                INSERT INTO finus.goal (name, type, category, target, period)
+                VALUES (%s, %s, %s, %s , %s)
+            """, (name, goal_type, category, target , period))
             
             goal_id = cursor.lastrowid
 

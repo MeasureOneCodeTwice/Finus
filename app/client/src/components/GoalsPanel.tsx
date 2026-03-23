@@ -11,11 +11,6 @@ function GoalsPanel({
 }: GoalsPanelProps) {
   const [expandedGoalId, setExpandedGoalId] = useState<string | null>(null);
 
-  const calculateProgress = (goal: Goal): number => {
-    const percentage = (goal.current_amount / goal.target_amount) * 100;
-    return Math.min(percentage, 100); // Cap at 100%
-  };
-
   const formatAmount = (amount: number): string => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -26,11 +21,12 @@ function GoalsPanel({
   };
 
   const getGoalDescription = (goal: Goal): string => {
-    if (goal.type === "spending_limit") {
-      return `Spending limit • ${goal.period === "monthly" ? "Monthly" : "Weekly"}`;
+    if (goal.type === "reduce_spending") {
+      return `Spending limit • ${goal.period === "m" ? "Monthly" : "Weekly"}`;
     } else {
-      const targetDate = new Date(goal.target_date);
-      return `Save by ${targetDate.toLocaleDateString()}`;
+      // const targetDate = new Date(goal.target_date);
+      // return `Save by ${targetDate.toLocaleDateString()}`;
+      return `Savings Goal`;
     }
   };
 
@@ -57,7 +53,7 @@ function GoalsPanel({
 
       <div className="space-y-3 max-h-[calc(80vh-120px)] overflow-y-auto">
         {goals.map((goal) => {
-          const progress = calculateProgress(goal);
+          const progress = goal.progress;
           const isExpanded = expandedGoalId === goal.id;
 
           return (
@@ -77,7 +73,7 @@ function GoalsPanel({
                 <span className="text-white capitalize">{goal.category}</span>
                 <span className="text-gray-400">
                   {formatAmount(goal.current_amount)} /{" "}
-                  {formatAmount(goal.target_amount)}
+                  {formatAmount(goal.target)}
                 </span>
               </div>
 
@@ -101,11 +97,11 @@ function GoalsPanel({
                     </span>
                     <input
                       type="number"
-                      value={goal.target_amount}
+                      value={goal.target}
                       onChange={(e) =>
                         handleEdit(
                           goal.id,
-                          "target_amount",
+                          "target",
                           parseFloat(e.target.value),
                         )
                       }
@@ -114,26 +110,11 @@ function GoalsPanel({
                     />
                   </div>
 
-                  {goal.type === "savings_target" && (
+                  {goal.type === "save" && (
                     <div className="flex justify-between items-center">
                       <span className="text-xs text-gray-400">
                         Target Date:
                       </span>
-                      <input
-                        type="date"
-                        value={
-                          new Date(goal.target_date).toISOString().split("T")[0]
-                        }
-                        onChange={(e) =>
-                          handleEdit(
-                            goal.id,
-                            "target_date",
-                            new Date(e.target.value),
-                          )
-                        }
-                        className="bg-black/50 border border-green-500/30 rounded px-2 py-1 text-sm text-white"
-                        onClick={(e) => e.stopPropagation()}
-                      />
                     </div>
                   )}
 
@@ -158,7 +139,7 @@ function GoalsPanel({
           );
         })}
 
-        {/* Add goal button */}
+        {/* add goal button */}
         {goals.length < maxGoals && (
           <button
             onClick={onAddGoal}

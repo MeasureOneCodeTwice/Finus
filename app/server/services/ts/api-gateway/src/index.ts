@@ -2,7 +2,7 @@ import { PORT } from "@/port";
 import { onExit } from "@/hooks";
 import express from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
-import { buildCorsConfig } from "@/expressUtils";
+import { buildCorsConfig } from "@/expressUtils.ts";
 
 const app = express();
 app.use(buildCorsConfig());
@@ -22,7 +22,7 @@ app.use(
   }),
 );
 
-const USER_PATHS = ["accounts", "profiles", "charts/expenses"];
+const USER_PATHS = ["accounts", "profiles", "/charts/expenses", "/table/transactions", "/table/snapshot", "/goals"];
 app.use(
   createProxyMiddleware({
     pathFilter: (path) => pathMatches(path, USER_PATHS),
@@ -41,15 +41,7 @@ app.use(
   }),
 );
 
-// const ANALYTICS_PATHS = ["charts/savings", "charts/incomeflow"];
-// app.use(
-//   createProxyMiddleware({
-//     pathFilter: (path) => pathMatches(path, ANALYTICS_PATHS),
-//     target: process.env.ANALYTICS_SERVICE_ADDR,
-//     changeOrigin: true,
-//     pathRewrite: { "^/api": "" },
-//   }),
-// );
+
 
 app.get("/health", async (req: express.Request, res: express.Response) => {
   const result: { [key: string]: string } = {};
@@ -73,49 +65,33 @@ const server = app.listen(PORT, () => {
 });
 onExit(async () => await server.close());
 
-//API gateway sits on port 3000 and is accessible from there. Go to browser and type http://localhost:3000/health and you should see which services are up.
-// app.get('/health', async (req: express.Request, res: express.Response) => {
-//     const result: { [serviceName: string]: string } = {};
-//     const services: string[] = Object.keys(process.env).filter((x) => /^.*_SERVICE_ADDR$/.test(x));
-
-//     for(const service of services) {
-//       const serviceName = service.split('_')[0];
-//       if (serviceName)
-//         result[serviceName] = await fetch(`${process.env[service]}/health`)
-//           .then((res) => res.text())
-//           .catch((err) => err.message);
-//         console.log("received response");
-//     }
-
-//     res.json(result);
-// });
 
 //expenses bar chart in user service
-app.use(
-  createProxyMiddleware({
-    pathFilter: ["/charts/expenses"],
-    target: process.env.USER_SERVICE_ADDR,
-    changeOrigin: true,
-  }),
-);
+// app.use(
+//   createProxyMiddleware({
+//     pathFilter: ["/charts/expenses"],
+//     target: process.env.USER_SERVICE_ADDR,
+//     changeOrigin: true,
+//   }),
+// );
 
 //transactions table in user service
-app.use(
-  createProxyMiddleware({
-    pathFilter: ["/table/transactions"],
-    target: process.env.USER_SERVICE_ADDR,
-    changeOrigin: true,
-  }),
-);
+// app.use(
+//   createProxyMiddleware({
+//     pathFilter: ["/table/transactions"],
+//     target: process.env.USER_SERVICE_ADDR,
+//     changeOrigin: true,
+//   }),
+// );
 
 //snapshot of total values like debt, savings, etc from user service
-app.use(
-  createProxyMiddleware({
-    pathFilter: ["/table/snapshot"],
-    target: process.env.USER_SERVICE_ADDR,
-    changeOrigin: true,
-  }),
-);
+// app.use(
+//   createProxyMiddleware({
+//     pathFilter: ["/table/snapshot"],
+//     target: process.env.USER_SERVICE_ADDR,
+//     changeOrigin: true,
+//   }),
+// );
 
 //savings chart from analytics service
 app.use(
