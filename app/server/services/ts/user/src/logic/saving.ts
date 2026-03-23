@@ -1,10 +1,13 @@
-import type { SavingInfoRequest } from "../types/SavingInfoRequest.ts";
-import { FinancialAccountType } from "../types/FinancialAccountType.ts";
-import  { createNewSavingAccount } from "../queries/saving.ts";
+import  { addSavingAccount, findSavingsBy } from "../queries/saving.ts";
 import type { SavingInfoResponse } from "../types/SavingInfoResponse.ts";
-export async function createNewSaving(savingInfo: SavingInfoRequest, userId: string) : Promise<SavingInfoResponse>{
+import type { FinancialAccountRequest } from "../types/FinancialAccountRequest.ts";
+
+export async function getSavings(userId: string): Promise<SavingInfoResponse[]> {
+  return await findSavingsBy(userId)
+}
+export async function createSavingAccount(savingInfo: FinancialAccountRequest, userId: string) : Promise<SavingInfoResponse>{
     try {
-        return await createNewSavingAccount(savingInfo, userId);
+        return await addSavingAccount(savingInfo, userId);
     } catch (err) {
         console.error("Error creating a new saving account: ", err);
         throw err;

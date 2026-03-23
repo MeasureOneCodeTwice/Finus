@@ -8,7 +8,6 @@ import { UnauthorizedAccessError } from "../types/UnauthorizedAccess.ts";
 import { advancedPayoffCalculation, calculateExpectedPayOffDates, createNewDebt, getDebts } from "../logic/debt.ts";
 export const debtRouter = Router();
 
-
 debtRouter.get("/", async (req: Request, res: Response) => {
     try {
         const userId = authenticateJWT(req);
@@ -29,7 +28,6 @@ debtRouter.get("/", async (req: Request, res: Response) => {
 debtRouter.post("/", async (req: Request, res: Response) => {
     try {
         const userId = authenticateJWT(req);
-        console.log(req.body)
         const newDebt = await createNewDebt(req.body, userId);
         res.status(201).json({ message: "Debt created successfully", data: newDebt });
     } catch (err: any) {

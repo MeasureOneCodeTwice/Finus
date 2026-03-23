@@ -1,8 +1,9 @@
+import type { FinancialAccountType } from "./FinancialAccountType.ts";
 export interface DebtInfoResponse {
   id: number;
   balance: number;
   name: string;
-  type: 'loan';
+  type: FinancialAccountType.CREDIT;
   subtype: string;
   lastUpdated?: string;
 }

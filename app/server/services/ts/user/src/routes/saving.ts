@@ -2,12 +2,14 @@ import { Router } from "express";
 import type { Request, Response } from "express";
 import { authenticateJWT } from "../handleJWT.js";
 import { UnauthorizedAccessError } from "../types/UnauthorizedAccess.ts";
-import { createNewSaving } from "../logic/saving.ts";
+import { createSavingAccount, getSavings } from "../logic/saving.ts";
 export const savingRouter = Router();
 
 savingRouter.get("/", async (req: Request, res: Response) => {
     try {
         const userId = authenticateJWT(req);
+        const savings = await getSavings(userId)
+        res.status(200).json({ data: savings})
     } catch (err: any) {
         switch (err.constructor) {
             case UnauthorizedAccessError:
@@ -22,7 +24,7 @@ savingRouter.get("/", async (req: Request, res: Response) => {
 savingRouter.post("/", async (req: Request, res: Response) => {
     try {
         const userId = authenticateJWT(req);
-        const savingAccount = await createNewSaving(req.body, userId.toString());
+        const savingAccount = await createSavingAccount(req.body, userId);
         res.status(201).json({ data: savingAccount });
     } catch (err: any) {
         switch (err.constructor) {
