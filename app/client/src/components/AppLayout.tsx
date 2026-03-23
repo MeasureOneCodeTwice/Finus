@@ -44,9 +44,9 @@ export default function AppLayout({ onLogout }: AppLayoutProps) {
     const newGoal: Partial<Goal> = {
       type: "reduce_spending",
       name: "New Goal",
-      category: "Restaurants",
+      category: "Unknown",
       target: 100,
-      current_amount: 2,
+      current_amount: 0,
       period: "m",
     };
 

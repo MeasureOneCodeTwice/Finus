@@ -3,20 +3,22 @@ import { instance } from "./config";
 
 async function fetchGoals(): Promise<Goal[]> {
   console.log("fetching goals");
-  const response = await instance.get('/goals');
+  const response = await instance.get("/goals");
   if (response.status !== 200) {
     throw new Error(`Failed to fetch goals data: ${response.statusText}`);
   }
-  console.log('returning a list of goals: ', response.data);
+  console.log("returning a list of goals: ", response.data);
   return response.data;
 }
 
 async function createGoal(goal: Partial<Goal>): Promise<Goal> {
   console.log("creating goal: ", goal);
   const response = await instance.post("/goals", goal);
-  if (response.status !== 201) {  // 201 Created is standard for POST
+  if (response.status !== 201) {
+    // 201 Created is standard for POST
     throw new Error(`Failed to create goal: ${response.statusText}`);
   }
+  console.log("got response from create goal: ", response.data);
   return response.data;
 }
 
@@ -28,14 +30,16 @@ async function updateGoal(
   if (response.status !== 200) {
     throw new Error(`Failed to edit goal: ${response.statusText}`);
   }
-  console.log("updated goal: ", response.data);
+
+  // console.log("updated goal: ", response.data);
   return response.data;
 }
 
 async function deleteGoal(goalId: string): Promise<void> {
-  console.log("deleting goal: ", goalId);
+  // console.log("deleting goal: ", goalId);
   const response = await instance.delete(`/goals?gid=${goalId}`);
-  if (response.status !== 204) {  // 204 No Content is standard for DELETE
+  if (response.status !== 204) {
+    // 204 No Content is standard for DELETE
     throw new Error(`Failed to delete goal: ${response.statusText}`);
   }
 }

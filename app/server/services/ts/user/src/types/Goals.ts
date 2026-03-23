@@ -1,5 +1,5 @@
-export type GoalType = 'spending_limit' | 'savings_target';
-export type GoalPeriod = 'm' | 'w';
+export type GoalType = "save" | "reduce_spending";
+export type GoalPeriod = "m" | "w" | "na";
 
 export interface Goal {
   id: number;
@@ -8,7 +8,8 @@ export interface Goal {
   category?: string;
   target: number;
   period: GoalPeriod;
-  profile_id: number;//maybe add the current amount here too, it's just not stored in the db
+  profile_id: number; //maybe add the current amount here too, it's just not stored in the db
+  // current_amount: number;
 }
 
 export interface GoalWithProgress extends Goal {
@@ -28,10 +29,6 @@ export interface UpdateGoalInput {
   name?: string;
   category?: string;
   target?: number;
-}
-
-export interface UpdateGoalInput {
-  name?: string;
-  category?: string;
-  target?: number;
+  period?: GoalPeriod;
+  type?: GoalType;
 }
