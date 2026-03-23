@@ -5,6 +5,6 @@ export interface updateResponse {
 }
 
 export interface projecteDataResponse {
-  dataPoint: number
-  date: Date
+  dataPoint: number[];
+  range: Date[];
 }

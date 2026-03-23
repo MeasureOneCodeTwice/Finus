@@ -63,7 +63,7 @@ export default function PopupForm({
       const newAccount: Account = {
         id: 0,
         name: formInput.name,
-        type: accountType,
+        type: accountCategory[accountType],
         balance: accountBalance,
         subtype: subtype,
         value: 0,

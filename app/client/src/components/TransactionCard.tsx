@@ -45,6 +45,7 @@ export default function Card({
         <div>
           <p>{"$" + transaction.amount.toFixed(2)}</p>
           <p>{"Date:" + transaction.date}</p>
+          <p>{"Type: " + transaction.category}</p>
           <br></br>
           <p>{transaction.description}</p>
         </div>

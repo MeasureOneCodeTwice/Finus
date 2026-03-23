@@ -14,9 +14,13 @@ import {
 import type { AuthSession } from "../types/authTypes";
 import SelectAccount from "@/components/SelectAccount";
 import { useEffect, useState } from "react";
-import {type Account } from "@/types/AccountType";
+import { type Account } from "@/types/AccountType";
 import { getUserAccounts } from "@/api/Account";
-
+import { accountCategory } from "@/enum/AccountCategory";
+import SelectDebt from "@/components/SelectDebt";
+import { getDebt } from "@/api/Debt";
+import { type Debt } from "@/types/Debt";
+import { type projecteDataResponse } from "@/types/responseTypes";
 
 Chart.register(
   PointElement,
@@ -35,32 +39,64 @@ type ProjectionProp = {
 };
 
 function ProjectionPage({ session }: ProjectionProp) {
-    const [accounts, setAccounts] = useState<Account[]>([])
-    const [selectedAccount, setSelectedAccount] = useState<number>(0)
-    
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [debts, setDebts] = useState<Debt[]>([]);
+  const [selectedAccount, setSelectedAccount] = useState<number>(0);
+  //range
+  const [, setRange] = useState<string>("");
+  const [selectedType, setSelectedType] = useState<"Saving" | "Debt">("Saving");
+  //savingData and debtData
+  const [,] = useState<projecteDataResponse | undefined>(undefined);
+  const [,] = useState<projecteDataResponse | undefined>(undefined);
 
-    const calculateProjection = () => {
+  const calculateProjection = () => {};
 
-    }
+  useEffect(() => {
+    if (selectedType === "Saving") {
+      getUserAccounts(session, accountCategory.SAVING)
+        .then((userAccounts) => {
+          console.log(userAccounts);
 
-
-    useEffect(() => {
-    getUserAccounts(session)
-      .then((userAccounts) => {
-        console.log(userAccounts);
-
-        //Detemrine accounts exist
-        if (userAccounts) {
-          setAccounts(userAccounts);
-        } else {
+          //Detemrine accounts exist
+          if (userAccounts) {
+            setAccounts(userAccounts);
+          }
+        })
+        .catch(() => {
           //alert("Failed to get accounts");
-        }
-      })
-      .catch(() => {
-        //alert("Failed to get accounts");
-      });
-  }, [session, selectedAccount]);
+        });
+    }
+  }, [session, selectedAccount, selectedType]);
 
+  useEffect(() => {
+    if (selectedType === "Debt") {
+      getDebt(session)
+        .then((userDebts) => {
+          console.log(userDebts);
+
+          //Detemrine if there are any debts
+          if (userDebts) {
+            setDebts(userDebts);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [session, debts, selectedType]);
+
+  const typeButton = [
+    { key: "Saving", label: "Saving" },
+    { key: "Debt", label: "Debt" },
+  ].map(({ key, label }) => (
+    <button
+      key={key}
+      onClick={() => setSelectedType(key as "Saving" | "Debt")}
+      className={`px-4 py-1.5 text-sm rounded-md transition-all outline-1
+        ${selectedType === key ? "bg-green-500 text-green-400 outline-2 outline-green-400" : "text-gray-300"}
+      `}
+    >
+      {label}
+    </button>
+  ));
 
   const glowLeft = (
     <div
@@ -98,23 +134,45 @@ function ProjectionPage({ session }: ProjectionProp) {
     <section className="relative px-16 py-19 bg-[#030805]">
       {glowLeft}
       {glowRight}
-      <h1 className="text-4xl font-bold mb-4">
-        Projection
-      </h1>
+      <h1 className="text-4xl font-bold mb-4">Projection</h1>
       <p className="text-lg text-green-500">
         Here you can view a projection of you're saving's or debt
       </p>
 
       <h2 className="text-2xl font-bold mb-4">Select Saving Account or Debt</h2>
-     
-      <div className="space-x-2">
-        <SelectAccount accounts={accounts} selectedAccount={selectedAccount} setSelectedAccount={setSelectedAccount} />
-        <label htmlFor="range">Range:</label>
-        <input id="range" name = "range" type="date"/>
-        <button onClick = {calculateProjection} className="px-4 py-1.5 text-sm rounded-md transition-all outline-1 text-gray-300">Calculate</button>
+
+      <div className="max-w-min flex gap-2 bg-black/50 p-1 rounded-lg border border-green-500/20">
+        {typeButton}
       </div>
 
-
+      <div className="space-x-2">
+        {selectedType === "Saving" ? (
+          <SelectAccount
+            accounts={accounts}
+            selectedAccount={selectedAccount}
+            setSelectedAccount={setSelectedAccount}
+          />
+        ) : (
+          <SelectDebt
+            debts={debts}
+            selectedDebt={selectedAccount}
+            setSelectedDebt={setSelectedAccount}
+          />
+        )}
+        <label htmlFor="range">Range:</label>
+        <input
+          id="range"
+          name="range"
+          type="date"
+          onChange={(event) => setRange(event.target.value)}
+        />
+        <button
+          onClick={calculateProjection}
+          className="px-4 py-1.5 text-sm rounded-md transition-all outline-1 text-gray-300"
+        >
+          Calculate
+        </button>
+      </div>
     </section>
   );
 }
