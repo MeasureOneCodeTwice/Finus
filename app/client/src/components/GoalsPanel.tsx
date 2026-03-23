@@ -2,7 +2,7 @@
 import type { Goal, GoalsPanelProps } from "../types/Goals.ts";
 import { useState, useEffect, useRef, useReducer } from "react";
 
-// Define the reducer
+//define the reducer - this is necessary because we need to track the edits in state even if the panel is closed
 type EditValuesState = {
   [goalId: string]: {
     name: string;
@@ -27,7 +27,7 @@ function editValuesReducer(
 ): EditValuesState {
   switch (action.type) {
     case "INIT_GOAL":
-      // Only initialize if it doesn't exist
+      // only initialize if it doesn't exist
       if (state[action.payload.goalId]) return state;
       return {
         ...state,
@@ -62,10 +62,9 @@ function GoalsPanel({
   const [expandedGoalId, setExpandedGoalId] = useState<string | null>(null);
   const [editValues, dispatch] = useReducer(editValuesReducer, {});
 
-  // Track which goals have been initialized (optional now, but kept for safety)
   const initializedGoals = useRef<Set<string>>(new Set());
 
-  // Initialize edit values when a goal expands
+  //initialize edit values when a goal expands
   useEffect(() => {
     if (expandedGoalId) {
       const goal = goals.find((g) => g.id === expandedGoalId);
@@ -146,10 +145,13 @@ function GoalsPanel({
 
       <div className="space-y-3 max-h-[calc(80vh-120px)] overflow-y-auto">
         {goals.map((goal) => {
-          const progress = goal.progress;
+          const progress = goal.progress_percentage;
           const isExpanded = expandedGoalId === goal.id;
           const currentEdits = editValues[goal.id];
           const hasChanges = hasUnsavedChanges(goal.id);
+
+          const progressBarColor =
+            goal.type === "reduce_spending" ? "bg-red-500" : "bg-green-500";
 
           return (
             <div
@@ -176,7 +178,7 @@ function GoalsPanel({
 
               <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-green-500 rounded-full transition-all duration-300"
+                  className={`h-full rounded-full transition-all duration-300 ${progressBarColor}`}
                   style={{ width: `${progress}%` }}
                 />
               </div>

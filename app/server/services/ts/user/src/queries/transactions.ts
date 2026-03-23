@@ -23,29 +23,52 @@ export async function getAllTransactionsQuery(
 
 export async function getDateCategoryTransactionsQuery(
   pool: Pool,
-  prfoileId: number,
+  profileId: number,
   category: string,
   from: Date,
   to: Date,
 ): Promise<Transaction[]> {
+  //convert dates to MySQL format
+  const fromStr = from.toISOString().slice(0, 19).replace("T", " ");
+  const toStr = to.toISOString().slice(0, 19).replace("T", " ");
+
   const query = `
-    SELECT t.*, u.first_name, u.last_name
+    SELECT t.*
     FROM finus.transaction t
     JOIN finus.financialAccount fa ON t.financialAccount_id = fa.id
     JOIN finus.profile_financialAccount pfa ON fa.id = pfa.financialAccount_id
-    JOIN finus.profile p ON pfa.profile_id = p.id
-    JOIN finus.finusAccount_profile uap ON p.id = uap.profile_id
-    JOIN finus.finusAccount u ON uap.account_id = u.id
-    WHERE p.id = ? AND t.category = ? AND t.date >= ? AND t.date <= ?
+    WHERE pfa.profile_id = ? 
+      AND t.category = ? 
+      AND t.date >= ? 
+      AND t.date <= ?
     ORDER BY t.date DESC
   `;
 
   const [rows] = await pool.query<Transaction[]>(query, [
-    prfoileId,
+    profileId,
     category,
-    from,
-    to,
+    fromStr,
+    toStr,
   ]);
+  return rows;
+}
+
+export async function getProfileCategoryTransactionsQuery(
+  pool: Pool,
+  profileId: number,
+  category: string,
+): Promise<Transaction[]> {
+  const query = `
+    SELECT t.*
+    FROM finus.transaction t
+    JOIN finus.financialAccount fa ON t.financialAccount_id = fa.id
+    JOIN finus.profile_financialAccount pfa ON fa.id = pfa.financialAccount_id
+    WHERE pfa.profile_id = ? 
+      AND t.category = ?
+    ORDER BY t.date DESC
+  `;
+
+  const [rows] = await pool.query<Transaction[]>(query, [profileId, category]);
   return rows;
 }
 
@@ -55,37 +78,38 @@ export async function getProfileCategorySavingsQuery(
   profileId: number,
   category: string,
 ): Promise<Transaction[]> {
-  const query_savings = `
-    SELECT t.*, u.first_name, u.last_name
+  const query = `
+    SELECT t.*
     FROM finus.transaction t
     JOIN finus.financialAccount fa ON t.financialAccount_id = fa.id
     JOIN finus.profile_financialAccount pfa ON fa.id = pfa.financialAccount_id
-    JOIN finus.profile p ON pfa.profile_id = p.id
-    JOIN finus.finusAccount_profile uap ON p.id = uap.profile_id
-    JOIN finus.finusAccount u ON uap.account_id = u.id
-    WHERE p.id = ? AND t.category = '?' and t.amount > 0
+    WHERE pfa.profile_id = ? 
+      AND t.category = ?
+      AND t.amount > 0
     ORDER BY t.date DESC
   `;
 
-  const query_expenses = `
-    SELECT t.*, u.first_name, u.last_name
+  const [rows] = await pool.query<Transaction[]>(query, [profileId, category]);
+  return rows;
+}
+
+//get only expenses (negative amounts) for a category
+export async function getProfileCategoryExpensesQuery(
+  pool: Pool,
+  profileId: number,
+  category: string,
+): Promise<Transaction[]> {
+  const query = `
+    SELECT t.*
     FROM finus.transaction t
     JOIN finus.financialAccount fa ON t.financialAccount_id = fa.id
     JOIN finus.profile_financialAccount pfa ON fa.id = pfa.financialAccount_id
-    JOIN finus.profile p ON pfa.profile_id = p.id
-    JOIN finus.finusAccount_profile uap ON p.id = uap.profile_id
-    JOIN finus.finusAccount u ON uap.account_id = u.id
-    WHERE p.id = ? AND t.category = '?' and t.amount < 0
+    WHERE pfa.profile_id = ? 
+      AND t.category = ?
+      AND t.amount < 0
     ORDER BY t.date DESC
   `;
 
-  const [rows_savings] = await pool.query<Transaction[]>(query_savings, [
-    profileId,
-    category,
-  ]);
-  const [rows_expenses] = await pool.query<Transaction[]>(query_expenses, [
-    profileId,
-    category,
-  ]);
-  return rows_savings.concat(rows_expenses);
+  const [rows] = await pool.query<Transaction[]>(query, [profileId, category]);
+  return rows;
 }

@@ -30,8 +30,8 @@ app.use(express.json());
 
 app.use(
   (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    console.log("USER Incoming request: " + req.method + " " + req.url);
-    console.log(req.body);
+    // console.log("USER Incoming request: " + req.method + " " + req.url);
+    // console.log(req.body);
     next();
   },
 );
@@ -245,8 +245,6 @@ app.patch("/goals", async (req: express.Request, res: express.Response) => {
 // DELETE goal
 app.delete("/goals", async (req: express.Request, res: express.Response) => {
   try {
-    console.log("deleting goal");
-
     const userId = authenticateJWT(req);
     const goalId = parseInt(req.query.gid);
 

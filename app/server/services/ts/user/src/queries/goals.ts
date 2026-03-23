@@ -14,6 +14,8 @@ export async function getUserProfileId(
      WHERE account_id = ?`,
     [userId],
   );
+
+  // console.log('Tried to find user profile id based on user id, found: ', rows);
   return rows[0]?.profile_id || null; //getting the first profile for now, needs to be rewritten if multiple profiles are implemented (stretch)
 }
 

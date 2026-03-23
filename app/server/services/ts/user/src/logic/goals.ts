@@ -16,64 +16,66 @@ async function calculateCurrentAmount(
   goal: Goal,
   profileId: number | null,
 ): Promise<number> {
+  if (!profileId) {
+    // console.log("No profileId provided");
+    return 0;
+  }
+
   if (goal.type === "reduce_spending") {
-    //get the current period's spending, this can be either a week or a month
     const period = goal.period;
     const now = new Date();
+    let startDate: Date;
 
-    if (period == "w") {
-      const startOfWeek = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate() - now.getDay(),
-      );
-      const spending =
-        await transactionsQueries.getDateCategoryTransactionsQuery(
-          pool,
-          profileId ? profileId : 0,
-          goal.category!,
-          startOfWeek,
-          now,
-        );
-      const total_spending = spending.reduce(
-        (total, transaction) => total + transaction.amount,
-        0,
-      );
-      console.log("returning weekly total spending: ", total_spending);
-      return total_spending;
+    if (period === "w") {
+      // Start of week (Sunday)
+      startDate = new Date(now);
+      startDate.setDate(now.getDate() - now.getDay());
+      startDate.setHours(0, 0, 0, 0);
+      // console.log(`Weekly period: ${startDate.toISOString()} to ${now.toISOString()}`);
     } else {
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      const spending =
-        await transactionsQueries.getDateCategoryTransactionsQuery(
-          pool,
-          profileId ? profileId : 0,
-          goal.category!,
-          startOfMonth,
-          now,
-        );
-      const total_spending = spending.reduce(
-        (total, transaction) => total + transaction.amount,
-        0,
-      );
-      console.log("returning monthly total spending: ", total_spending);
-      return total_spending;
+      // Start of month
+      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      startDate.setHours(0, 0, 0, 0);
+      // console.log(`Monthly period: ${startDate.toISOString()} to ${now.toISOString()}`);
     }
-  } else if (goal.type === "save") {
-    const savings_expenses =
-      await transactionsQueries.getProfileCategorySavingsQuery(
-        pool,
-        profileId ? profileId : 0,
-        goal.category!,
-      );
 
-    //aggregate the rows as savings - expenses (expese transaction values are negative though so this is a sum of savings and expenses)
-    const total_savings = savings_expenses.reduce(
+    // Get expenses (negative amounts) for this category in the period
+    const expenses = await transactionsQueries.getDateCategoryTransactionsQuery(
+      pool,
+      profileId,
+      goal.category!,
+      startDate,
+      now,
+    );
+
+    // Sum the amounts (they are negative, so sum will be negative)
+    const totalSpending = expenses.reduce(
       (total, transaction) => total + transaction.amount,
       0,
     );
-    console.log("returning total savings: ", total_savings);
-    return total_savings;
+
+    // Return absolute value for display
+    // console.log(`Total spending for ${goal.category}: ${totalSpending}`);
+    return Math.abs(totalSpending);
+  } else if (goal.type === "save") {
+    // For savings goals, get all transactions for this category
+    const transactions =
+      await transactionsQueries.getProfileCategoryTransactionsQuery(
+        pool,
+        profileId,
+        goal.category!,
+      );
+
+    // Sum all amounts (positive = savings, negative = expenses)
+    const total = transactions.reduce(
+      (sum, transaction) => sum + transaction.amount,
+      0,
+    );
+
+    // console.log(`Total savings for ${goal.category}: ${total}`);
+    return total > 0 ? total : 0;
   }
+
   return 0;
 }
 
@@ -85,21 +87,25 @@ export async function getGoalsByProfileId(
   return goals;
 }
 
-// Enrich a goal with calculated progress
+//enrich a goal with calculated progress
 export async function enrichGoalWithProgress(
   pool: Pool,
   goal: Goal,
-  userId: number,
+  profileId: number,
 ): Promise<GoalWithProgress> {
-  const profileId = await goalsQueries.getUserProfileId(pool, userId);
   const current_amount = await calculateCurrentAmount(pool, goal, profileId);
-  console.log(
-    "In enrich goals function - got a current amount for goal: ",
-    current_amount,
-  );
   const progress_percentage = Math.min(
     (current_amount / goal.target) * 100,
     100,
+  );
+
+  console.log(
+    "enriching goal with progress, cur amount:",
+    current_amount,
+    "progress percentage:",
+    progress_percentage,
+    " because target is:",
+    goal.target,
   );
 
   return {

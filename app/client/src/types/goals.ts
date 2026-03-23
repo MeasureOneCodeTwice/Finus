@@ -7,7 +7,7 @@ export interface BaseGoal {
   category: string;
   target: number;
   period: "m" | "w" | "na";
-  progress: number;
+  progress_percentage: number;
   current_amount: number; //this is the amount that has been saved or spent depending on goal type. This is aggregated on the server, and is not actually stored in DB
 }
 
