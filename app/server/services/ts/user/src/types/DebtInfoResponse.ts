@@ -1,7 +1,8 @@
 export interface DebtInfoResponse {
   id: number;
-  amount: number;
-  dueDate: string;
-  category: string;
-  status: "pending" | "paid" | "overdue";
+  balance: number;
+  name: string;
+  type: 'loan';
+  subtype: string;
+  lastUpdated?: string;
 }

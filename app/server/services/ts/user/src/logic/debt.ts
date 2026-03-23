@@ -1,19 +1,17 @@
 import { getConnectionPool } from "@/sqlUtil.ts";
 import type { Pool } from "mysql2/promise";
-import type { DebtInfoRequest } from "../types/DebtInfoRequest.ts";
+import type { FinancialAccountRequest } from "../types/FinancialAccountRequest.ts";
+import { addDebt, findDebtsBy } from "../queries/debt.ts";
+import type { DebtInfoResponse } from "../types/DebtInfoResponse.ts";
 
 const db = getConnectionPool();
-export async function createNewDebt(debt: DebtInfoRequest): Promise<void> {
-  const connection: Pool = await db.getConnection();
-  /*try {
-    await connection.execute(
-      "INSERT INTO debts (creditor_id, amount, description) VALUES (?, ?, ?)",
-      [debt.creditorId, debt.amount, debt.description],
-    );
-  } finally {
-    connection.release();
-  }*/
+export async function getDebts(userId: string): Promise<DebtInfoResponse[]> {
+  return await findDebtsBy(userId)
+}
+export async function createNewDebt(debt: FinancialAccountRequest, userId: string): Promise<DebtInfoResponse> {
+  const newDebt = await addDebt(debt,userId)
   console.log(debt)
+  return newDebt
 }
 type DebtPayoffRequest = {
   id: string;
