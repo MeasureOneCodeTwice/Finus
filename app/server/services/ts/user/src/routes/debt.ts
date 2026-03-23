@@ -5,13 +5,16 @@ import { pool } from "../db.ts";
 import type { financialAccount } from "@/types.js";
 import { authenticateJWT } from "../handleJWT.js";
 import { UnauthorizedAccessError } from "../types/UnauthorizedAccess.ts";
-import { advancedPayoffCalculation, calculateExpectedPayOffDates, createNewDebt } from "../logic/debt.ts";
+import { advancedPayoffCalculation, calculateExpectedPayOffDates, createNewDebt, getDebts } from "../logic/debt.ts";
 export const debtRouter = Router();
 
 
 debtRouter.get("/", async (req: Request, res: Response) => {
     try {
         const userId = authenticateJWT(req);
+        getDebts(userId).then((debts) => {
+            res.status(200).json({ message: "Debts retrieved successfully", data: debts });
+        });
     } catch (err: any) {
         switch (err.constructor) {
             case UnauthorizedAccessError:
@@ -26,8 +29,9 @@ debtRouter.get("/", async (req: Request, res: Response) => {
 debtRouter.post("/", async (req: Request, res: Response) => {
     try {
         const userId = authenticateJWT(req);
-        await createNewDebt(req.body);
-        res.status(201).json({ message: "Debt created successfully" });
+        console.log(req.body)
+        const newDebt = await createNewDebt(req.body, userId);
+        res.status(201).json({ message: "Debt created successfully", data: newDebt });
     } catch (err: any) {
         switch (err.constructor) {
             case UnauthorizedAccessError:

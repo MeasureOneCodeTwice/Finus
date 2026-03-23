@@ -1,5 +1,5 @@
 export enum FinancialAccountType {
-    SAVINGS = 'savingss',
+    SAVINGS = 'savings',
     CREDIT = 'credit_card',
     INVESTMENT = 'investment',
     CHEQUING = 'chequing',
