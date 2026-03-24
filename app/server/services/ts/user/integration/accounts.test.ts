@@ -19,14 +19,12 @@ beforeAll(async () => {
   const result = await request(BASE_URL)
     .post("/api/signup")
     .send(accountDetails);
-  console.log(JSON.stringify(result.body, null, 2));
 
   const login = await request(BASE_URL)
     .post("/api/login")
     .send({ email: accountDetails.email, password: accountDetails.password });
 
   token = login.body.token;
-  console.log(JSON.stringify(login.body, null, 2));
 
   const account = await request(BASE_URL)
     .post("/api/accounts")
