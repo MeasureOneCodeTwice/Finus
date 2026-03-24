@@ -1,33 +1,43 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import request from "supertest";
 
-const BASE_URL = process.env.APP_URL!;
+const BASE_URL = "http://localhost:3000";
 
 let token: string;
 let accountId: number;
 
 beforeAll(async () => {
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+  const accountDetails = {
+    username: "hi@hi.com",
+    email: "hi@hi.com",
+    first_name: "logan",
+    last_name: "also logan",
+    age: 30,
+    password: "123ABC!7",
+  };
 
-  await request(BASE_URL)
+  const result = await request(BASE_URL)
     .post("/api/signup")
-    .send({ email: "test@example.com", password: "password123" });
+    .send(accountDetails);
+  console.log(JSON.stringify(result.body, null, 2));
 
   const login = await request(BASE_URL)
     .post("/api/login")
-    .send({ email: "test@example.com", password: "password123" });
+    .send({ email: accountDetails.email, password: accountDetails.password });
 
   token = login.body.token;
+
+  console.log(JSON.stringify(login.body, null, 2));
 
   const account = await request(BASE_URL)
     .post("/api/accounts")
     .set("Authorization", `Bearer ${token}`)
     .send({
-      name: "Chequing",
-      type: "bank",
+      name: "all my moola",
+      type: "chequing",
       balance: 1000,
       value: 1000,
-      subtype: "personal",
+      subtype: "TFSA",
     });
 
   accountId = account.body.id;
@@ -167,16 +177,13 @@ describe("Transactions Integration (Docker)", () => {
     expect(res.body.transactions.length).toBe(1);
   });
 
-it("rejects unauthorized access", async () => {
-  const res = await request(BASE_URL)
-    .post("/api/transactions")
-    .send({
+  it("rejects unauthorized access", async () => {
+    const res = await request(BASE_URL).post("/api/transactions").send({
       financialAccount_id: accountId,
       amount: 10,
       date: "2024-01-01T12:00:00",
     });
 
-  expect(res.status).toBe(404);
-});
-
+    expect(res.status).toBe(404);
+  });
 });

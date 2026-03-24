@@ -337,15 +337,13 @@ async function checkUserId(
   try {
     //Checks if the profile has an account with that id
     const [rows] = await db.query(
-      `SELECT 1 FROM profile_financialAccount 
+      `SELECT * FROM profile_financialAccount 
       WHERE profile_id =? AND financialAccount_id =?`,
       [userId, accountId],
     );
 
     console.log(rows.length);
-    if (rows.length > 0) {
-      result = true;
-    }
+    result = rows.length > 0;
   } catch (error) {
     console.error(error);
   }

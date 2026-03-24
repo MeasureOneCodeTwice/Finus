@@ -1,26 +1,32 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import request from "supertest";
 
-
-const BASE_URL = process.env.APP_URL!;
+const BASE_URL = "http://localhost:3000";
 
 let token: string;
 let accountId: number;
 
 beforeAll(async () => {
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+  const accountDetails = {
+    username: "hi@hi.com",
+    email: "hi@hi.com",
+    first_name: "logan",
+    last_name: "also logan",
+    age: 30,
+    password: "123ABC!7",
+  };
 
-  // Create test user
-  await request(BASE_URL)
+  const result = await request(BASE_URL)
     .post("/api/signup")
-    .send({ email: "test@example.com", password: "password123" });
+    .send(accountDetails);
+  console.log(JSON.stringify(result.body, null, 2));
 
-  // Login
   const login = await request(BASE_URL)
     .post("/api/login")
-    .send({ email: "test@example.com", password: "password123" });
+    .send({ email: accountDetails.email, password: accountDetails.password });
 
   token = login.body.token;
+  console.log(JSON.stringify(login.body, null, 2));
 });
 
 describe("Accounts Integration (Docker)", () => {
@@ -107,12 +113,10 @@ describe("Accounts Integration (Docker)", () => {
   });
 
   it("rejects account creation without auth", async () => {
-    const res = await request(BASE_URL)
-      .post("/api/accounts")
-      .send({
-        name: "Unauthorized",
-        type: "bank",
-      });
+    const res = await request(BASE_URL).post("/api/accounts").send({
+      name: "Unauthorized",
+      type: "bank",
+    });
 
     expect(res.status).toBe(404);
   });
