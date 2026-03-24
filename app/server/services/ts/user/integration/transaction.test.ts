@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import request from "supertest";
 
-const BASE_URL = "http://localhost:3000";
+const BASE_URL = process.env.API_GATEWAY_ADDR;
 
 let token: string;
 let accountId: number;
@@ -16,16 +16,13 @@ beforeAll(async () => {
     password: "123ABC!7",
   };
 
-  const result = await request(BASE_URL)
-    .post("/api/signup")
-    .send(accountDetails);
+  await request(BASE_URL).post("/api/signup").send(accountDetails);
 
   const login = await request(BASE_URL)
     .post("/api/login")
     .send({ email: accountDetails.email, password: accountDetails.password });
 
   token = login.body.token;
-
 
   const account = await request(BASE_URL)
     .post("/api/accounts")
