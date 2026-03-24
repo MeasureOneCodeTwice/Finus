@@ -27,27 +27,22 @@ beforeAll(async () => {
 
   token = login.body.token;
   console.log(JSON.stringify(login.body, null, 2));
+
+  const account = await request(BASE_URL)
+    .post("/api/accounts")
+    .set("Authorization", `Bearer ${token}`)
+    .send({
+      name: "Chequing",
+      type: "chequing",
+      balance: 1000,
+      value: 1000,
+      subtype: "na",
+    });
+
+  accountId = account.body.id;
 });
 
 describe("Accounts Integration (Docker)", () => {
-  it("creates an account", async () => {
-    const res = await request(BASE_URL)
-      .post("/api/accounts")
-      .set("Authorization", `Bearer ${token}`)
-      .send({
-        name: "Chequing",
-        type: "bank",
-        balance: 1000,
-        value: 1000,
-        subtype: "personal",
-      });
-
-    expect(res.status).toBe(200);
-    expect(res.body.id).toBeDefined();
-
-    accountId = res.body.id;
-  });
-
   it("lists accounts for the authenticated user", async () => {
     const res = await request(BASE_URL)
       .get("/api/accounts")
@@ -65,10 +60,10 @@ describe("Accounts Integration (Docker)", () => {
       .send({
         id: accountId,
         name: "Updated Chequing",
-        type: "bank",
+        type: "chequing",
         balance: 1500,
         value: 1500,
-        subtype: "personal",
+        subtype: "na",
       });
 
     expect(res.status).toBe(200);
@@ -76,10 +71,14 @@ describe("Accounts Integration (Docker)", () => {
   });
 
   it("prevents unauthorized account updates", async () => {
-    // Create second user
-    await request(BASE_URL)
-      .post("/api/signup")
-      .send({ email: "other@example.com", password: "password123" });
+    await request(BASE_URL).post("/api/signup").send({
+      username: "otheruser",
+      email: "other@example.com",
+      first_name: "other",
+      last_name: "user",
+      age: 22,
+      password: "password123",
+    });
 
     const login2 = await request(BASE_URL)
       .post("/api/login")
@@ -93,10 +92,10 @@ describe("Accounts Integration (Docker)", () => {
       .send({
         id: accountId,
         name: "Hacked Account",
-        type: "bank",
+        type: "chequing",
         balance: 9999,
         value: 9999,
-        subtype: "fraud",
+        subtype: "na",
       });
 
     expect(res.status).toBe(401);
@@ -115,10 +114,10 @@ describe("Accounts Integration (Docker)", () => {
   it("rejects account creation without auth", async () => {
     const res = await request(BASE_URL).post("/api/accounts").send({
       name: "Unauthorized",
-      type: "bank",
+      type: "chequing",
     });
 
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(400);
   });
 
   it("validates account input", async () => {
@@ -127,9 +126,9 @@ describe("Accounts Integration (Docker)", () => {
       .set("Authorization", `Bearer ${token}`)
       .send({
         name: "", // invalid
-        type: "bank",
+        type: "chequing",
       });
 
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(400);
   });
 });

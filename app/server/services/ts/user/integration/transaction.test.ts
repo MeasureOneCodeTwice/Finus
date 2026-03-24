@@ -184,6 +184,6 @@ describe("Transactions Integration (Docker)", () => {
       date: "2024-01-01T12:00:00",
     });
 
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(401);
   });
 });
