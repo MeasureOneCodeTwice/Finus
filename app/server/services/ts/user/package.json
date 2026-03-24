@@ -9,12 +9,14 @@
     "@types/bun": "latest",
     "@types/express": "^5.0.6",
     "@types/node": "^25.1.0",
+    "@types/supertest": "^7.2.0",
     "@typescript-eslint/eslint-plugin": "^8.54.0",
     "@typescript-eslint/parser": "^8.54.0",
     "eslint": "^9.39.2",
     "eslint-plugin-react": "^7.37.5",
     "globals": "^17.3.0",
     "jiti": "^2.6.1",
+    "supertest": "^7.2.2",
     "typescript-eslint": "^8.54.0"
   },
   "peerDependencies": {
@@ -31,6 +33,6 @@
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "mysql2": "^3.15.3",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.1"
   }
 }

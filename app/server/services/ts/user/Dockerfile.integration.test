@@ -1,0 +1,11 @@
+FROM measureonecodetwice/finus-user:local
+
+COPY user/integration ./integration
+
+WORKDIR /project
+COPY vitest.config.ts .
+
+ENV CI=true
+ENV APP_URL=http://api-gateway:8000
+ENV JWT_SECRET=dummysecret
+CMD ["bun", "run", "vitest", "--run", "integration"]

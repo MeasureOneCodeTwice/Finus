@@ -18,3 +18,19 @@ services:
       build: 
         context: services/python/analytics
         dockerfile: Dockerfile.test
+
+    user-integration-test:
+      build:
+        context: ./services/ts
+        dockerfile: user/Dockerfile.integration.test
+      env_file:
+        - ./default_container.env
+      environment:
+        APP_URL: http://api-gateway:8000
+        JWT_SECRET: ${JWT_SECRET}
+         
+      depends_on:
+        - api-gateway
+        - database
+
+    
