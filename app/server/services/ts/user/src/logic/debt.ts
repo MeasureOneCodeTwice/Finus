@@ -1,6 +1,7 @@
 import type { FinancialAccountRequest } from "../types/FinancialAccountRequest.ts";
 import { addDebt, findDebtsBy } from "../queries/debt.ts";
 import type { DebtInfoResponse } from "../types/DebtInfoResponse.ts";
+import { BadRequestError } from "../types/BadRequestError.ts";
 
 export async function getDebts(userId: string): Promise<DebtInfoResponse[]> {
   return await findDebtsBy(userId)
@@ -77,6 +78,7 @@ export function calculateExpectedPayOffDates( dbr: DebtPayoffRequest): DebtPayof
   };
 }
 type AdvancedDebtStage = {
+  id: number
   principalAmount: number;
   interestAmount: number;
   remainingDebt: number;
@@ -90,13 +92,18 @@ export function advancedPayoffCalculation( dbr: DebtPayoffRequest): DebtPayoffRe
 
   const expectedDate = new Date(nextDueDate);
   let remainingDebt = remainingAmount;
-  let i = 0;
+  let i = 1;
   while (remainingDebt > 0) {
     const interest = remainingDebt * monthlyInterestRate;
-    const principal = minimumPayment - interest;
+    let principal = minimumPayment - interest;
+
+     if (principal > remainingDebt) {
+      principal = remainingDebt;
+    }
     const newRemainingAmount = remainingDebt - principal;
 
     stages.push({
+      id: i,
       principalAmount: parseFloat(principal.toFixed(2)),
       interestAmount: parseFloat(interest.toFixed(2)),
       remainingDebt: parseFloat(newRemainingAmount.toFixed(2)),
@@ -106,6 +113,10 @@ export function advancedPayoffCalculation( dbr: DebtPayoffRequest): DebtPayoffRe
     remainingDebt = newRemainingAmount;
     expectedDate.setDate(expectedDate.getDate() + period);
     i++;
+
+    if (principal <= 0) {
+      throw new BadRequestError("Minimum payment is too low. Debt will never be paid off.");
+    }
   }
   console.log(i)
   return {
