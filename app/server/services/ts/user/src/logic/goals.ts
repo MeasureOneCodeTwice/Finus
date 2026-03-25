@@ -18,6 +18,7 @@ async function calculateCurrentAmount(
 ): Promise<number> {
   if (!profileId) {
     // console.log("No profileId provided");
+    // throw new Error("No profileId provided");
     return 0;
   }
 
@@ -39,7 +40,7 @@ async function calculateCurrentAmount(
       // console.log(`Monthly period: ${startDate.toISOString()} to ${now.toISOString()}`);
     }
 
-    // Get expenses (negative amounts) for this category in the period
+    //get expenses (negative amounts) for this category in the period
     const expenses = await transactionsQueries.getDateCategoryTransactionsQuery(
       pool,
       profileId,
@@ -48,13 +49,13 @@ async function calculateCurrentAmount(
       now,
     );
 
-    // Sum the amounts (they are negative, so sum will be negative)
+    //sum the amounts (they are negative, so sum will be negative)
     const totalSpending = expenses.reduce(
       (total, transaction) => total + transaction.amount,
       0,
     );
 
-    // Return absolute value for display
+    //return absolute value for display
     // console.log(`Total spending for ${goal.category}: ${totalSpending}`);
     return Math.abs(totalSpending);
   } else if (goal.type === "save") {
@@ -66,13 +67,12 @@ async function calculateCurrentAmount(
         goal.category!,
       );
 
-    // Sum all amounts (positive = savings, negative = expenses)
+    //sum all amounts (positive = savings, negative = expenses)
     const total = transactions.reduce(
       (sum, transaction) => sum + transaction.amount,
       0,
     );
 
-    // console.log(`Total savings for ${goal.category}: ${total}`);
     return total > 0 ? total : 0;
   }
 
@@ -173,7 +173,7 @@ export async function createUserGoal(
   }
 
   const enrichedGoal = await enrichGoalWithProgress(pool, newGoal, profileId);
-  if (!newGoal) {
+  if (!enrichedGoal) {
     throw new Error("Failed to enrich goal with progress");
   }
 

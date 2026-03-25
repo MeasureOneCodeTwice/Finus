@@ -11,6 +11,7 @@
     "@types/node": "^25.1.0",
     "@typescript-eslint/eslint-plugin": "^8.54.0",
     "@typescript-eslint/parser": "^8.54.0",
+    "@vitest/coverage-c8": "^0.33.0",
     "eslint": "^10.1.0",
     "eslint-plugin-react": "^7.37.5",
     "globals": "^17.3.0",
