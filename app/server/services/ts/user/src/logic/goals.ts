@@ -92,7 +92,7 @@ export async function enrichGoalWithProgress(
   pool: Pool,
   goal: Goal,
   profileId: number,
-): Promise<GoalWithProgress> {
+): Promise<GoalWithProgress | null> {
   const current_amount = await calculateCurrentAmount(pool, goal, profileId);
   const progress_percentage = Math.min(
     (current_amount / goal.target) * 100,

@@ -24,7 +24,9 @@
   "scripts": {
     "dev": "bun --watch src/index.ts",
     "build": "tsc",
-    "start": "bun dist/index.js"
+    "start": "bun dist/index.js",
+    "test:mutation": "npx stryker run",
+    "test": "vitest"
   },
   "dependencies": {
     "@mysql/xdevapi": "^8.0.35",

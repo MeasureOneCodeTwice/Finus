@@ -22,7 +22,7 @@ import {
   createEmptyGoals,
   createMockCreateGoalInput,
 } from "./factories/goal.factory.ts";
-import type { Goal, GoalType, GoalWithProgress } from "../src/types/Goals.ts";
+import type { Goal, GoalType } from "../src/types/Goals.ts";
 
 vi.mock("../src/queries/goals", () => ({
   getUserProfileId: vi.fn(),
@@ -465,15 +465,16 @@ describe("Goals Logic", () => {
   });
 
   it("should throw error when enrichGoalWithProgress returns null", async () => {
+    //this fails on docker for some reason, but runs fine locally, unknown if it works in GitHub Actions so it's untouched
     const mockNewGoal = createMockGoal();
     mockGetUserProfileId.mockResolvedValue(profileId);
     mockGetGoalCountByProfileId.mockResolvedValue(2);
     mockCreateGoal.mockResolvedValue(mockNewGoal);
     const createInput = createMockCreateGoalInput();
-    // Spy on enrichGoalWithProgress and make it return null
+    //spy on enrichGoalWithProgress and make it return null
     const enrichSpy = vi
       .spyOn(goalsLogic, "enrichGoalWithProgress")
-      .mockResolvedValue(null as unknown as GoalWithProgress);
+      .mockResolvedValue(null);
 
     await expect(createUserGoal(mockPool, userId, createInput)).rejects.toThrow(
       "Failed to enrich goal with progress",
@@ -485,7 +486,7 @@ describe("Goals Logic", () => {
   it("should throw error when createGoal returns undefined", async () => {
     mockGetUserProfileId.mockResolvedValue(profileId);
     mockGetGoalCountByProfileId.mockResolvedValue(2);
-    mockCreateGoal.mockResolvedValue(undefined); // Simulate undefined result
+    mockCreateGoal.mockResolvedValue(undefined); //simulate undefined result
     const createInput = createMockCreateGoalInput();
 
     await expect(createUserGoal(mockPool, userId, createInput)).rejects.toThrow(
