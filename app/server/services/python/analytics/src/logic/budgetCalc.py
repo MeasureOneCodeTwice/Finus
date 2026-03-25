@@ -118,16 +118,12 @@ class BudgetCalculator:
                 for c, t in category_types.items() if t == 'want'
             )
 
-        print('in budget calc calculate category budget, pre recommended initialization: ', avg_spent, pool_actual, pool_total)
-
         #apply spending limit goal if exists
         if pool_actual > 0:
             recommended = (avg_spent / pool_actual) * pool_total
         else:
             recommended = avg_spent * 0.9
 
-        print('in budget calc calculate category budget, post recommended initialization: ', recommended)
-        
         #apply spending limit goal if exists
         if goal and goal.get('target', 0) > 0:
             goal_target_monthly = float(goal['target'])
@@ -157,13 +153,12 @@ class BudgetCalculator:
         goals = goals or []
         income, expenses = self.separate_income_expenses(transactions)
         monthly_avg = self.calculate_monthly_averages(expenses)
+        monthly_avg_savings = self.calculate_monthly_averages(income)
         pools = self.calculate_budget_pools(avg_monthly_income)
         
         savings_boost, wants_reduction, goal_categories = self.calculate_goal_impact(
             goals, avg_monthly_income, monthly_avg
         )
-
-        print('In server, post goal calculations, got savings_boost: ', savings_boost, 'wants_reduction: ', wants_reduction, 'goal_categories: ', goal_categories)
 
         if savings_boost > 0:
             #transfer from wants to savings
@@ -188,8 +183,12 @@ class BudgetCalculator:
         
         #add any missing goal categories to top_categories
         for goal_cat in goal_categories:
-            if goal_cat not in top_category_names and goal_cat in monthly_avg:
+            if goal_cat not in top_category_names and goal_cat in monthly_avg:#some goals may have expenses in their categories
                 top_categories.append((goal_cat, monthly_avg[goal_cat]))
+            if goal_cat not in top_category_names and goal_cat in monthly_avg_savings:#some goals are just savings goals and their categories have no expenses, so they won't be in monthly expenses
+                top_categories.append((goal_cat, monthly_avg_savings[goal_cat]))
+            if goal_cat not in top_category_names:#lastly some goals may not have expenses or savings, so they're just 0
+                top_categories.append((goal_cat, 0))
 
         #re-sort
         top_categories.sort(key=lambda x: x[1], reverse=True)
