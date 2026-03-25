@@ -1,20 +1,27 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { searchMarkets } from "@/api/Market";
+import { getMarketHistory, getMarketQuote, searchMarkets } from "@/api/Market";
+import PinnedInstrumentsSection from "@/components/market/PinnedInstrumentsSection";
 import MarketSearchBar from "@/components/market/MarketSearchBar";
 import MarketSearchResultsPanel from "@/components/market/MarketSearchResultsPanel";
+import SelectedInstrumentPanel from "@/components/market/SelectedInstrumentPanel";
 import {
   fromPinnedInstrument,
   toPinnedInstrument,
 } from "@/components/market/marketSectionHelpers";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type {
+  MarketHistoryPeriod,
+  MarketHistoryPoint,
+  MarketInstrument,
+  MarketInstrumentType,
+} from "@/types/Market";
+import { mergeInstrumentQuote, toChartSeries } from "@/utils/market";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import type { MarketInstrument, MarketInstrumentType } from "@/types/Market";
-import { loadPinnedMarkets, savePinnedMarkets } from "@/utils/marketStorage";
+  loadPinnedMarkets,
+  PINNED_MARKETS_CLEARED_EVENT,
+  savePinnedMarkets,
+} from "@/utils/marketStorage";
 
 function isMarketInstrumentType(value: unknown): value is MarketInstrumentType {
   return value === "stock" || value === "forex";
@@ -52,9 +59,22 @@ export default function MarketDashboardSection() {
   const [searchResults, setSearchResults] = useState<MarketInstrument[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
-  const [pinnedInstruments, setPinnedInstruments] = useState<MarketInstrument[]>(
-    () => loadPinnedMarkets().map(fromPinnedInstrument),
+  const [selectedPeriod, setSelectedPeriod] =
+    useState<MarketHistoryPeriod>("6mo");
+  const [selectedHistory, setSelectedHistory] = useState<MarketHistoryPoint[]>(
+    [],
   );
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState<string | null>(null);
+  const [pinnedInstruments, setPinnedInstruments] = useState<
+    MarketInstrument[]
+  >(() => loadPinnedMarkets().map(fromPinnedInstrument));
+  const [hydratingPinnedSymbols, setHydratingPinnedSymbols] = useState<
+    Record<string, boolean>
+  >({});
+  const [hydratedPinnedSymbols, setHydratedPinnedSymbols] = useState<
+    Record<string, boolean>
+  >({});
   const [selectedInstrument, setSelectedInstrument] =
     useState<MarketInstrument | null>(() => {
       const [firstPinned] = loadPinnedMarkets();
@@ -65,6 +85,11 @@ export default function MarketDashboardSection() {
     () => new Set(pinnedInstruments.map((instrument) => instrument.symbol)),
     [pinnedInstruments],
   );
+  const selectedChartData = useMemo(
+    () => toChartSeries(selectedHistory),
+    [selectedHistory],
+  );
+  const selectedSymbol = selectedInstrument?.symbol ?? null;
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -73,6 +98,41 @@ export default function MarketDashboardSection() {
 
     return () => window.clearTimeout(timeoutId);
   }, [searchTerm]);
+
+  useEffect(() => {
+    function handlePinnedMarketsCleared() {
+      const nextPinned = loadPinnedMarkets().map(fromPinnedInstrument);
+      setPinnedInstruments(nextPinned);
+      setHydratingPinnedSymbols({});
+      setHydratedPinnedSymbols({});
+      setSelectedInstrument((current) => {
+        if (nextPinned.length > 0) {
+          return nextPinned[0];
+        }
+
+        if (current) {
+          const refreshedSelection = searchResults.find(
+            (instrument) => instrument.symbol === current.symbol,
+          );
+          return refreshedSelection ?? searchResults[0] ?? null;
+        }
+
+        return searchResults[0] ?? null;
+      });
+    }
+
+    window.addEventListener(
+      PINNED_MARKETS_CLEARED_EVENT,
+      handlePinnedMarketsCleared,
+    );
+
+    return () => {
+      window.removeEventListener(
+        PINNED_MARKETS_CLEARED_EVENT,
+        handlePinnedMarketsCleared,
+      );
+    };
+  }, [searchResults]);
 
   useEffect(() => {
     let cancelled = false;
@@ -127,23 +187,158 @@ export default function MarketDashboardSection() {
     };
   }, [debouncedSearchTerm]);
 
+  function syncInstrumentQuote(
+    symbol: string,
+    quote: Pick<
+      MarketInstrument,
+      "price" | "change" | "changePercent" | "timestamp"
+    >,
+  ) {
+    setSearchResults((current) =>
+      current.map((instrument) =>
+        instrument.symbol === symbol
+          ? mergeInstrumentQuote(instrument, quote)
+          : instrument,
+      ),
+    );
+    setPinnedInstruments((current) =>
+      current.map((instrument) =>
+        instrument.symbol === symbol
+          ? mergeInstrumentQuote(instrument, quote)
+          : instrument,
+      ),
+    );
+    setSelectedInstrument((current) =>
+      current && current.symbol === symbol
+        ? mergeInstrumentQuote(current, quote)
+        : current,
+    );
+  }
+
+  useEffect(() => {
+    if (!selectedSymbol) {
+      setSelectedHistory([]);
+      setHistoryError(null);
+      setHistoryLoading(false);
+      return;
+    }
+
+    const activeSymbol = selectedSymbol;
+    let cancelled = false;
+
+    async function loadSelectedInstrumentDetails() {
+      setHistoryLoading(true);
+      setHistoryError(null);
+
+      try {
+        const [quote, history] = await Promise.all([
+          getMarketQuote(activeSymbol),
+          getMarketHistory(activeSymbol, selectedPeriod),
+        ]);
+
+        if (cancelled) {
+          return;
+        }
+
+        syncInstrumentQuote(activeSymbol, quote);
+        setSelectedHistory(history.points);
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
+
+        setSelectedHistory([]);
+        setHistoryError(
+          error instanceof Error
+            ? error.message
+            : "Unable to load market history.",
+        );
+      } finally {
+        if (!cancelled) {
+          setHistoryLoading(false);
+        }
+      }
+    }
+
+    void loadSelectedInstrumentDetails();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedPeriod, selectedSymbol]);
+
+  useEffect(() => {
+    for (const instrument of pinnedInstruments) {
+      if (hydratedPinnedSymbols[instrument.symbol]) {
+        continue;
+      }
+
+      if (hydratingPinnedSymbols[instrument.symbol]) {
+        continue;
+      }
+
+      void hydratePinnedInstrument(instrument);
+    }
+  }, [hydratedPinnedSymbols, hydratingPinnedSymbols, pinnedInstruments]);
+
+  async function hydratePinnedInstrument(instrument: MarketInstrument) {
+    setHydratingPinnedSymbols((current) => ({
+      ...current,
+      [instrument.symbol]: true,
+    }));
+
+    try {
+      const quote = await getMarketQuote(instrument.symbol);
+      syncInstrumentQuote(instrument.symbol, quote);
+    } catch (error) {
+      console.error("Failed to hydrate pinned market instrument", error);
+    } finally {
+      setHydratingPinnedSymbols((current) => ({
+        ...current,
+        [instrument.symbol]: false,
+      }));
+      setHydratedPinnedSymbols((current) => ({
+        ...current,
+        [instrument.symbol]: true,
+      }));
+    }
+  }
+
   function persistPinned(nextItems: MarketInstrument[]) {
     savePinnedMarkets(nextItems.map(toPinnedInstrument));
   }
 
   function handleTogglePin(instrument: MarketInstrument) {
+    if (pinnedSymbols.has(instrument.symbol)) {
+      setPinnedInstruments((current) => {
+        const nextItems = current.filter(
+          (item) => item.symbol !== instrument.symbol,
+        );
+        persistPinned(nextItems);
+        return nextItems;
+      });
+      setHydratedPinnedSymbols((current) => {
+        const nextState = { ...current };
+        delete nextState[instrument.symbol];
+        return nextState;
+      });
+      setHydratingPinnedSymbols((current) => {
+        const nextState = { ...current };
+        delete nextState[instrument.symbol];
+        return nextState;
+      });
+      return;
+    }
+
     setPinnedInstruments((current) => {
-      const alreadyPinned = current.some(
-        (item) => item.symbol === instrument.symbol,
-      );
-
-      const nextItems = alreadyPinned
-        ? current.filter((item) => item.symbol !== instrument.symbol)
-        : [...current, instrument];
-
-      persistPinned(nextItems);
-      return nextItems;
+      const nextPinned = [...current, instrument];
+      persistPinned(nextPinned);
+      return nextPinned;
     });
+    setHydratedPinnedSymbols((current) => ({
+      ...current,
+      [instrument.symbol]: false,
+    }));
   }
 
   return (
@@ -154,32 +349,12 @@ export default function MarketDashboardSection() {
         </CardHeader>
 
         <CardContent className="space-y-6 pt-6">
-          {pinnedInstruments.length > 0 && (
-            <div className="space-y-3">
-              <div>
-                <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-100/70">
-                  Pinned instruments
-                </h3>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                {pinnedInstruments.map((instrument) => (
-                  <button
-                    key={instrument.symbol}
-                    type="button"
-                    onClick={() => setSelectedInstrument(instrument)}
-                    className={`rounded-full border px-3 py-2 text-sm transition ${
-                      selectedInstrument?.symbol === instrument.symbol
-                        ? "border-emerald-300/40 bg-emerald-400/15 text-white"
-                        : "border-white/10 bg-white/5 text-emerald-50/80 hover:border-emerald-300/30"
-                    }`}
-                  >
-                    {instrument.displaySymbol}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+          <PinnedInstrumentsSection
+            pinnedInstruments={pinnedInstruments}
+            selectedSymbol={selectedSymbol}
+            onSelectInstrument={setSelectedInstrument}
+            onTogglePin={handleTogglePin}
+          />
 
           <MarketSearchBar searchTerm={searchTerm} onChange={setSearchTerm} />
 
@@ -189,19 +364,22 @@ export default function MarketDashboardSection() {
               searchLoading={searchLoading}
               searchError={searchError}
               searchResults={searchResults}
-              selectedSymbol={selectedInstrument?.symbol ?? null}
+              selectedSymbol={selectedSymbol}
               pinnedSymbols={pinnedSymbols}
               onSelectInstrument={setSelectedInstrument}
               onTogglePin={handleTogglePin}
             />
 
-            <div className="rounded-3xl border border-white/10 bg-black/25 p-5">
-              <div className="flex min-h-[420px] flex-col items-center justify-center gap-4 text-center">
-                <h3 className="text-xl font-semibold text-white">
-                  Graph Goes Here
-                </h3>
-              </div>
-            </div>
+            <SelectedInstrumentPanel
+              selectedInstrument={selectedInstrument}
+              pinnedSymbols={pinnedSymbols}
+              selectedPeriod={selectedPeriod}
+              selectedChartData={selectedChartData}
+              historyError={historyError}
+              historyLoading={historyLoading}
+              onTogglePin={handleTogglePin}
+              onSelectPeriod={setSelectedPeriod}
+            />
           </div>
         </CardContent>
       </Card>

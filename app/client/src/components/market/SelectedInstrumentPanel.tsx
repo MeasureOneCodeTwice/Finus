@@ -1,11 +1,17 @@
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { Activity, Pin, PinOff, TrendingDown, TrendingUp } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type {
-  MarketHistoryPeriod,
-  MarketInstrument,
-} from "@/types/Market";
+import type { MarketHistoryPeriod, MarketInstrument } from "@/types/Market";
 import { cn } from "@/utils/utils";
 import {
   MARKET_PERIOD_OPTIONS,
@@ -18,8 +24,7 @@ import {
 import { changeColorClass } from "@/components/market/marketSectionHelpers";
 
 type ChartPoint = {
-  date: Date;
-  label: string;
+  timestamp: number;
   price: number;
 };
 
@@ -44,6 +49,33 @@ export default function SelectedInstrumentPanel({
   onTogglePin,
   onSelectPeriod,
 }: SelectedInstrumentPanelProps) {
+  const firstTimestamp = selectedChartData[0]?.timestamp ?? 0;
+  const lastTimestamp =
+    selectedChartData[selectedChartData.length - 1]?.timestamp ?? 0;
+  const totalSpanMs = Math.max(lastTimestamp - firstTimestamp, 0);
+
+  const axisLabelFormatter =
+    totalSpanMs <= 1000 * 60 * 60 * 36
+      ? new Intl.DateTimeFormat("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+        })
+      : totalSpanMs <= 1000 * 60 * 60 * 24 * 7
+        ? new Intl.DateTimeFormat("en-US", {
+            weekday: "short",
+            hour: "numeric",
+          })
+        : new Intl.DateTimeFormat("en-US", {
+            month: "short",
+            day: "numeric",
+            year: selectedChartData.length > 180 ? "2-digit" : undefined,
+          });
+
+  const tooltipLabelFormatter = new Intl.DateTimeFormat("en-US", {
+    dateStyle: "medium",
+    timeStyle: totalSpanMs <= 1000 * 60 * 60 * 24 * 14 ? "short" : undefined,
+  });
+
   return (
     <div className="rounded-3xl border border-white/10 bg-black/25 p-5">
       {selectedInstrument ? (
@@ -92,7 +124,9 @@ export default function SelectedInstrumentPanel({
                     ) : (
                       <TrendingDown className="h-4 w-4" />
                     )}
-                    <span>{formatSignedValue(selectedInstrument.change, 2)}</span>
+                    <span>
+                      {formatSignedValue(selectedInstrument.change, 2)}
+                    </span>
                     <span>
                       {formatSignedPercent(selectedInstrument.changePercent)}
                     </span>
@@ -108,7 +142,9 @@ export default function SelectedInstrumentPanel({
             <Button
               type="button"
               variant={
-                pinnedSymbols.has(selectedInstrument.symbol) ? "secondary" : "outline"
+                pinnedSymbols.has(selectedInstrument.symbol)
+                  ? "secondary"
+                  : "outline"
               }
               className={cn(
                 "rounded-full border-white/12",
@@ -121,12 +157,12 @@ export default function SelectedInstrumentPanel({
               {pinnedSymbols.has(selectedInstrument.symbol) ? (
                 <>
                   <PinOff className="h-4 w-4" />
-                  Unpin instrument
+                  Unpin
                 </>
               ) : (
                 <>
                   <Pin className="h-4 w-4" />
-                  Pin instrument
+                  Pin
                 </>
               )}
             </Button>
@@ -151,20 +187,103 @@ export default function SelectedInstrumentPanel({
           </div>
 
           <div className="rounded-[28px] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-4">
-            <div className="flex h-[360px] flex-col items-center justify-center gap-3 text-center">
-              <div className="rounded-full border border-amber-300/20 bg-amber-300/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-amber-100">
-                WIP
+            {historyError ? (
+              <div className="flex h-[360px] items-center justify-center text-sm text-rose-100">
+                {historyError}
               </div>
-              <p className="max-w-sm text-sm text-emerald-50/60">
-                Historical data visualization is still being rebuilt for this
-                panel.
-              </p>
-              {(historyLoading || historyError || selectedChartData.length > 0) && (
-                <p className="text-xs text-emerald-50/45">
-                  Chart rendering is temporarily disabled.
-                </p>
-              )}
-            </div>
+            ) : historyLoading ? (
+              <div className="flex h-[360px] items-center justify-center text-sm text-emerald-50/65">
+                Loading historical data...
+              </div>
+            ) : selectedChartData.length > 1 ? (
+              <div className="h-[360px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={selectedChartData}>
+                    <defs>
+                      <linearGradient
+                        id="market-chart-fill"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="5%"
+                          stopColor="#34d399"
+                          stopOpacity={0.55}
+                        />
+                        <stop
+                          offset="95%"
+                          stopColor="#34d399"
+                          stopOpacity={0}
+                        />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid
+                      stroke="rgba(255,255,255,0.08)"
+                      vertical={false}
+                    />
+                    <XAxis
+                      dataKey="timestamp"
+                      type="number"
+                      scale="time"
+                      domain={["dataMin", "dataMax"]}
+                      stroke="rgba(236,253,245,0.48)"
+                      tickLine={false}
+                      axisLine={false}
+                      minTickGap={24}
+                      tickFormatter={(value: number) =>
+                        axisLabelFormatter.format(new Date(Number(value)))
+                      }
+                    />
+                    <YAxis
+                      stroke="rgba(236,253,245,0.48)"
+                      tickLine={false}
+                      axisLine={false}
+                      width={78}
+                      tickFormatter={(value: number) =>
+                        formatMarketPrice(
+                          Number(value),
+                          selectedInstrument.currency,
+                        )
+                      }
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "rgba(3, 11, 8, 0.95)",
+                        border: "1px solid rgba(110, 231, 183, 0.2)",
+                        borderRadius: "18px",
+                        color: "#ecfdf5",
+                      }}
+                      labelStyle={{ color: "#d1fae5" }}
+                      labelFormatter={(value) =>
+                        tooltipLabelFormatter.format(new Date(Number(value)))
+                      }
+                      formatter={(value) => [
+                        formatMarketPrice(
+                          Number(value ?? 0),
+                          selectedInstrument.currency,
+                        ),
+                        "Price",
+                      ]}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="price"
+                      stroke="#34d399"
+                      strokeWidth={3}
+                      fill="url(#market-chart-fill)"
+                      dot={false}
+                      activeDot={{ r: 4 }}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="flex h-[360px] items-center justify-center text-sm text-emerald-50/60">
+                Historical data is unavailable for this period.
+              </div>
+            )}
           </div>
         </>
       ) : (
@@ -173,12 +292,8 @@ export default function SelectedInstrumentPanel({
             <Activity className="h-8 w-8" />
           </div>
           <h3 className="mt-5 text-xl font-semibold text-white">
-            Pick an instrument to inspect
+            Pick a stock or forex option to inspect
           </h3>
-          <p className="mt-2 max-w-md text-sm text-emerald-50/60">
-            Choose a stock or forex pair from the left to see its full historical
-            trend and current market movement.
-          </p>
         </div>
       )}
     </div>
