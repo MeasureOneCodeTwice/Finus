@@ -16,5 +16,5 @@ export interface FinancialAccountRequest {
   type: FinancialAccountType;
   balance: number;
   value: number;
-  subtype: SavingAccountType | "loan" | "n/a";
+  subtype: SavingAccountType | "Loan" | "n/a";
 }

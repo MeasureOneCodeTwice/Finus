@@ -13,7 +13,7 @@ debtRouter.get("/", async (req: Request, res: Response) => {
     try {
         const userId = authenticateJWT(req);
         getDebts(userId).then((debts) => {
-            res.status(200).json({ message: "Debts retrieved successfully", data: debts });
+            res.status(200).json(debts);
         });
     } catch (err: any) {
         switch (err.constructor) {

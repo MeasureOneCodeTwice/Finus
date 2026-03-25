@@ -10,7 +10,7 @@ savingRouter.get("/", async (req: Request, res: Response) => {
     try {
         const userId = authenticateJWT(req);
         const savings = await getSavingAccount(userId)
-        res.status(200).json({ data: savings})
+        res.status(200).json(savings)
     } catch (err: any) {
         switch (err.constructor) {
             case UnauthorizedAccessError:

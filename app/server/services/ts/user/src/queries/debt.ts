@@ -3,6 +3,7 @@ import { RowDataPacket } from "mysql2";
 import type { PoolConnection, ResultSetHeader } from "mysql2/promise";
 import type { DebtInfoResponse } from "../types/DebtInfoResponse.ts";
 import type { FinancialAccountRequest } from "../types/FinancialAccountRequest.ts";
+import { FinancialAccountType } from "../types/FinancialAccountType.ts";
 const db = getConnectionPool();
 
 export async function findDebtsBy(userId: string) : Promise<DebtInfoResponse[]>{
@@ -13,8 +14,8 @@ export async function findDebtsBy(userId: string) : Promise<DebtInfoResponse[]>{
         JOIN finus.profile p ON pfa.profile_id = p.id
         JOIN finus.finusAccount_profile uap ON p.id = uap.profile_id
         WHERE uap.account_id = ? 
-        AND fa.type = 'credit_card' 
-        AND fa.subtype = 'loan'
+        AND fa.type = 'Credit Card' 
+        AND fa.subtype = 'Loan'
     `;
     
     const [rows] = await db.execute<RowDataPacket[]>(query, [userId]);
@@ -23,6 +24,7 @@ export async function findDebtsBy(userId: string) : Promise<DebtInfoResponse[]>{
         id: Number(row.id),
         name: String(row.name),
         balance: Number(row.balance),
+        type: FinancialAccountType.CREDIT,
         subtype: String(row.subtype),
         lastUpdated: new Date(row.last_updated).toISOString() ?? "N/A",
     }));

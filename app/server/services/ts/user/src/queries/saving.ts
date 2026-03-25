@@ -3,6 +3,7 @@ import { RowDataPacket } from "mysql2";
 import type { PoolConnection, ResultSetHeader } from "mysql2/promise";
 import type { SavingInfoResponse } from "../types/SavingInfoResponse.ts";
 import type { FinancialAccountRequest } from "../types/FinancialAccountRequest.ts";
+import { FinancialAccountType } from "../types/FinancialAccountType.ts";
 const db = getConnectionPool();
 
 export async function findSavingsBy(userId: string) : Promise<SavingInfoResponse[]>{
@@ -13,7 +14,7 @@ export async function findSavingsBy(userId: string) : Promise<SavingInfoResponse
         JOIN finus.profile p ON pfa.profile_id = p.id
         JOIN finus.finusAccount_profile uap ON p.id = uap.profile_id
         WHERE uap.account_id = ? 
-        AND fa.type = 'savings' 
+        AND fa.type = 'Savings' 
     `;
     
     const [rows] = await db.execute<RowDataPacket[]>(query, [userId]);
@@ -22,6 +23,7 @@ export async function findSavingsBy(userId: string) : Promise<SavingInfoResponse
         id: Number(row.id),
         name: String(row.name),
         balance: Number(row.balance),
+        type: FinancialAccountType.SAVINGS,
         subtype: String(row.subtype),
         lastUpdated: new Date(row.last_updated).toISOString() ?? "N/A",
     }));

@@ -8,7 +8,7 @@ interface selectProp{
 }
 
 export default function SelectAccount({accounts, selectedAccount, setSelectedAccount}:selectProp){
-    
+    console.log(accounts)
     return(
         <>
         <label htmlFor="selectAccount">User Account:</label>

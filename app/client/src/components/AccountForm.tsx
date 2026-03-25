@@ -36,13 +36,12 @@ export default function PopupForm({
     let interest = undefined;
     const accountBalance = Number(balance);
 
-    if (accountType === accountCategory.SAVING) {
+    if ((accountType === "SAVING" || accountType === "CREDIT_CARD") && formInput.subType) {
       subtype = formInput.subType;
     }
 
     if (
-      accountType === accountCategory.SAVING ||
-      accountType === accountCategory.DEBT
+      accountType === accountCategory.SAVING
     ) {
       interest = formInput.interest;
     }
@@ -220,21 +219,7 @@ export default function PopupForm({
             placeholder="0.00"
           />
           <br></br>
-
-          {accountType === "DEBT" || accountType === "SAVING" ? (
-            <>
-              <label htmlFor="interst">Interest %</label>
-              <input
-                id="interest"
-                name="interest"
-                type="number"
-                min="0"
-                max="100"
-                onChange={handleChange}
-              />
-              <br></br>
-            </>
-          ) : null}
+          
 
           {accountType === "SAVING" ? (
             <>
@@ -244,10 +229,24 @@ export default function PopupForm({
                 <option value="TFSA">TFSA</option>
                 <option value="RRSP">RRSP</option>
                 <option value="FHSA">FHSA</option>
+                <option value="RESP">RESP</option>
+                <option value="RDSP">RDSP</option>
               </select>
               <br></br>
             </>
           ) : null}
+
+          {accountType === "CREDIT_CARD" ? (
+            <>
+              <label htmlFor="subType">Type of credit:</label>
+              <select id="subType" name="subType" onChange={handleChange}>
+                <option value = "">Select subtype</option>
+                <option value ="Loan">Loan</option>
+              </select>
+
+            </>
+
+          ):null}
 
           <div className="bottomButtons">
             <button onClick={toggle}>Close</button>

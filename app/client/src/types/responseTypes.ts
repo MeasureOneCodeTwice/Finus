@@ -4,7 +4,7 @@ export interface updateResponse {
   id?: number;
 }
 
-export interface projecteDataResponse {
+export interface projectedDataResponse {
   dataPoint: number[];
   dateLabel: string[];
 }

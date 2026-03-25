@@ -1,13 +1,12 @@
-import type { projectedDataResponse, updateResponse } from "../types/responseTypes";
-import type { AuthSession } from "@/types/authTypes";
-import type { Account } from "@/types/AccountType";
-import type { projectionDebtRequest } from "@/types/requestTypes";
+import { type Account } from "@/types/AccountType";
+import {type  AuthSession } from "@/types/authTypes";
+import type { projectionSavingRequest } from "@/types/requestTypes";
+import {type projectedDataResponse } from "@/types/responseTypes";
+const requestUrl = "http://localhost:3000/api/savings";
 
-
-const requestUrl = "http://localhost:3000/api/debts";
 
 //Sends a request to get different debts the user has
-export async function getDebt(session: AuthSession): Promise<Account[]> {
+export async function getSaving(session: AuthSession): Promise<Account[]> {
   try {
     //Sends a http request and waits for a response
     const response = await fetch(requestUrl, {
@@ -30,8 +29,8 @@ export async function getDebt(session: AuthSession): Promise<Account[]> {
 }
 
 //Post request, even tho it says get in the function
-export async function getDebtProjection(session: AuthSession, request:projectionDebtRequest ): Promise<projectedDataResponse>{
-  const url = requestUrl + "/predit-payoff"
+export async function getSavingProjection(session: AuthSession, request:projectionSavingRequest ): Promise<projectedDataResponse>{
+  const url = requestUrl + "/projected"
   console.log(url)
   
     try {
@@ -48,13 +47,13 @@ export async function getDebtProjection(session: AuthSession, request:projection
     //Determine if our post was a success
     if (!response.ok) {
       console.error(response.status);
+      throw new Error("Failed to get projection for saving")
     }
+    console.log(response)
 
     return response.json();
   } catch (error) {
     console.error(error);
     throw error;
   }
-
-
 }

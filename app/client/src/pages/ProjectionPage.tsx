@@ -15,15 +15,17 @@ import type { AuthSession } from "../types/authTypes";
 import SelectAccount from "@/components/SelectAccount";
 import { useEffect, useState } from "react";
 import { type Account } from "@/types/AccountType";
-import { getUserAccounts } from "@/api/Account";
-import { accountCategory } from "@/enum/AccountCategory";
-import SelectDebt from "@/components/SelectDebt";
-import { getDebt } from "@/api/Debt";
-import { type Debt } from "@/types/Debt";
-import { type projecteDataResponse } from "@/types/responseTypes";
+import { getDebt, getDebtProjection } from "@/api/Debt";
+import { getSaving,getSavingProjection } from "@/api/Saving";
+import { type projectedDataResponse } from "@/types/responseTypes";
 import ProjectionGraph from "@/components/ProjectionGraph";
 import { TbGraph } from "react-icons/tb";
 import NoItemState from "@/components/NoItemState";
+import { handleCurrencyChange, handleCurrencyBlur } from "@/utils/handleInput";
+import type { projectionDebtRequest, projectionSavingRequest } from "@/types/requestTypes";
+import { validateDebtProjection, validateSavingProjection } from "@/utils/ValidateProjectionRequest";
+import { error } from "node:console";
+
 
 Chart.register(
   PointElement,
@@ -43,20 +45,105 @@ type ProjectionProp = {
 
 function ProjectionPage({ session }: ProjectionProp) {
   const [accounts, setAccounts] = useState<Account[]>([]);
-  const [debts, setDebts] = useState<Debt[]>([]);
+  const [debts, setDebts] = useState<Account[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<number>(0);
+  const [selectedDebt, setSelectedDebt] = useState<number>(0)
   //range
-  const [, setRange] = useState<string>("");
+  const [range, setRange] = useState<string>("");
+  const [interest, setInterest] = useState<string>("")
+  const [amount, setAmount] = useState<string>("")
+  const [period, setPeriod] = useState<string>("")
+  const [minPay, setMinPay] = useState<string>("")
+
   const [selectedType, setSelectedType] = useState<"Saving" | "Debt">("Saving");
+
   //savingData and debtData
-  const [savingData] = useState<projecteDataResponse | undefined>(undefined);
-  const [debtData] = useState<projecteDataResponse | undefined>(undefined);
+  const [savingData, setSavingData] = useState<projectedDataResponse | undefined>(undefined);
+  const [debtData, setDebtData] = useState<projectedDataResponse | undefined>(undefined);
 
-  const calculateProjection = () => {};
+  let debtRequest: projectionDebtRequest | undefined = undefined
+  let savingRequest: projectionSavingRequest | undefined = undefined
 
+  const calculateProjection = () => {
+    const inputAmount = Number(amount)
+    const inputMinPay = Number(minPay)
+    const inputInterest = Number(interest)
+    const inputPeriod = Number(period)
+
+    switch(selectedType){
+      case "Debt":
+        if(validateDebtProjection(selectedDebt, inputAmount, inputMinPay, inputInterest, range, inputPeriod)){
+
+          debtRequest = {
+            id:selectedAccount, 
+            remainingAmount: inputAmount, 
+            minimumPayment:inputMinPay,
+            interestRate: inputInterest,
+            nextDueDate: range,
+            period: inputPeriod
+          }
+
+          getDebtProjection(session, debtRequest).then((data) =>{
+            
+            if(data){
+              setDebtData(data)
+            }
+
+          }).catch((error)=>{
+            alert(error)
+          })
+          
+        } else {
+          alert("Please enter all fields")
+        }
+      break
+
+      case "Saving":
+        
+        if(validateSavingProjection(selectedAccount, inputInterest)){
+          savingRequest = {
+            id:selectedAccount, 
+            interestRate: inputInterest, 
+            range: range
+          }
+
+          getSavingProjection(session, savingRequest)
+        } else {
+            alert("Please enter all fields")
+        }
+    }
+  };
+
+  //Handles on change of percentage
+  const handleNumberChange = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, setNumber: React.Dispatch<React.SetStateAction<string>>, min:number, max:number) => {
+
+    let input = event.target.value;
+    let changeInterest
+    const pattern = /^\d*\.?\d{0,2}$/;
+
+  console.log(input);
+  console.log(pattern.test(input));
+
+  //Determine if the input follows the format/pattern
+  if (pattern.test(input) || input === "") {
+      input = input.replace(/^0+(?=\d)/, "");
+      changeInterest = Number(input)
+
+      if( changeInterest > max) {
+        changeInterest = max
+      }
+
+      if(changeInterest < min) {
+        changeInterest = min
+      }
+      console.log(changeInterest)
+      setNumber(changeInterest.toString())
+    }
+  }
+  //Get the saving accounts
   useEffect(() => {
     if (selectedType === "Saving") {
-      getUserAccounts(session, accountCategory.SAVING)
+      getSaving(session)
         .then((userAccounts) => {
           console.log(userAccounts);
 
@@ -69,8 +156,9 @@ function ProjectionPage({ session }: ProjectionProp) {
           //alert("Failed to get accounts");
         });
     }
-  }, [session, selectedAccount, selectedType]);
+  }, [session, selectedType]);
 
+  //Gets the debt accounts
   useEffect(() => {
     if (selectedType === "Debt") {
       getDebt(session)
@@ -84,7 +172,37 @@ function ProjectionPage({ session }: ProjectionProp) {
         })
         .catch(() => {});
     }
-  }, [session, debts, selectedType]);
+  }, [session, selectedType]);
+
+  //Updates the fields the currently selected debt when swap to debt
+  useEffect(()=>{
+    if(selectedDebt && selectedType === "Debt") {
+      if(debtRequest){
+        setInterest(debtRequest.interestRate.toString())
+        setRange(debtRequest.nextDueDate)
+      }
+    }
+  },[session,selectedType])
+
+  //Update to field to the currently projected saving account
+  useEffect(()=>{
+    if(selectedAccount && selectedType === "Saving"){
+      if(savingRequest) {
+        setInterest(savingRequest.interestRate.toString())
+        setRange(savingRequest.range)
+      }
+    }
+  }, [session, selectedType])
+
+  useEffect(() =>{
+    if(selectedDebt) {
+      const target = debts.find(
+      (account) => account.id === selectedDebt,)?.balance;
+      if(target) {
+        setAmount(target.toFixed(2))
+      }
+    }
+  }, [session, selectedDebt])
 
   const typeButton = [
     { key: "Saving", label: "Saving" },
@@ -148,7 +266,7 @@ function ProjectionPage({ session }: ProjectionProp) {
         {typeButton}
       </div>
 
-      <div className="space-x-2">
+      <div className="space-y-2">
         {selectedType === "Saving" ? (
           <SelectAccount
             accounts={accounts}
@@ -156,19 +274,40 @@ function ProjectionPage({ session }: ProjectionProp) {
             setSelectedAccount={setSelectedAccount}
           />
         ) : (
-          <SelectDebt
-            debts={debts}
-            selectedDebt={selectedAccount}
-            setSelectedDebt={setSelectedAccount}
+          <SelectAccount
+            accounts={debts}
+            selectedAccount={selectedDebt}
+            setSelectedAccount={setSelectedDebt}
           />
         )}
-        <label htmlFor="range">Range:</label>
-        <input
-          id="range"
-          name="range"
-          type="date"
-          onChange={(event) => setRange(event.target.value)}
-        />
+        <div className="space-x-2 gap-2 bg-black/50 p-1 rounded-lg border border-green-500/20">
+          {selectedType === "Debt" && 
+            <>
+            <label htmlFor="amount">Remaining Amount:$</label>
+            <input name= "amount" id = "amount" type = "string" value = {amount} className="w-20 bg-black/50 p-1 rounded-lg border border-green-500/20" onChange={(event) => handleCurrencyChange(event,setAmount)} onBlur={(event)=>handleCurrencyBlur(event,amount, setAmount)}/>
+
+            <label htmlFor="min">Minimum Payment:$</label>
+            <input name="min" id="min" type = "string" value = {minPay} className="w-20 bg-black/50 p-1 rounded-lg border border-green-500/20" onChange = {(event) => handleCurrencyChange(event,setMinPay)} onBlur={(event) => handleCurrencyBlur(event,minPay, setMinPay)}/>
+            
+            <label htmlFor="period">Days between payment:</label>
+            <input name="period" type = "string" className="w-20 bg-black/50 p-1 rounded-lg border border-green-500/20" onChange={(event)=>{handleNumberChange(event, setPeriod, 0, 100)}}/>
+
+            </>
+          }
+
+          <label htmlFor="interest">Interest:% </label>
+          <input id ="interest" name = "interest" value = {interest} className= "w-20 bg-black/50 p-1 rounded-lg border border-green-500/20 "onChange = {(event) => {handleNumberChange(event,setInterest, 0, 100)}}/>  
+          
+          <br></br>
+          <label htmlFor="range">Range:</label>
+          <input id="range"
+            name="range"
+            type="date"
+            className = "bg-black/50 p-1 rounded-lg border border-green-500/20"
+            onChange={(event) => setRange(event.target.value)}
+          />
+        </div>
+
         <button
           onClick={calculateProjection}
           className="px-4 py-1.5 text-sm rounded-md transition-all outline-1 text-gray-300"

@@ -197,6 +197,8 @@ accountsRouter.delete("/", async (req: Request, res: Response) => {
       [id],
     );
 
+    await connection.query("DELETE FROM transactions WHERE financialAccount_id=?", [id] )
+
     return res.status(200).json({ message: "Account successfully deleted" });
   } catch (err) {
     console.error("Failed to delete user's account", err);

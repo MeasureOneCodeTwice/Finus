@@ -1,7 +1,7 @@
 export enum FinancialAccountType {
-    SAVINGS = 'savings',
-    CREDIT = 'credit_card',
-    INVESTMENT = 'investment',
-    CHEQUING = 'chequing',
-    UNCONFIRMED = 'unconfirmed',
+    SAVINGS = 'Savings',
+    CREDIT = 'Credit Card',
+    INVESTMENT = 'Investment',
+    CHEQUING = 'Chequing',
+    UNCONFIRMED = 'Unconfirmed',
 }

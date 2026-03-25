@@ -160,8 +160,8 @@ CREATE TABLE finus.fixedInterestInvestment(
 );
 
 #Populate lookup tables
-INSERT INTO finus.financialAccountType    (type) VALUES ('chequing'), ('savings'), ('credit_card'), ('investment');
-INSERT INTO finus.financialAccountSubtype (subtype) VALUES ('RRSP'), ('TFSA'), ('FHSA'), ('RESP'), ('RDSP'), ('loan'), ('na');
+INSERT INTO finus.financialAccountType    (type) VALUES ('Chequing'), ('Savings'), ('Credit Card'), ('Investment');
+INSERT INTO finus.financialAccountSubtype (subtype) VALUES ('RRSP'), ('TFSA'), ('FHSA'), ('RESP'), ('RDSP'), ('Loan'), ('na');
 -- loan is used for credit_card accounts that are for loans like mortgage and etc, this is used to track debt
 INSERT  INTO finus.investmentType          (type) VALUES ('fixedInterest'), ('stock'); #These have to match table names
 INSERT  INTO finus.goalType                (type) VALUES ('money'), ('debt');
