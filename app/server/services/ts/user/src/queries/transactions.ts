@@ -22,9 +22,10 @@ export async function getAllTransactionsQuery(
   return rows;
 }
 export async function findTransactionsBy(
+  db: Pool,
   financialAccountId: string,
 ): Promise<Transaction[]> {
-  const db = getConnectionPool();
+  //const db = getConnectionPool();
   const query = `
     SELECT * FROM finus.transaction t
     WHERE t.financialAccount_id = ?

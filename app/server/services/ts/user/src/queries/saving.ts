@@ -1,12 +1,12 @@
 import { getConnectionPool } from "@/sqlUtil.ts";
 import { RowDataPacket } from "mysql2";
-import type { PoolConnection, ResultSetHeader } from "mysql2/promise";
+import type { PoolConnection, ResultSetHeader, Pool } from "mysql2/promise";
 import type { SavingInfoResponse } from "../types/SavingInfoResponse.ts";
 import type { FinancialAccountRequest } from "../types/FinancialAccountRequest.ts";
 import { FinancialAccountType } from "../types/FinancialAccountType.ts";
 const db = getConnectionPool();
 
-export async function findSavingsBy(userId: string) : Promise<SavingInfoResponse[]>{
+export async function findSavingsBy(db: Pool, userId: string) : Promise<SavingInfoResponse[]>{
     const query = `
         SELECT fa.id, fa.name, fa.balance, fa.subtype, fa.last_updated
         FROM finus.financialAccount fa
@@ -15,6 +15,7 @@ export async function findSavingsBy(userId: string) : Promise<SavingInfoResponse
         JOIN finus.finusAccount_profile uap ON p.id = uap.profile_id
         WHERE uap.account_id = ? 
         AND fa.type = 'Savings' 
+        GROUP BY fa.id
     `;
     
     const [rows] = await db.execute<RowDataPacket[]>(query, [userId]);
@@ -25,12 +26,14 @@ export async function findSavingsBy(userId: string) : Promise<SavingInfoResponse
         balance: Number(row.balance),
         type: FinancialAccountType.SAVINGS,
         subtype: String(row.subtype),
-        lastUpdated: new Date(row.last_updated).toISOString() ?? "N/A",
+        lastUpdated: row.last_updated
+            ? new Date(row.last_updated).toISOString()
+            : "N/A",
     }));
     return result;
 }
 
-export async function addSavingAccount(newSavings: FinancialAccountRequest, userId: string) : Promise<SavingInfoResponse>{
+export async function addSavingAccount(db: Pool, newSavings: FinancialAccountRequest, userId: string) : Promise<SavingInfoResponse>{
 
     const connection : PoolConnection = await db.getConnection();
     await connection.beginTransaction();

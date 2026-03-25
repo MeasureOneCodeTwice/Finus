@@ -16,6 +16,7 @@ export async function findDebtsBy(userId: string) : Promise<DebtInfoResponse[]>{
         WHERE uap.account_id = ? 
         AND fa.type = 'Credit Card' 
         AND fa.subtype = 'Loan'
+        GROUP BY fa.id
     `;
     
     const [rows] = await db.execute<RowDataPacket[]>(query, [userId]);
