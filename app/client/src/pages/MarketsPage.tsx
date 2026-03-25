@@ -47,7 +47,7 @@ function MarketsPage({ session }: MarketsPageProps) {
         Markets for {session?.user.first_name ?? session?.user.name ?? "you"}
       </h1>
       <p className="max-w-3xl text-lg text-green-500">
-        Search for stocks and foreign exchange instruments 
+        Search for stocks and foreign exchange options
       </p>
       <MarketDashboardSection />
     </section>

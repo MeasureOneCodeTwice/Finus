@@ -10,6 +10,8 @@ services:
         - NODE_ENV=development
       ports:
         - "3000:8000"
+      volumes:
+        - client_state_data:/var/lib/finus-client-state
       depends_on:
         - auth
         - user
@@ -93,3 +95,4 @@ services:
 
 volumes: 
   db_data: 
+  client_state_data:

@@ -97,37 +97,18 @@ function isPositiveChange(value: number | null): boolean {
 }
 
 function toChartSeries(points: MarketHistoryPoint[]) {
-  const firstTimestamp = points[0]?.timestamp ?? 0;
-  const lastTimestamp = points[points.length - 1]?.timestamp ?? 0;
-  const totalSpanSeconds = Math.max(lastTimestamp - firstTimestamp, 0);
-
-  const labelFormatter =
-    totalSpanSeconds <= 60 * 60 * 36
-      ? new Intl.DateTimeFormat("en-US", {
-          hour: "numeric",
-          minute: "2-digit",
-        })
-      : totalSpanSeconds <= 60 * 60 * 24 * 7
-        ? new Intl.DateTimeFormat("en-US", {
-            weekday: "short",
-            hour: "numeric",
-          })
-        : new Intl.DateTimeFormat("en-US", {
-            month: "short",
-            day: "numeric",
-            year: points.length > 180 ? "2-digit" : undefined,
-          });
-
   return points.map((point) => ({
-    date: new Date(point.timestamp * 1000),
-    label: labelFormatter.format(new Date(point.timestamp * 1000)),
+    timestamp: point.timestamp * 1000,
     price: point.price,
   }));
 }
 
 function mergeInstrumentQuote(
   instrument: MarketInstrument,
-  quote: Pick<MarketInstrument, "price" | "change" | "changePercent" | "timestamp">,
+  quote: Pick<
+    MarketInstrument,
+    "price" | "change" | "changePercent" | "timestamp"
+  >,
 ): MarketInstrument {
   return {
     ...instrument,
