@@ -143,6 +143,16 @@ app.use(
     changeOrigin: true,
   }),
 );
+
+//compound interest from analytics service
+app.use(
+  createProxyMiddleware({
+    pathFilter: ["/compound-interest"],
+    target: process.env.ANALYTICS_SERVICE_ADDR,
+    changeOrigin: true,
+  }),
+);
+
 //get predicted debt payoff data from analytics service
 /*app.use(
   createProxyMiddleware({
@@ -171,12 +181,3 @@ app.use(
     pathRewrite: { "^/api/savings": "/savings" },
   }),
 );
-//savings-related request
-/*app.use(
-  createProxyMiddleware({
-    pathFilter: "/api/projected-savings",
-    target: process.env.ANALYTICS_SERVICE_ADDR,
-    changeOrigin: true,
-    pathRewrite: { "^/api/projected-savings": "/projected-savings" },
-  }),
-);*/

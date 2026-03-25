@@ -70,19 +70,23 @@ class BudgetPerformanceResponse(BaseModel):
 #     category: str
 #     minimumPayment: float
 #     debtStages: List[DebtStage]
-# class ProjectedSavingsRequest(BaseModel):
-#     balance: float
-#     monthly_contribution: float
-#     interest_rate: float | None  # annual interest rate in percentage
-#     time_frame: int  # in years
-# class StatItem(BaseModel):
-#     year: int
-#     best_case: float
-#     projected_balance: float
-#     worst_case: float
-# class ProjectedSavingsResponse(BaseModel):
-#     balance: float
-#     monthly_contribution: float
-#     interest_rate: float | None  # annual interest rate in percentage
-#     time_frame: int  # in years
-#     stat: List[StatItem]
+class ProjectedSavingsRequest(BaseModel):
+    balance: float
+    monthly_deposit: float
+    annual_interest_rate: float | None  # annual interest rate in percentage
+    time_frame: int  # in years
+class StatItem(BaseModel):
+    year: int
+    best_case: float
+    projected_balance: float
+    worst_case: float
+class ProjectedSavingsResponse(BaseModel):
+    balance: float
+    monthly_contribution: float
+    interest_rate: float | None  # annual interest rate in percentage
+    time_frame: int  # in years
+    stat: List[StatItem]
+class CompoundInterestResponse(BaseModel):
+    accumulative_balance: float
+    accumulative_interest: float
+    date: str

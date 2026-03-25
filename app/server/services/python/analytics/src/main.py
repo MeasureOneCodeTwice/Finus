@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
+from typing import List, Dict
 import uvicorn
 import os
 
@@ -10,7 +11,7 @@ from src.utils.dates import period_calc
 from src.logic.budget import generate_budget, generate_budget_performance
 from src.queries import savings as savings_queries, incomeflow as incomeflow_queries
 from src.logic import savings as savings_service, incomeflow as incomeflow_service
-#from src.models.schemas import DebtPayoffRequest, ProjectedSavingsRequest, ProjectedSavingsResponse
+from src.models.schemas import ProjectedSavingsRequest, ProjectedSavingsResponse, CompoundInterestResponse
 
 
 app = FastAPI()
@@ -132,18 +133,18 @@ async def get_budget(
 #         print(e)
 #         raise HTTPException(status_code=500, detail=str(e))
 
-# @app.post('/projected-savings')
-# async def predict_projected_savings(
-#     requestBody: ProjectedSavingsRequest,
-#     user_id: int = Depends(get_current_user),
-# ) -> ProjectedSavingsResponse:
-#     try:
-#        print(f"Generating projected savings for user {user_id}")
-#        print(requestBody)
-#        return savings_service.calculate_compound_interest(requestBody)
-#     except Exception as e:
-#         print(e)
-#         raise HTTPException(status_code=500, detail=str(e))
+@app.post('/compound-interest')
+async def compount_interest(
+    requestBody: ProjectedSavingsRequest,
+    user_id: int = Depends(get_current_user),
+) -> List[CompoundInterestResponse]:
+    try:
+       print(f"Generating compound interests for user {user_id}")
+       print(requestBody)
+       return savings_service.calculate_compound_interest(requestBody)
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 
