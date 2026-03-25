@@ -19,6 +19,11 @@ services:
         context: services/python/analytics
         dockerfile: Dockerfile.test
 
+    market-test:
+      build:
+        context: services/python/market
+        dockerfile: Dockerfile.test
+
     user-integration-test:
       build:
         context: ./services/ts

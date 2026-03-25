@@ -1,0 +1,15 @@
+FROM measureonecodetwice/finus-market:local
+
+WORKDIR /app
+
+COPY test ./test
+COPY requirements.txt .
+COPY requirements-test.txt .
+
+RUN pip install -r requirements-test.txt
+
+ENV PYTHONPATH=/app
+ENV JWT_SECRET=test_secret_key_12345
+ENV CI=true
+
+CMD ["python", "-m", "pytest", "test/", "-v", "--cov=src"]
