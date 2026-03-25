@@ -1,5 +1,6 @@
 import type { Pool } from "mysql2/promise";
 import type { Transaction } from "../types/Transaction.ts";
+import { getConnectionPool } from "@/sqlUtil.ts";
 
 export async function getAllTransactionsQuery(
   pool: Pool,
@@ -18,5 +19,18 @@ export async function getAllTransactionsQuery(
   `;
 
   const [rows] = await pool.query<Transaction[]>(query, [userId]);
+  return rows;
+}
+export async function findTransactionsBy(
+  financialAccountId: string,
+): Promise<Transaction[]> {
+  const db = getConnectionPool();
+  const query = `
+    SELECT * FROM finus.transaction t
+    WHERE t.financialAccount_id = ?
+    ORDER BY t.date DESC
+  `;
+
+  const [rows] = await db.execute<Transaction[]>(query, [financialAccountId]);
   return rows;
 }

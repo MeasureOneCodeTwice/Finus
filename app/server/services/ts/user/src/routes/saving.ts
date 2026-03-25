@@ -2,16 +2,37 @@ import { Router } from "express";
 import type { Request, Response } from "express";
 import { authenticateJWT } from "../handleJWT.js";
 import { UnauthorizedAccessError } from "../types/UnauthorizedAccess.ts";
-import { createSavingAccount, getSavings } from "../logic/saving.ts";
+import { createSavingAccount, getSavingAccount, getSavingAccountTransactionBy } from "../logic/saving.ts";
+import { BadRequestError } from "../types/BadRequestError.ts";
 export const savingRouter = Router();
 
 savingRouter.get("/", async (req: Request, res: Response) => {
     try {
         const userId = authenticateJWT(req);
-        const savings = await getSavings(userId)
+        const savings = await getSavingAccount(userId)
         res.status(200).json({ data: savings})
     } catch (err: any) {
         switch (err.constructor) {
+            case UnauthorizedAccessError:
+                console.error("User is not authorized to access saving", err);
+                return res.status(401).json({ error: "User is not authorized to access saving" });
+            default:
+                console.error("Saving access failed", err);
+                res.status(500).json({ error: "Saving access failed" });
+        }
+    }
+});
+savingRouter.get("/:financialAccountId/transactions", async (req: Request, res: Response) => {
+    try {
+        const userId = authenticateJWT(req);
+        const financialAccountId = req.params.financialAccountId?.toString()
+        console.log("Financial account id: ", financialAccountId)
+        const transactions = await getSavingAccountTransactionBy(financialAccountId)
+        res.status(200).json({ data: transactions})
+    } catch (err: any) {
+        switch (err.constructor) {
+            case BadRequestError:
+                return res.status(400).json({error: err.message})
             case UnauthorizedAccessError:
                 console.error("User is not authorized to access saving", err);
                 return res.status(401).json({ error: "User is not authorized to access saving" });
