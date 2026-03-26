@@ -1,12 +1,11 @@
 import { getConnectionPool } from "@/sqlUtil.ts";
 import { RowDataPacket } from "mysql2";
-import type { PoolConnection, ResultSetHeader } from "mysql2/promise";
+import type { PoolConnection, ResultSetHeader, Pool } from "mysql2/promise";
 import type { DebtInfoResponse } from "../types/DebtInfoResponse.ts";
 import type { FinancialAccountRequest } from "../types/FinancialAccountRequest.ts";
 import { FinancialAccountType } from "../types/FinancialAccountType.ts";
-const db = getConnectionPool();
 
-export async function findDebtsBy(userId: string) : Promise<DebtInfoResponse[]>{
+export async function findDebtsBy(db: Pool, userId: string) : Promise<DebtInfoResponse[]>{
     const query = `
         SELECT fa.id, fa.name, fa.balance, fa.subtype, fa.last_updated
         FROM finus.financialAccount fa
@@ -27,11 +26,13 @@ export async function findDebtsBy(userId: string) : Promise<DebtInfoResponse[]>{
         balance: Number(row.balance),
         type: FinancialAccountType.CREDIT,
         subtype: String(row.subtype),
-        lastUpdated: new Date(row.last_updated).toISOString() ?? "N/A",
+        lastUpdated: row.last_updated
+            ? new Date(row.last_updated).toISOString()
+            : "N/A",
     }));
     return result;
 }
-export async function addDebt(newDebt: FinancialAccountRequest, userId: string): Promise<DebtInfoResponse> {
+export async function addDebt(db: Pool, newDebt: FinancialAccountRequest, userId: string): Promise<DebtInfoResponse> {
    
     const connection : PoolConnection = await db.getConnection();
     await connection.beginTransaction();

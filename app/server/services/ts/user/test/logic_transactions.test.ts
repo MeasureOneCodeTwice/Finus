@@ -8,6 +8,7 @@ import {
   createEmptyTransactions,
   createTransactionsWithMissingFields,
 } from "./factories/transaction.factory.ts";
+import type { Transaction } from "../src/types/Transaction.ts";
 
 vi.mock("../src/queries/transactions", () => ({
   getAllTransactionsQuery: vi.fn(),
@@ -85,3 +86,4 @@ describe("getTransactionsData", () => {
     });
   });
 });
+
