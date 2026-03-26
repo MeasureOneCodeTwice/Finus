@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import request from "supertest";
+import { createAuthenticatedAccount, createSignupBody } from "./setup";
 
 const BASE_URL = process.env.API_GATEWAY_ADDR;
 
@@ -7,37 +8,17 @@ let token: string;
 let accountId: number;
 
 beforeAll(async () => {
-  const accountDetails = {
-    username: "hi@hi.com",
-    email: "hi@hi.com",
-    first_name: "logan",
-    last_name: "also logan",
-    age: 30,
-    password: "123ABC!7",
-  };
+  const setup = await createAuthenticatedAccount(BASE_URL, "accounts", {
+    name: "Chequing",
+    type: "chequing",
+    balance: 1000,
+    value: 1000,
+    subtype: "na",
+  });
 
-  console.error(process.env.JWT_SECRET);
-  await request(BASE_URL).post("/api/signup").send(accountDetails);
-
-  const login = await request(BASE_URL)
-    .post("/api/login")
-    .send({ email: accountDetails.email, password: accountDetails.password });
-
-  token = login.body.token;
-
-  const account = await request(BASE_URL)
-    .post("/api/accounts")
-    .set("Authorization", `Bearer ${token}`)
-    .send({
-      name: "Chequing",
-      type: "chequing",
-      balance: 1000,
-      value: 1000,
-      subtype: "na",
-    });
-
-  accountId = account.body.id;
-});
+  token = setup.token;
+  accountId = setup.accountId;
+}, 30000);
 
 describe("Accounts Integration (Docker)", () => {
   it("lists accounts for the authenticated user", async () => {
@@ -68,18 +49,18 @@ describe("Accounts Integration (Docker)", () => {
   });
 
   it("prevents unauthorized account updates", async () => {
-    await request(BASE_URL).post("/api/signup").send({
-      username: "otheruser",
-      email: "other@example.com",
-      first_name: "other",
-      last_name: "user",
-      age: 22,
-      password: "password123",
-    });
+    const otherUser = createSignupBody("accounts-other");
+    otherUser.age = 22;
+    otherUser.password = "password123";
+
+    const signup = await request(BASE_URL).post("/api/signup").send(otherUser);
+    expect(signup.status).toBe(201);
 
     const login2 = await request(BASE_URL)
       .post("/api/login")
-      .send({ email: "other@example.com", password: "password123" });
+      .send({ email: otherUser.email, password: otherUser.password });
+
+    expect(login2.status).toBe(200);
 
     const token2 = login2.body.token;
 

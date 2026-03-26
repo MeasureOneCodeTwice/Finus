@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import request from "supertest";
+import { createAuthenticatedAccount } from "./setup";
 
 const BASE_URL = process.env.API_GATEWAY_ADDR;
 
@@ -7,36 +8,17 @@ let token: string;
 let accountId: number;
 
 beforeAll(async () => {
-  const accountDetails = {
-    username: "hi@hi.com",
-    email: "hi@hi.com",
-    first_name: "logan",
-    last_name: "also logan",
-    age: 30,
-    password: "123ABC!7",
-  };
+  const setup = await createAuthenticatedAccount(BASE_URL, "transactions", {
+    name: "all my moola",
+    type: "chequing",
+    balance: 1000,
+    value: 1000,
+    subtype: "TFSA",
+  });
 
-  await request(BASE_URL).post("/api/signup").send(accountDetails);
-
-  const login = await request(BASE_URL)
-    .post("/api/login")
-    .send({ email: accountDetails.email, password: accountDetails.password });
-
-  token = login.body.token;
-
-  const account = await request(BASE_URL)
-    .post("/api/accounts")
-    .set("Authorization", `Bearer ${token}`)
-    .send({
-      name: "all my moola",
-      type: "chequing",
-      balance: 1000,
-      value: 1000,
-      subtype: "TFSA",
-    });
-
-  accountId = account.body.id;
-});
+  token = setup.token;
+  accountId = setup.accountId;
+}, 30000);
 
 describe("Transactions Integration (Docker)", () => {
   it("creates a transaction", async () => {
