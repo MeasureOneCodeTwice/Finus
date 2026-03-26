@@ -53,3 +53,13 @@ services:
           condition: service_healthy
         api-gateway: 
           condition: service_started
+    
+    userinput-test:
+      build:
+        context: ../client
+        dockerfile: Dockerfile.test
+      volumes:
+      - ./app/client:/app
+      - ./common:/common
+      working_dir: /app
+      command: ["bun", "test", "--run"]

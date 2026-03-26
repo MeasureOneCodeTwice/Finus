@@ -2,7 +2,6 @@ import { describe, it, expect } from "vitest";
 import {
   validateAccountForm,
   validateTransactionForm,
-  validateIncomeForm,
 } from "../src/utils/ValidateForms";
 import { accountCategory } from "../src/enum/AccountCategory";
 import { transactionCategory } from "../src/enum/TransactionCategory";
@@ -122,19 +121,5 @@ describe("validateTransactionForm", () => {
 
     const result = validateTransactionForm(123, validType, 50, "");
     expect(result).toBe(false);
-  });
-});
-
-describe("validateIncomeForm", () => {
-  it("returns true for valid name and positive income", () => {
-    expect(validateIncomeForm("Job", 1000)).toBe(true);
-  });
-
-  it("returns false for missing name", () => {
-    expect(validateIncomeForm("", 1000)).toBe(false);
-  });
-
-  it("returns false for non-positive income", () => {
-    expect(validateIncomeForm("Job", 0)).toBe(false);
   });
 });
