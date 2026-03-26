@@ -1,5 +1,6 @@
 YAHOO_SEARCH_URL = "https://query1.finance.yahoo.com/v1/finance/search"
 YAHOO_CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
+YAHOO_SYMBOL_SAFE_CHARS = "=^.-"
 SUPPORTED_PERIODS = {"1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y"}
 SUPPORTED_INTERVALS = {"5m", "15m", "1d", "1wk", "1mo"}
 DEFAULT_SEARCH_LIMIT = 8

@@ -10,6 +10,7 @@ from .config import (
     REQUEST_HEADERS,
     YAHOO_CHART_URL,
     YAHOO_SEARCH_URL,
+    YAHOO_SYMBOL_SAFE_CHARS,
 )
 from .utils import normalize_query, to_float
 
@@ -17,7 +18,7 @@ from .utils import normalize_query, to_float
 def fetch_yahoo_chart(symbol: str, period: str, interval: str) -> dict:
     try:
         response = requests.get(
-            YAHOO_CHART_URL.format(symbol=quote(symbol, safe="=^.-")),
+            YAHOO_CHART_URL.format(symbol=quote(symbol, safe=YAHOO_SYMBOL_SAFE_CHARS)),
             params={
                 "range": period,
                 "interval": interval,
@@ -35,7 +36,7 @@ def fetch_yahoo_chart(symbol: str, period: str, interval: str) -> dict:
             detail="Unable to reach Yahoo market data.",
         ) from exc
 
-    chart = payload.get("chart", {})
+    chart = payload.get("chart") or {}
     if chart.get("error"):
         description = chart["error"].get("description")
         raise HTTPException(
@@ -55,7 +56,7 @@ def fetch_yahoo_chart(symbol: str, period: str, interval: str) -> dict:
 
 def extract_chart_points(chart_result: dict) -> list[dict]:
     timestamps = chart_result.get("timestamp") or []
-    indicators = chart_result.get("indicators", {})
+    indicators = chart_result.get("indicators") or {}
     quotes = indicators.get("quote") or []
     if not quotes:
         raise HTTPException(
@@ -63,7 +64,8 @@ def extract_chart_points(chart_result: dict) -> list[dict]:
             detail="Historical data not found for symbol.",
         )
 
-    closes = quotes[0].get("close") or []
+    first_quote = quotes[0] or {}
+    closes = first_quote.get("close") or []
     points = []
     for timestamp, close in zip(timestamps, closes):
         close_price = to_float(close)
@@ -127,7 +129,7 @@ def yahoo_search(query: str, limit: int) -> list[dict]:
         return []
 
     results = []
-    for item in payload.get("quotes", []):
+    for item in payload.get("quotes") or []:
         quote_type = item.get("quoteType")
         symbol = item.get("symbol")
         if not symbol:
@@ -140,17 +142,17 @@ def yahoo_search(query: str, limit: int) -> list[dict]:
         else:
             continue
 
+        display_symbol = symbol if instrument_type == "stock" else symbol.replace("=X", "")
+        name = item.get("longname") or item.get("shortname") or symbol
+        currency = item.get("currency") or "USD"
+
         results.append(
             {
                 "symbol": symbol,
-                "displaySymbol": (
-                    item.get("symbol")
-                    if instrument_type == "stock"
-                    else item.get("symbol", "").replace("=X", "")
-                ),
-                "name": item.get("longname") or item.get("shortname") or symbol,
+                "displaySymbol": display_symbol,
+                "name": name,
                 "type": instrument_type,
-                "currency": item.get("currency") or "USD",
+                "currency": currency,
                 "exchange": item.get("exchange"),
             }
         )
