@@ -9,18 +9,15 @@ import { authenticateJWT } from "../handleJWT.js";
 import { checkUserId } from "../CheckUser.ts";
 import { pool } from "../db.ts";
 
-
-
 //import { authenticateJWT } from "../handleJWT.js";
 
 //import { error } from "node:console";
 export const accountsRouter = Router();
 
-
 accountsRouter.post("/", async (req: Request, res: Response) => {
-  let connection: PoolConnection | undefined
+  let connection: PoolConnection | undefined;
   try {
-    connection = await pool.getConnection()
+    connection = await pool.getConnection();
     const { name, type, balance, value, subtype } = req.body;
     const last_updated = new Date();
 
@@ -56,16 +53,16 @@ accountsRouter.post("/", async (req: Request, res: Response) => {
   } catch (err) {
     console.error("Account creation failed", err);
     return res.status(500).json({ error: "Account creation failed" });
-  } finally{
-    if(connection){
-      connection.release()
+  } finally {
+    if (connection) {
+      connection.release();
     }
   }
 });
 
 accountsRouter.get("/", async (req: Request, res: Response) => {
   let userId;
-  let connection: PoolConnection | undefined
+  let connection: PoolConnection | undefined;
   try {
     userId = authenticateJWT(req);
   } catch (err) {
@@ -75,7 +72,7 @@ accountsRouter.get("/", async (req: Request, res: Response) => {
 
   if (userId) {
     try {
-      connection = await pool.getConnection()
+      connection = await pool.getConnection();
       const [rows] = await connection.query<financialAccount[]>(
         `SELECT * FROM financialAccount JOIN profile_financialAccount pfa 
         ON financialAccount.id = pfa.financialAccount_id
@@ -89,9 +86,9 @@ accountsRouter.get("/", async (req: Request, res: Response) => {
     } catch (err) {
       console.error("Failed to retrieve user's account", err);
       return res.status(500).json({ error: "Failed to retrieve account(s)" });
-    } finally{
-      if(connection){
-        connection.release()
+    } finally {
+      if (connection) {
+        connection.release();
       }
     }
   }
@@ -99,7 +96,7 @@ accountsRouter.get("/", async (req: Request, res: Response) => {
 
 accountsRouter.put("/", async (req: Request, res: Response) => {
   let userId;
-  let connection: PoolConnection | undefined
+  let connection: PoolConnection | undefined;
 
   //Checks if was given by the requests
   if (isAccount(req.body)) {
@@ -119,9 +116,8 @@ accountsRouter.put("/", async (req: Request, res: Response) => {
       .json({ error: "User not authorized to update account" });
   }
 
-
   try {
-    connection = await pool.getConnection()
+    connection = await pool.getConnection();
 
     //Check if the user is the owner of the account that's bineg updated
     if (!(await checkUserId(connection, userId, account.id))) {
@@ -130,7 +126,7 @@ accountsRouter.put("/", async (req: Request, res: Response) => {
         .status(401)
         .json({ error: "User is not authorized to update accounts" });
     }
-    
+
     const { id, name, type, balance, value, subtype } = req.body;
 
     const last_updated = new Date();
@@ -150,16 +146,16 @@ accountsRouter.put("/", async (req: Request, res: Response) => {
   } catch (err) {
     console.error("Failed to update user's account", err);
     return res.status(500).json({ error: "Failed to update user's account" });
-  } finally{
-    if(connection){
-      connection.release()
+  } finally {
+    if (connection) {
+      connection.release();
     }
   }
 });
 
 accountsRouter.delete("/", async (req: Request, res: Response) => {
   let userId;
-  let connection: PoolConnection | undefined
+  let connection: PoolConnection | undefined;
   const { id } = req.body;
 
   try {
@@ -179,9 +175,8 @@ accountsRouter.delete("/", async (req: Request, res: Response) => {
       .json({ error: "Bad request: No account was givens" });
   }
 
-
   try {
-    connection = await pool.getConnection()
+    connection = await pool.getConnection();
 
     //Checks if user is owner of the acount
     if (!(await checkUserId(connection, userId, id))) {
@@ -197,20 +192,21 @@ accountsRouter.delete("/", async (req: Request, res: Response) => {
       [id],
     );
 
-    await connection.query("DELETE FROM transactions WHERE financialAccount_id=?", [id] )
+    await connection.query(
+      "DELETE FROM transaction WHERE financialAccount_id=?",
+      [id],
+    );
 
     return res.status(200).json({ message: "Account successfully deleted" });
   } catch (err) {
     console.error("Failed to delete user's account", err);
     return res.status(500).json({ error: "Failed to delete user's account" });
-  } finally{
-    if(connection){
-      connection.release()
+  } finally {
+    if (connection) {
+      connection.release();
     }
   }
 });
-
-
 
 function isAccount(reqBody: unknown): reqBody is financialAccount {
   //Checks if it exists and is an object
@@ -233,4 +229,3 @@ function isAccount(reqBody: unknown): reqBody is financialAccount {
     check.last_updated instanceof Date
   );
 }
-
