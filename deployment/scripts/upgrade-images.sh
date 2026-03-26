@@ -1,3 +1,3 @@
 #!/bin/bash
-docker compose down
-docker compose up -d --pull always
+sudo docker compose down
+sudo docker compose up -d --pull always
