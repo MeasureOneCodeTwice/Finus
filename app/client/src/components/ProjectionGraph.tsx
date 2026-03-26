@@ -6,9 +6,10 @@ import NoItemState from "./NoItemState";
 
 interface graphProp{
     data: projectedDataResponse
+    name: string
 }
 
-export default function ProjectionGraph({data}:graphProp){
+export default function ProjectionGraph({data, name}:graphProp){
     
     const chartOptions: ChartOptions<"line"> = {
         responsive: true,
@@ -51,7 +52,7 @@ export default function ProjectionGraph({data}:graphProp){
         labels:data.dateLabel,
         datasets: [
             {
-                label: "dataProjection",
+                label: name,
                 data: data.dataPoint,
                 fill: "rgba(34, 250, 94, 0.55)",
                 borderColor: "rgba(34, 197, 94, 1)",
@@ -64,10 +65,13 @@ export default function ProjectionGraph({data}:graphProp){
     return(
     <>
     {chartData ? (
-        <>
+        <div className="flex flex-col items-center py-12 px-12 my-20 rounded-[20px]
+        bg-black backdrop-blur-xs backdrop-grayscale border border-green-500/15 shadow-[0_0_40px_rgba(34,197,94,0.15)]
+        transition-all duration-300 hover:shadow-[0_0_60px_rgba(34,197,94,0.3)]">
+
             <h2 className="text-2xl font-bold mb-4">Budget vs Expenditure</h2>
             <Line data={chartData} options={chartOptions} />
-        </>
+        </div>
         ) : (
         <>
             <NoItemState

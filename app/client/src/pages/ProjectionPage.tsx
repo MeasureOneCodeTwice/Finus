@@ -24,7 +24,6 @@ import NoItemState from "@/components/NoItemState";
 import { handleCurrencyChange, handleCurrencyBlur } from "@/utils/handleInput";
 import type { projectionDebtRequest, projectionSavingRequest } from "@/types/requestTypes";
 import { validateDebtProjection, validateSavingProjection } from "@/utils/ValidateProjectionRequest";
-import { error } from "node:console";
 
 
 Chart.register(
@@ -61,8 +60,13 @@ function ProjectionPage({ session }: ProjectionProp) {
   const [savingData, setSavingData] = useState<projectedDataResponse | undefined>(undefined);
   const [debtData, setDebtData] = useState<projectedDataResponse | undefined>(undefined);
 
-  let debtRequest: projectionDebtRequest | undefined = undefined
-  let savingRequest: projectionSavingRequest | undefined = undefined
+  const [debtRequest, setDebtRequest] = useState<projectionDebtRequest| undefined>(undefined)
+  const [savingRequest, setSavingRequest] = useState<projectionSavingRequest | undefined>(undefined)
+
+  //Total amount of interest generated
+  const [totalInterest, setTotalInterest] = useState<number>(0)
+  //Total amoutn of pay 
+  const [totalPay, setTotalPay] = useState<number>(0)
 
   const calculateProjection = () => {
     const inputAmount = Number(amount)
@@ -74,7 +78,7 @@ function ProjectionPage({ session }: ProjectionProp) {
       case "Debt":
         if(validateDebtProjection(selectedDebt, inputAmount, inputMinPay, inputInterest, range, inputPeriod)){
 
-          debtRequest = {
+          const newDebtRequest: projectionDebtRequest = {
             id:selectedAccount, 
             remainingAmount: inputAmount, 
             minimumPayment:inputMinPay,
@@ -83,10 +87,25 @@ function ProjectionPage({ session }: ProjectionProp) {
             period: inputPeriod
           }
 
-          getDebtProjection(session, debtRequest).then((data) =>{
-            
+          setDebtRequest(newDebtRequest)
+
+          getDebtProjection(session, newDebtRequest).then((data) =>{
+            let dataTotalInterest = 0
+            let dataTotalPay = 0
+            console.log(data)
             if(data){
-              setDebtData(data)
+              const graphData: projectedDataResponse = {dataPoint: [], dateLabel: []}
+      
+              data.debtStages.map((stage)=>{
+                graphData.dataPoint.push(stage.remainingDebt)
+                graphData.dateLabel.push(stage.installmentDate)
+                dataTotalInterest += stage.interestAmount
+                dataTotalPay += stage.principalAmount
+              })
+
+              setDebtData(graphData)
+              setTotalPay(dataTotalPay)
+              setTotalInterest(dataTotalInterest)
             }
 
           }).catch((error)=>{
@@ -101,13 +120,17 @@ function ProjectionPage({ session }: ProjectionProp) {
       case "Saving":
         
         if(validateSavingProjection(selectedAccount, inputInterest)){
-          savingRequest = {
+          const newSavingRequest = {
             id:selectedAccount, 
             interestRate: inputInterest, 
             range: range
           }
 
-          getSavingProjection(session, savingRequest)
+          setSavingRequest(newSavingRequest)
+
+          getSavingProjection(session, newSavingRequest).then((data)=> {
+            setSavingData(data)
+          })
         } else {
             alert("Please enter all fields")
         }
@@ -176,10 +199,11 @@ function ProjectionPage({ session }: ProjectionProp) {
 
   //Updates the fields the currently selected debt when swap to debt
   useEffect(()=>{
-    if(selectedDebt && selectedType === "Debt") {
+    if(debtRequest && selectedType === "Debt") {
       if(debtRequest){
         setInterest(debtRequest.interestRate.toString())
         setRange(debtRequest.nextDueDate)
+        setPeriod(debtRequest.period.toString())
       }
     }
   },[session,selectedType])
@@ -290,7 +314,7 @@ function ProjectionPage({ session }: ProjectionProp) {
             <input name="min" id="min" type = "string" value = {minPay} className="w-20 bg-black/50 p-1 rounded-lg border border-green-500/20" onChange = {(event) => handleCurrencyChange(event,setMinPay)} onBlur={(event) => handleCurrencyBlur(event,minPay, setMinPay)}/>
             
             <label htmlFor="period">Days between payment:</label>
-            <input name="period" type = "string" className="w-20 bg-black/50 p-1 rounded-lg border border-green-500/20" onChange={(event)=>{handleNumberChange(event, setPeriod, 0, 100)}}/>
+            <input name="period" value = {period} type = "string" className="w-20 bg-black/50 p-1 rounded-lg border border-green-500/20" onChange={(event)=>{handleNumberChange(event, setPeriod, 0, 100)}}/>
 
             </>
           }
@@ -320,7 +344,7 @@ function ProjectionPage({ session }: ProjectionProp) {
         {selectedType === "Saving" ? (
           savingData ? (
             <>
-              <ProjectionGraph data={savingData} />
+              <ProjectionGraph data={savingData} name="Total Savings" />
             </>
           ) : (
             <>
@@ -336,7 +360,10 @@ function ProjectionPage({ session }: ProjectionProp) {
         {selectedType === "Debt" ? (
           debtData ? (
             <>
-              <ProjectionGraph data={debtData} />
+              <ProjectionGraph data={debtData} name="Remaining Debt" />
+              <div className="space-x-2 gap-2 bg-black/50 p-1 rounded-lg border border-green-500/20">
+                {"Total Amount Paid:$" + totalPay.toFixed(2) + "    Total Interest Paid:$" + totalInterest.toFixed(2)}
+              </div>
             </>
           ) : (
             <>

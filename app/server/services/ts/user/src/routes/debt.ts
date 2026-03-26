@@ -43,10 +43,11 @@ debtRouter.post("/", async (req: Request, res: Response) => {
     }
 });
 debtRouter.post("/predict-payoff", async (req: Request, res: Response) => {
+
     try {
         const userId = authenticateJWT(req);
         const payoffPrediction = advancedPayoffCalculation(req.body);
-        res.status(200).json({ data: payoffPrediction });
+        res.status(200).json(payoffPrediction);
     } catch (err: any) {
         switch (err.constructor) {
             case BadRequestError:
