@@ -25,6 +25,7 @@
     "@vitest/coverage-v8": "^4.1.1",
     "cors": "^2.8.6",
     "express": "^5.2.1",
-    "mysql2": "^3.18.1"
+    "mysql2": "^3.18.1",
+    "stryker-mutator-bun-runner": "^0.4.0"
   }
 }
