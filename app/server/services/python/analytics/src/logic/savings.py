@@ -2,8 +2,11 @@ import pandas as pd
 from typing import List, Dict
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
+from fastapi import HTTPException
 # from ..queries import savings as savings_queries
-from src.models.schemas import ProjectedSavingsRequest, ProjectedSavingsResponse, CompoundInterestResponse
+from src.dependencies import get_db_connection
+from src.models.schemas import ProjectedSavingsRequest, MonthlySavingGrowthRate, CompoundInterestResponse
+from src.queries.savings import get_savings_transactions
 
 def calculate_savings_over_time(
     accounts: List[Dict],
@@ -54,40 +57,111 @@ def calculate_savings_over_time(
         }]
     }
 
+def get_monthly_balances(transactions: pd.DataFrame):
+    df = transactions.copy()
+    df['date'] = pd.to_datetime(df['date'])
+
+    # Sort by date
+    df = df.sort_values('date')
+
+    # Group by month
+    df['year_month'] = df['date'].dt.to_period('M')
+
+    monthly_sums = df.groupby('year_month')['amount'].sum().reset_index()
+
+    monthly_sums['year_month'] = monthly_sums['year_month'].dt.to_timestamp()
+
+    # Create full monthly range
+    full_range = pd.date_range(
+        start=monthly_sums['year_month'].min(),
+        end=monthly_sums['year_month'].max(),
+        freq='MS'  # month start
+    )
+
+    monthly_sums = monthly_sums.set_index('year_month').reindex(full_range, fill_value=0)
+    monthly_sums = monthly_sums.rename_axis('date').reset_index()
+
+    # Convert to cumulative balance
+    monthly_sums['balance'] = monthly_sums['amount'].cumsum()
+    print(monthly_sums)
+
+    return monthly_sums
+
+def compute_monthly_growth_rates(monthly_df: pd.DataFrame):
+    # Compute increase rate between months
+    monthly_df['growth_rate'] = monthly_df['balance'].pct_change()
+
+    # Drop first NaN
+    growth_rates = monthly_df['growth_rate'].dropna()
+
+    return growth_rates
+
+def generate_savings_growth_rate(transactions: List[Dict]) -> MonthlySavingGrowthRate:
+    df = pd.DataFrame(transactions)
+
+    if df.empty:
+        return None
+
+    monthly_balances = get_monthly_balances(df)
+    growth_rates = compute_monthly_growth_rates(monthly_balances)
+
+    mean_growth = growth_rates.mean()
+    standard_deviation_growth = growth_rates.std()
+
+    return MonthlySavingGrowthRate( 
+        best_case=round(mean_growth + standard_deviation_growth, 2),
+        expected_case=round(mean_growth, 2),
+        worst_case=max(round(mean_growth - standard_deviation_growth, 2), 0)
+    )
+    
+
 def calculate_compound_interest(request: ProjectedSavingsRequest) -> List[CompoundInterestResponse]:
-    balance = request.balance
+    connection = get_db_connection()
+    if not connection:
+        raise HTTPException(status_code=500, detail="Database connection failed")
+        
+    cursor = connection.cursor(dictionary=True)
+    transactions = get_savings_transactions(cursor, [request.financial_account_id])
+    monthly_savings_rate = generate_savings_growth_rate(transactions)
+    print(monthly_savings_rate)
+
+    best_rate = monthly_savings_rate.best_case
+    worst_rate = monthly_savings_rate.worst_case
+    expected_rate = monthly_savings_rate.expected_case
+
+    worst_balance = request.balance
+    expected_balance = request.balance
+    best_balance = request.balance
+
     monthly_deposit = request.monthly_deposit
-    annual_interest_rate = request.annual_interest_rate
     time_frame = request.time_frame
 
-    monthly_rate: float = (annual_interest_rate / 100) / 12
     results: List[CompoundInterestResponse] = []
 
     months = time_frame * 12
     current_date = date.today()
 
-    total_interest = 0.0  # track cumulative interest
-
-    for month in range(1, months + 1):
+    for _ in range(months):
         # deposit money
-        balance += monthly_deposit
+        worst_balance += monthly_deposit
+        expected_balance += monthly_deposit
+        best_balance += monthly_deposit
 
-        # calculate interest on updated balance
-        interest = balance * monthly_rate
-
-        # add interest to balance
-        balance += interest
+        # compute growth
+        worst_balance += worst_balance * worst_rate
+        expected_balance += expected_balance * expected_rate
+        best_balance += best_balance * best_rate
 
         # rounding
-        interest = round(interest, 2)
-        balance = round(balance, 2)
-
-        total_interest += interest
+        worst_balance = round(worst_balance, 2)
+        expected_balance = round(expected_balance, 2)
+        best_balance = round(best_balance, 2)
 
         results.append(
             CompoundInterestResponse(
-                accumulative_balance=balance,
-                accumulative_interest=round(total_interest, 2),
+                accumulative_worst_balance=worst_balance,
+                accumulative_expected_balance=expected_balance,
+                accumulative_best_balance=best_balance,
                 date=current_date.strftime("%B %Y")
             )
         )

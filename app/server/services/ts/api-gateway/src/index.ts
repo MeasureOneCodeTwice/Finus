@@ -153,15 +153,14 @@ app.use(
   }),
 );
 
-//get predicted debt payoff data from analytics service
-/*app.use(
+//debt payoff prediction from analytics service
+app.use(
   createProxyMiddleware({
-    pathFilter: "/predicted-payoff",
+    pathFilter: ["/predict-debt-payoff"],
     target: process.env.ANALYTICS_SERVICE_ADDR,
     changeOrigin: true,
-    //pathRewrite: { "^/api/predicted-payoff": "/predicted-payoff" },
   }),
-);*/
+);
 
 //debt-related request
 app.use(

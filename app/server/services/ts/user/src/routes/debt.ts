@@ -5,7 +5,7 @@ import { pool } from "../db.ts";
 import type { financialAccount } from "@/types.js";
 import { authenticateJWT } from "../handleJWT.js";
 import { UnauthorizedAccessError } from "../types/UnauthorizedAccess.ts";
-import { generateDebtPayoffStages, createNewDebt, getDebts } from "../logic/debt.ts";
+import { createNewDebt, getDebts } from "../logic/debt.ts";
 import { BadRequestError } from "../types/BadRequestError.ts";
 export const debtRouter = Router();
 
@@ -39,25 +39,6 @@ debtRouter.post("/", async (req: Request, res: Response) => {
             default:
                 console.error("Debt creation failed", err);
                 res.status(500).json({ error: "Debt creation failed" });
-        }
-    }
-});
-debtRouter.post("/predict-payoff", async (req: Request, res: Response) => {
-
-    try {
-        const userId = authenticateJWT(req);
-        const payoffPrediction = generateDebtPayoffStages(req.body);
-        res.status(200).json( payoffPrediction );
-    } catch (err: any) {
-        switch (err.constructor) {
-            case BadRequestError:
-                return res.status(400).json({error: err.message})
-            case UnauthorizedAccessError:
-                console.error("User is not authorized to create debt", err);
-                return res.status(401).json({ error: "User is not authorized to create debt" });
-            default:
-                console.error(err);
-                res.status(500).json({ error: "Debt payoff calculation failed" });
         }
     }
 });
