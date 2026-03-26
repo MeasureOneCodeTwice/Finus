@@ -7,15 +7,19 @@ from .yahoo_client import extract_chart_points, fetch_yahoo_chart
 def fetch_quote_snapshot(symbol: str) -> dict:
     chart_result = fetch_yahoo_chart(symbol, "1mo", "1d")
     points = extract_chart_points(chart_result)
-    meta = chart_result.get("meta", {})
+    meta = chart_result.get("meta") or {}
 
     latest_point = points[-1]
-    latest_price = to_float(meta.get("regularMarketPrice")) or latest_point["price"]
-    previous_close = (
-        to_float(meta.get("chartPreviousClose"))
-        or to_float(meta.get("previousClose"))
-        or (points[-2]["price"] if len(points) > 1 else None)
-    )
+    latest_price = to_float(meta.get("regularMarketPrice"))
+    if latest_price is None:
+        latest_price = latest_point["price"]
+
+    previous_close = to_float(meta.get("chartPreviousClose"))
+    if previous_close is None:
+        previous_close = to_float(meta.get("previousClose"))
+    if previous_close is None and len(points) > 1:
+        previous_close = points[-2]["price"]
+
     change, change_percent = format_change(latest_price, previous_close)
 
     return {

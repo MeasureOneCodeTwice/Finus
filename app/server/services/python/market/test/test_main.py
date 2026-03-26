@@ -54,6 +54,23 @@ def test_search_route_stops_combining_once_limit_is_reached():
     enrich_mock.assert_called_once_with([{"symbol": "AAPL"}, {"symbol": "MSFT"}])
 
 
+def test_search_route_uses_default_query_and_limit():
+    with patch("src.main.search_forex_catalog", return_value=[]) as forex_mock, patch(
+        "src.main.search_stock_catalog", return_value=[]
+    ) as stock_mock, patch("src.main.yahoo_search", return_value=[]) as yahoo_mock, patch(
+        "src.main.enrich_search_results",
+        return_value=[],
+    ) as enrich_mock:
+        response = client.get("/markets/search")
+
+    assert response.status_code == 200
+    assert response.json() == []
+    forex_mock.assert_called_once_with("", src.main.DEFAULT_SEARCH_LIMIT)
+    stock_mock.assert_called_once_with("", src.main.DEFAULT_SEARCH_LIMIT)
+    yahoo_mock.assert_called_once_with("", src.main.DEFAULT_SEARCH_LIMIT)
+    enrich_mock.assert_called_once_with([])
+
+
 def test_quote_route_delegates_to_service():
     with patch("src.main.fetch_quote_snapshot", return_value={"symbol": "AAPL"}) as quote_mock:
         response = client.get("/markets/quote", params={"symbol": "AAPL"})
@@ -96,6 +113,19 @@ def test_history_route_returns_payload_and_validation_errors():
     )
     assert invalid_interval.status_code == 400
     assert invalid_interval.json()["detail"] == "Unsupported interval."
+
+
+def test_history_route_uses_default_period_and_interval():
+    with patch(
+        "src.main.build_history",
+        return_value=([{"timestamp": 1, "price": 10.0}], "yahoo"),
+    ) as history_mock:
+        response = client.get("/markets/history", params={"symbol": "AAPL"})
+
+    assert response.status_code == 200
+    assert response.json()["period"] == "6mo"
+    assert response.json()["interval"] == "1d"
+    history_mock.assert_called_once_with("AAPL", "6mo", "1d")
 
 
 def test_main_module_runs_uvicorn_when_executed_as_script():

@@ -24,6 +24,21 @@ services:
         context: services/python/market
         dockerfile: Dockerfile.test
 
+    market-mutation-test:
+      build:
+        context: services/python/market
+        dockerfile: Dockerfile.mutation.test
+
+    market-integration-test:
+      build:
+        context: services/python/market
+        dockerfile: Dockerfile.integration.test
+      env_file:
+        - ./default_container.env
+      depends_on:
+        market:
+          condition: service_started
+
     user-integration-test:
       build:
         context: ./services/ts
