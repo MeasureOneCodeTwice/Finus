@@ -5,7 +5,7 @@ import { pool } from "../db.ts";
 import type { financialAccount } from "@/types.js";
 import { authenticateJWT } from "../handleJWT.js";
 import { UnauthorizedAccessError } from "../types/UnauthorizedAccess.ts";
-import { advancedPayoffCalculation, calculateExpectedPayOffDates, createNewDebt, getDebts } from "../logic/debt.ts";
+import { generateDebtPayoffStages, createNewDebt, getDebts } from "../logic/debt.ts";
 import { BadRequestError } from "../types/BadRequestError.ts";
 export const debtRouter = Router();
 
@@ -46,8 +46,8 @@ debtRouter.post("/predict-payoff", async (req: Request, res: Response) => {
 
     try {
         const userId = authenticateJWT(req);
-        const payoffPrediction = advancedPayoffCalculation(req.body);
-        res.status(200).json(payoffPrediction);
+        const payoffPrediction = generateDebtPayoffStages(req.body);
+        res.status(200).json( payoffPrediction );
     } catch (err: any) {
         switch (err.constructor) {
             case BadRequestError:

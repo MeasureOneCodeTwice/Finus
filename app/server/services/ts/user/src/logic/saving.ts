@@ -21,7 +21,13 @@ export async function getSavingAccountTransactionBy(financialAccountId: string |
     description: transation.description,
     sender: transation.sender,
     recipient: transation.recipient,
-    date: new Date(transation.date).toISOString().replace("T", " ").replace(/\.\d{3}Z$/, "") ?? "N/A",
+    date: transation.date ? 
+        new Date(transation.date)
+          .toISOString()
+          .replace("T", " ")
+          .replace(/\.\d{3}Z$/, "")
+      : 
+        "N/A"
   }))
   return transationDtos;
 }
