@@ -36,11 +36,21 @@ resource "aws_security_group" "default" {
     protocol    = "tcp"
   }
 
-  egress {
-    description = "HTTP from anywhere"
-    from_port   = "3000"
-    to_port     = "3000"
+  ingress {
+    description = "Docker webhook"
+    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = "4444"
+    to_port     = "4444"
     protocol    = "tcp"
+  }
+
+  egress {
+    description      = "All outbound traffic"
+    from_port        = "0"
+    to_port          = "0"
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
   }
 }
 

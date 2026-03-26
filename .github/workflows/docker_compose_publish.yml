@@ -36,6 +36,14 @@ jobs:
           docker compose build
           echo "Pushing images..."
           docker compose push
+
+          echo RELEASE_VERSION=latest                   >  .env
+          echo DOCKER_HUB_USERNAME=$DOCKER_HUB_USERNAME >> .env
+          echo "Re-building with lastest tag..."
+          docker compose build
+          echo "Pushing images..."
+          docker compose push
+
         env:
           DOCKER_HUB_USERNAME: ${{ inputs.DOCKER_HUB_USERNAME }}
 
