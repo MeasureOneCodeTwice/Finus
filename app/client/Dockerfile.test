@@ -1,19 +1,4 @@
-FROM oven/bun:1.3.9-slim AS base
-
-WORKDIR /app
-
-COPY package.json bun.lockb.
-RUN --mount=type=cache,target=/root/.bun/install/cache \
-    bun install
-
-COPY tsconfig.* .
-COPY vite.config.ts .
-COPY index.* .
-COPY public ./public
-COPY src ./src
-
-
-FROM base AS test
+FROM finus-webserver:local
 
 COPY test ./test
 COPY vitest.config.ts .

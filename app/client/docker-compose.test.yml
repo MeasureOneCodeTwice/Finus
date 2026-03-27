@@ -1,0 +1,5 @@
+services:
+    user-input:
+      build:
+        context: .
+        dockerfile: Dockerfile.test
