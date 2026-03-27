@@ -203,7 +203,7 @@ export default function PopupForm({
             name="type"
             className="formSelect"
             onChange={(event) =>
-              setAccountType(event.target.value as typeofAccount)
+              {setAccountType(event.target.value as typeofAccount); setFormInput({ ...formInput, ["subType"]: "" })}
             }
           >
             <option value="">Select Account type</option>
@@ -229,7 +229,7 @@ export default function PopupForm({
           />
           <br></br>
 
-          {accountType === "SAVING" ? (
+          {accountType === "SAVINGS" ? (
             <>
               <label htmlFor="subType">Type of saving account</label>
               <select
@@ -239,7 +239,6 @@ export default function PopupForm({
                 className="formSelect"
                 onChange={(event) => {
                   handleChange(event);
-                  setFormInput({ ...formInput, ["subType"]: "" });
                 }}
               >
                 <option value="">Select saving type</option>

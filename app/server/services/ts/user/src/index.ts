@@ -58,6 +58,7 @@ process.on("SIGTERM", () => cleanup);
 
 app.get("/charts/expenses", async (req, res) => {
 process.on("SIGTERM", () => server.close());
+})
 
 app.get(
   "/charts/expenses",

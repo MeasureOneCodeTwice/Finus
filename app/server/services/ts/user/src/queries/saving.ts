@@ -14,7 +14,7 @@ export async function findSavingsBy(db: Pool, userId: string) : Promise<SavingIn
         JOIN finus.profile p ON pfa.profile_id = p.id
         JOIN finus.finusAccount_profile uap ON p.id = uap.profile_id
         WHERE uap.account_id = ? 
-        AND fa.type = 'Savings' 
+        AND fa.type = 'SAVINGS' 
         GROUP BY fa.id
     `;
     
