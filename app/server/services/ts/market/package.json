@@ -1,0 +1,15 @@
+{
+  "name": "market",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "vitest": "^4.1.1"
+  }
+}

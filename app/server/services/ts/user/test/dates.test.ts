@@ -1,4 +1,3 @@
-// tests/utils/dates.test.ts
 import { describe, expect, it } from "vitest";
 import { generateDateRange } from "../src/utils/dates.ts";
 import {

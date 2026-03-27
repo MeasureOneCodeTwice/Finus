@@ -9,12 +9,14 @@
     "@types/bun": "latest",
     "@types/express": "^5.0.6",
     "@types/node": "^25.1.0",
+    "@types/supertest": "^7.2.0",
     "@typescript-eslint/eslint-plugin": "^8.54.0",
     "@typescript-eslint/parser": "^8.54.0",
-    "eslint": "^9.39.2",
+    "eslint": "^10.1.0",
     "eslint-plugin-react": "^7.37.5",
     "globals": "^17.3.0",
     "jiti": "^2.6.1",
+    "supertest": "^7.2.2",
     "typescript-eslint": "^8.54.0"
   },
   "peerDependencies": {
@@ -23,7 +25,9 @@
   "scripts": {
     "dev": "bun --watch src/index.ts",
     "build": "tsc",
-    "start": "bun dist/index.js"
+    "start": "bun dist/index.js",
+    "test:mutation": "npx stryker run",
+    "test": "vitest"
   },
   "dependencies": {
     "@mysql/xdevapi": "^8.0.35",
@@ -31,6 +35,8 @@
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "mysql2": "^3.15.3",
+    "stryker-mutator-bun-runner": "^0.4.0",
+    "supertest": "^7.2.2",
     "vitest": "^4.0.18"
   }
 }

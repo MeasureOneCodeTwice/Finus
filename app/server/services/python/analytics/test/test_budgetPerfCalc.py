@@ -14,6 +14,49 @@ class TestBudgetPerformanceCalculator:
         return BudgetPerformanceCalculator()
     
     @pytest.fixture
+    def sample_budget_response_with_high_targets(self):
+        categories = [
+            BudgetCategory(
+                category='groceries',
+                type='need',
+                avg_monthly_spent=300,
+                monthly_budget=280,
+                recommended_budget=500,
+                is_essential=True
+            ),
+            BudgetCategory(
+                category='dining',
+                type='want',
+                avg_monthly_spent=200,
+                monthly_budget=150,
+                recommended_budget=400,
+                is_essential=False
+            ),
+            BudgetCategory(
+                category='entertainment',
+                type='want',
+                avg_monthly_spent=150,
+                monthly_budget=120,
+                recommended_budget=300,
+                is_essential=False
+            ),
+        ]
+        return BudgetResponse(
+            budget=categories,
+            generated_date='2024-03-15 12:00:00'
+        )
+    
+    @pytest.fixture
+    def mock_transactions_low_spending(self):
+        """Create transactions with low actual spending."""
+        return [
+            {'category': 'groceries', 'amount': -50, 'date': '2024-03-10'},
+            {'category': 'groceries', 'amount': -30, 'date': '2024-03-12'},
+            {'category': 'dining', 'amount': -40, 'date': '2024-03-14'},
+            {'category': 'entertainment', 'amount': -20, 'date': '2024-03-15'},
+        ]
+    
+    @pytest.fixture
     def mock_transactions(self):
         return [
             {'category': 'groceries', 'amount': -300, 'date': '2024-03-10'},
@@ -131,6 +174,32 @@ class TestBudgetPerformanceCalculator:
             # All actual amounts should be 0
             assert all(amount == 0 for amount in result['actualAmounts'])
             mock_get.assert_called_once()
+
+
+    async def test_calculate_performance_underflow(self, performance_calc, sample_budget_response_with_high_targets):
+        #create actual spending that is much lower than budget - this will cause variance < -100 - underflow
+        actual_spending = {
+            'groceries': 50,
+            'dining': 30,
+            'entertainment': 20
+        }
+        
+        result = performance_calc.calculate_performance(
+            sample_budget_response_with_high_targets.budget,
+            actual_spending,
+            'w'
+        )
+
+        assert len(result) > 0
+        
+        #verify all variances are less than -100
+        for i, category in enumerate(result['categories']):
+            budget = sample_budget_response_with_high_targets.budget[i].recommended_budget
+            actual = actual_spending[category]
+            variance = actual - budget
+            
+            assert variance < -100
+
     
     async def test_generate_performance_db_error(
         self,

@@ -2,10 +2,40 @@ import { PORT } from "@/port";
 import { onExit } from "@/hooks";
 import express from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
-import { buildCorsConfig } from "@/expressUtils";
+import { buildCorsConfig } from "@/expressUtils.ts";
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { randomUUID } from "node:crypto";
 
 const app = express();
 app.use(buildCorsConfig());
+
+const CLIENT_STATE_DIR =
+  process.env.CLIENT_STATE_DIR ?? "/var/lib/finus-client-state";
+const CLIENT_STATE_RESET_KEY_PATH = path.join(
+  CLIENT_STATE_DIR,
+  "reset-key.txt",
+);
+
+function resolveClientStateResetKey() {
+  try {
+    const existingKey = fs
+      .readFileSync(CLIENT_STATE_RESET_KEY_PATH, "utf8")
+      .trim();
+    if (existingKey.length > 0) {
+      return existingKey;
+    }
+  } catch {
+    // Fall through and create a new reset key.
+  }
+
+  const nextKey = randomUUID();
+  fs.mkdirSync(CLIENT_STATE_DIR, { recursive: true });
+  fs.writeFileSync(CLIENT_STATE_RESET_KEY_PATH, nextKey, "utf8");
+  return nextKey;
+}
+
+const clientStateResetKey = resolveClientStateResetKey();
 
 const pathMatches = (path, valid) => {
   path = path.replace("/api/", "");
@@ -22,11 +52,28 @@ app.use(
   }),
 );
 
-const USER_PATHS = ["accounts", "profiles", "charts/expenses"];
+const USER_PATHS = [
+  "accounts",
+  "profiles",
+  "/charts/expenses",
+  "/table/transactions",
+  "/table/snapshot",
+  "/goals",
+];
 app.use(
   createProxyMiddleware({
     pathFilter: (path) => pathMatches(path, USER_PATHS),
     target: process.env.USER_SERVICE_ADDR,
+    changeOrigin: true,
+    pathRewrite: { "^/api": "" },
+  }),
+);
+
+const MARKET_PATHS = ["markets/search", "markets/quote", "markets/history"];
+app.use(
+  createProxyMiddleware({
+    pathFilter: (path) => pathMatches(path, MARKET_PATHS),
+    target: process.env.MARKET_SERVICE_ADDR,
     changeOrigin: true,
     pathRewrite: { "^/api": "" },
   }),
@@ -40,16 +87,6 @@ app.use(
     pathRewrite: { "^/api/transactions": "/transactions" },
   }),
 );
-
-// const ANALYTICS_PATHS = ["charts/savings", "charts/incomeflow"];
-// app.use(
-//   createProxyMiddleware({
-//     pathFilter: (path) => pathMatches(path, ANALYTICS_PATHS),
-//     target: process.env.ANALYTICS_SERVICE_ADDR,
-//     changeOrigin: true,
-//     pathRewrite: { "^/api": "" },
-//   }),
-// );
 
 app.get("/health", async (req: express.Request, res: express.Response) => {
   const result: { [key: string]: string } = {};
@@ -68,54 +105,44 @@ app.get("/health", async (req: express.Request, res: express.Response) => {
   res.json(result);
 });
 
+app.get(
+  "/client-state/reset-key",
+  (_req: express.Request, res: express.Response) => {
+    res.json({ resetKey: clientStateResetKey });
+  },
+);
+
 const server = app.listen(PORT, () => {
   console.log(`API Gateway running on port ${PORT}`);
 });
 onExit(async () => await server.close());
 
-//API gateway sits on port 3000 and is accessible from there. Go to browser and type http://localhost:3000/health and you should see which services are up.
-// app.get('/health', async (req: express.Request, res: express.Response) => {
-//     const result: { [serviceName: string]: string } = {};
-//     const services: string[] = Object.keys(process.env).filter((x) => /^.*_SERVICE_ADDR$/.test(x));
-
-//     for(const service of services) {
-//       const serviceName = service.split('_')[0];
-//       if (serviceName)
-//         result[serviceName] = await fetch(`${process.env[service]}/health`)
-//           .then((res) => res.text())
-//           .catch((err) => err.message);
-//         console.log("received response");
-//     }
-
-//     res.json(result);
-// });
-
 //expenses bar chart in user service
-app.use(
-  createProxyMiddleware({
-    pathFilter: ["/charts/expenses"],
-    target: process.env.USER_SERVICE_ADDR,
-    changeOrigin: true,
-  }),
-);
+// app.use(
+//   createProxyMiddleware({
+//     pathFilter: ["/charts/expenses"],
+//     target: process.env.USER_SERVICE_ADDR,
+//     changeOrigin: true,
+//   }),
+// );
 
 //transactions table in user service
-app.use(
-  createProxyMiddleware({
-    pathFilter: ["/table/transactions"],
-    target: process.env.USER_SERVICE_ADDR,
-    changeOrigin: true,
-  }),
-);
+// app.use(
+//   createProxyMiddleware({
+//     pathFilter: ["/table/transactions"],
+//     target: process.env.USER_SERVICE_ADDR,
+//     changeOrigin: true,
+//   }),
+// );
 
 //snapshot of total values like debt, savings, etc from user service
-app.use(
-  createProxyMiddleware({
-    pathFilter: ["/table/snapshot"],
-    target: process.env.USER_SERVICE_ADDR,
-    changeOrigin: true,
-  }),
-);
+// app.use(
+//   createProxyMiddleware({
+//     pathFilter: ["/table/snapshot"],
+//     target: process.env.USER_SERVICE_ADDR,
+//     changeOrigin: true,
+//   }),
+// );
 
 //savings chart from analytics service
 app.use(
@@ -140,6 +167,15 @@ app.use(
   createProxyMiddleware({
     pathFilter: ["/charts/budget-expenditure"],
     target: process.env.ANALYTICS_SERVICE_ADDR,
+    changeOrigin: true,
+  }),
+);
+
+// market search, quote, and history endpoints from market service
+app.use(
+  createProxyMiddleware({
+    pathFilter: ["/markets/search", "/markets/quote", "/markets/history"],
+    target: process.env.MARKET_SERVICE_ADDR,
     changeOrigin: true,
   }),
 );

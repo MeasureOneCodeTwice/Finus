@@ -20,6 +20,22 @@ accountsRouter.post("/", async (req: Request, res: Response) => {
     const { name, type, balance, value, subtype } = req.body;
     const last_updated = new Date();
 
+    if (!name || name.trim() === "") {
+      return res.status(400).json({ error: "Name is required" });
+    }
+
+    if (!type || typeof type !== "string") {
+      return res.status(400).json({ error: "Type is required" });
+    }
+
+    if (balance === undefined || balance === null || isNaN(balance)) {
+      return res.status(400).json({ error: "Balance is required" });
+    }
+
+    if (value === undefined || value === null || isNaN(value)) {
+      return res.status(400).json({ error: "Value is required" });
+    }
+
     let userId;
 
     try {
