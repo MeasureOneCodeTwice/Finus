@@ -7,6 +7,12 @@ variable "ssh_key_pair_name" {
 variable "security_group_ids" {
   type = list(string)
 }
+variable "webserver_security_group_ids" {
+  type = list(string)
+}
+variable "backend_security_group_ids" {
+  type = list(string)
+}
 variable "subnet_id" {
   type = string
 }
@@ -34,7 +40,7 @@ resource "aws_instance" "backend" {
   ami                    = data.aws_ami.amazon_linux.id
   subnet_id              = var.subnet_id
   key_name               = var.ssh_key_pair_name
-  vpc_security_group_ids = var.security_group_ids
+  vpc_security_group_ids = concat(var.security_group_ids, var.backend_security_group_ids)
 
   tags = {
     Name = join("", ["finus-", var.environment_name, "-backend"])
@@ -46,7 +52,7 @@ resource "aws_instance" "webserver" {
   ami                    = data.aws_ami.amazon_linux.id
   subnet_id              = var.subnet_id
   key_name               = var.ssh_key_pair_name
-  vpc_security_group_ids = var.security_group_ids
+  vpc_security_group_ids = concat(var.security_group_ids, var.webserver_security_group_ids)
 
   tags = {
     Name = join("", ["finus-", var.environment_name, "-webserver"])

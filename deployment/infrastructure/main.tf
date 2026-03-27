@@ -24,6 +24,34 @@ resource "aws_internet_gateway" "default" {
   vpc_id = aws_vpc.finus.id
 }
 
+resource "aws_security_group" "webserver" {
+  name   = "finus-webserver"
+  vpc_id = aws_vpc.finus.id
+
+  ingress {
+    description = "HTTP from anywhere"
+    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = "80"
+    to_port     = "80"
+    protocol    = "tcp"
+  }
+}
+
+resource "aws_security_group" "services" {
+  name   = "finus-services"
+  vpc_id = aws_vpc.finus.id
+
+  ingress {
+    description = "TCP 3000 from anywhere"
+    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = "3000"
+    to_port     = "3000"
+    protocol    = "tcp"
+  }
+}
+
+
+
 resource "aws_security_group" "default" {
   name   = "finus-default"
   vpc_id = aws_vpc.finus.id
@@ -66,24 +94,28 @@ resource "aws_route_table" "route_table" {
 module "prod" {
   source = "./modules/finus"
 
-  environment_name   = "prod"
-  ssh_key_pair_name  = "finus-dev"
-  security_group_ids = [aws_security_group.default.id]
-  subnet_id          = aws_subnet.prod.id
-  vpc_id             = aws_vpc.finus.id
-  gateway_id         = aws_internet_gateway.default.id
-  route_table_id     = aws_route_table.route_table.id
+  environment_name             = "prod"
+  ssh_key_pair_name            = "finus-dev"
+  security_group_ids           = [aws_security_group.default.id]
+  webserver_security_group_ids = [aws_security_group.webserver.id]
+  backend_security_group_ids   = [aws_security_group.services.id]
+  subnet_id                    = aws_subnet.prod.id
+  vpc_id                       = aws_vpc.finus.id
+  gateway_id                   = aws_internet_gateway.default.id
+  route_table_id               = aws_route_table.route_table.id
 }
 
 
 module "dev" {
   source = "./modules/finus"
 
-  environment_name   = "dev"
-  ssh_key_pair_name  = "finus-dev"
-  security_group_ids = [aws_security_group.default.id]
-  subnet_id          = aws_subnet.dev.id
-  vpc_id             = aws_vpc.finus.id
-  gateway_id         = aws_internet_gateway.default.id
-  route_table_id     = aws_route_table.route_table.id
+  environment_name             = "dev"
+  ssh_key_pair_name            = "finus-dev"
+  security_group_ids           = [aws_security_group.default.id]
+  webserver_security_group_ids = [aws_security_group.webserver.id]
+  backend_security_group_ids   = [aws_security_group.services.id]
+  subnet_id                    = aws_subnet.dev.id
+  vpc_id                       = aws_vpc.finus.id
+  gateway_id                   = aws_internet_gateway.default.id
+  route_table_id               = aws_route_table.route_table.id
 }
