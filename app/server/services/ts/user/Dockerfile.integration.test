@@ -6,4 +6,5 @@ WORKDIR /project
 COPY vitest.config.ts .
 
 ENV CI=true
-CMD ["bun", "run", "vitest", "--run", "integration"]
+
+CMD ["bun", "test", "integration", "--coverage"]

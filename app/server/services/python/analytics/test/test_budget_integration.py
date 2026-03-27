@@ -18,11 +18,15 @@ class TestBudgetIntegration:
             {'amount': 5000, 'category': 'salary', 'date': '2024-02-01'},
             {'amount': -250, 'category': 'groceries', 'date': '2024-02-02'},
         ]
+
+        mock_goals = []
         
-        with patch(
-            'src.logic.budget.get_user_transactions_with_connection',
-            return_value=mock_transactions
-        ):
+        with patch('src.logic.budget.get_user_transactions_with_connection') as mock_transactions_query, \
+             patch('src.logic.budget.get_user_goals') as mock_goals_query:
+            
+            mock_transactions_query.return_value = mock_transactions
+            mock_goals_query.return_value = mock_goals
+
             # Generate budget
             budget = generate_budget(period, user_id)
             

@@ -1,11 +1,34 @@
 from src.models.schemas import ProjectedSavingsRequest
 import pytest
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 from unittest.mock import patch, MagicMock
 from src.logic.savings import calculate_savings_over_time, calculate_compound_interest, generate_savings_growth_rate, compute_monthly_growth_rates, get_monthly_balances
 
 class TestSavings:
+
+    @pytest.fixture
+    def mock_savings_transactions(self):
+        base_date = pd.Timestamp('2024-03-15')
+        return [
+            {'financialAccount_id': 1, 'amount': 100, 'date': base_date - timedelta(days=5)},
+            {'financialAccount_id': 1, 'amount': 200, 'date': base_date - timedelta(days=10)},
+            {'financialAccount_id': 2, 'amount': -50, 'date': base_date - timedelta(days=7)},
+            {'financialAccount_id': 2, 'amount': 150, 'date': base_date - timedelta(days=15)},
+            {'financialAccount_id': 1, 'amount': -75, 'date': base_date - timedelta(days=20)},
+            {'financialAccount_id': 1, 'amount': -25, 'date': base_date - timedelta(days=5)},
+            {'financialAccount_id': 1, 'amount': -25, 'date': base_date - timedelta(days=5)},
+            {'financialAccount_id': 1, 'amount': 25, 'date': base_date},
+            {'financialAccount_id': 1, 'amount': 25, 'date': base_date},
+            {'financialAccount_id': 1, 'amount': 25, 'date': base_date - timedelta(days=62)},
+        ]
+    
+    @pytest.fixture
+    def mock_savings_accounts(self):
+        return [
+            {'id': 1, 'balance': 5000},
+            {'id': 2, 'balance': 3000},
+        ]
     
     def test_calculate_savings_over_time_weekly(self, mock_savings_accounts, mock_savings_transactions):
         end_date = pd.Timestamp('2024-03-15')
@@ -22,10 +45,9 @@ class TestSavings:
         
         assert 'labels' in result
         assert 'datasets' in result
-        assert len(result['labels']) == 8  # 7 days + 1? Check your implementation
+        assert len(result['labels']) == 8
         assert result['datasets'][0]['label'] == 'Weekly Savings'
-        
-        # Verify data is numeric
+
         for value in result['datasets'][0]['data']:
             assert isinstance(value, (int, float))
     

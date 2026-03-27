@@ -25,3 +25,38 @@ def get_user_transactions_with_connection(user_id: int, start_date: str, end_dat
     finally:
         cursor.close()
         connection.close()
+
+#this was added to make goals influence the budget - analytics service will fetch goals on its own
+def get_user_goals(user_id: int) -> List[Dict]:
+    """Fetch active goals for a user."""
+    connection = get_db_connection()
+    cursor = connection.cursor(dictionary=True)
+    
+    #first get the user's profile
+    cursor.execute("""
+        SELECT profile_id 
+        FROM finus.finusAccount_profile 
+        WHERE account_id = %s
+    """, (user_id,))
+    profile = cursor.fetchone()
+    
+    if not profile:
+        cursor.close()
+        connection.close()
+        return []
+    
+    profile_id = profile['profile_id']
+    
+    #fetch goals for this profile
+    cursor.execute("""
+        SELECT g.* 
+        FROM finus.goal g
+        JOIN finus.profile_goal pg ON g.id = pg.goal_id
+        WHERE pg.profile_id = %s
+    """, (profile_id,))
+    
+    goals = cursor.fetchall()
+    cursor.close()
+    connection.close()
+    
+    return goals

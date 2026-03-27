@@ -32,16 +32,7 @@ async def get_current_user(authorization: Optional[str] = Header(None)):
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id = payload.get('sub')
         
-        if not user_id:
-            raise HTTPException(status_code=401, detail="User ID not found in token")
-        
         return int(user_id)
-        
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token expired")
-    except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Invalid token")
-    except ValueError:
-        raise HTTPException(status_code=401, detail="Invalid authorization header format")
-    except TypeError as e:
-        raise HTTPException(status_code=401, detail=str(e))
+
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=str(e))#general exception for simpler unit
