@@ -60,5 +60,5 @@ export function validateTransactionForm(
 }
 
 export function validateIncomeForm(name: string, income: number) {
-  return name && income > 0;
+  return name.trim().length > 0 && income > 0;
 }
