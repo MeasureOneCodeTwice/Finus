@@ -1,5 +1,11 @@
 services:
-    user-input:
-      build:
-        context: .
-        dockerfile: Dockerfile.test
+  webserver-base:
+    image: finus-webserver-base:local
+    build:
+      dockerfile: Dockerfile.base
+
+  user-input:
+    build:
+      dockerfile: Dockerfile.test
+    depends_on: 
+      - webserver-base
