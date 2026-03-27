@@ -1,4 +1,4 @@
-import type { Goal } from "../types/Goals.ts";
+import type { Goal } from "../types/goals.ts";
 import { instance } from "./config";
 
 async function fetchGoals(): Promise<Goal[]> {

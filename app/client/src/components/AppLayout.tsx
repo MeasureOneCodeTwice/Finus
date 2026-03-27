@@ -4,7 +4,7 @@ import { IoCheckmarkCircleOutline, IoReorderThreeSharp } from "react-icons/io5";
 import NavBar from "./NavBar";
 import { SIDEBAR_WIDTH } from "../utils/constants";
 import GoalsPanel from "./GoalsPanel";
-import type { Goal } from "../types/Goals.ts";
+import type { Goal } from "../types/goals.ts";
 import {
   fetchGoals,
   createGoal,

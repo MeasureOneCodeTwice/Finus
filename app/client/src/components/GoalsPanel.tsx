@@ -1,52 +1,132 @@
 // This is just a goals panel that gets populated by user goals - for simplicity there are 5 goals per user for now
-import type { Goal, GoalsPanelProps } from "../types/Goals.ts";
+import type { Goal, GoalsPanelProps } from "../types/goals.ts";
 import { useState, useEffect, useRef, useReducer } from "react";
 
 //define the reducer - this is necessary because we need to track the edits in state even if the panel is closed
-type EditValuesState = {
-  [goalId: string]: {
-    name: string;
-    category: string;
-    type: string;
-    period: string;
-    target: number;
-  };
-};
+interface EditValueBase {
+  name: string;
+  category: string;
+  target: number;
+}
+
+interface EditValueReduceSpending extends EditValueBase {
+  type: "reduce_spending";
+  period: "m" | "w";
+}
+
+interface EditValueSave extends EditValueBase {
+  type: "save";
+  period?: "na";
+}
+
+type EditValue = EditValueReduceSpending | EditValueSave;
+type EditValuesState = Record<string, EditValue>;
 
 type EditValuesAction =
-  | { type: "INIT_GOAL"; payload: { goalId: string; goal: Goal } }
+  | {
+      type: "INIT_GOAL";
+      payload: { goalId: string; goal: Goal };
+    }
   | {
       type: "UPDATE_FIELD";
-      payload: { goalId: string; field: string; value: string | number };
-    }
-  | { type: "RESET" };
+      payload: {
+        goalId: string;
+        field: string;
+        value: string | number;
+      };
+    };
 
 function editValuesReducer(
   state: EditValuesState,
   action: EditValuesAction,
 ): EditValuesState {
   switch (action.type) {
-    case "INIT_GOAL":
-      // only initialize if it doesn't exist
-      if (state[action.payload.goalId]) return state;
+    case "INIT_GOAL": {
+      const { goalId, goal } = action.payload;
+      if (state[goalId]) return state;
+
+      const baseValues = {
+        name: goal.name || "",
+        category: goal.category || "",
+        target: goal.target || 0,
+      };
+
+      if (goal.type === "reduce_spending") {
+        return {
+          ...state,
+          [goalId]: {
+            ...baseValues,
+            type: "reduce_spending",
+            period: goal.period || "m",
+          },
+        };
+      } else {
+        // type === "save"
+        return {
+          ...state,
+          [goalId]: {
+            ...baseValues,
+            type: "save",
+            period: "na",
+          },
+        };
+      }
+    }
+
+    case "UPDATE_FIELD": {
+      const { goalId, field, value } = action.payload;
+      const current = state[goalId];
+      if (!current) return state;
+
+      // Handle field updates with type safety
+      if (field === "type") {
+        // When type changes, we need to restructure the edit value
+        if (value === "reduce_spending") {
+          return {
+            ...state,
+            [goalId]: {
+              name: current.name,
+              category: current.category,
+              target: current.target,
+              type: "reduce_spending",
+              period: "m", // default period
+            } as EditValueReduceSpending,
+          };
+        } else {
+          return {
+            ...state,
+            [goalId]: {
+              name: current.name,
+              category: current.category,
+              target: current.target,
+              type: "save",
+              period: "na",
+            } as EditValueSave,
+          };
+        }
+      }
+
+      // For other fields, preserve the type
+      if (field === "period" && current.type === "reduce_spending") {
+        return {
+          ...state,
+          [goalId]: {
+            ...current,
+            period: value as "m" | "w",
+          },
+        };
+      }
+
+      // Generic field update
       return {
         ...state,
-        [action.payload.goalId]: {
-          name: action.payload.goal.name || "",
-          category: action.payload.goal.category || "",
-          type: action.payload.goal.type || "reduce_spending",
-          period: action.payload.goal.period || "m",
-          target: action.payload.goal.target || 0,
+        [goalId]: {
+          ...current,
+          [field]: value,
         },
       };
-    case "UPDATE_FIELD":
-      return {
-        ...state,
-        [action.payload.goalId]: {
-          ...state[action.payload.goalId],
-          [action.payload.field]: action.payload.value,
-        },
-      };
+    }
+
     default:
       return state;
   }
@@ -67,7 +147,7 @@ function GoalsPanel({
   //initialize edit values when a goal expands
   useEffect(() => {
     if (expandedGoalId) {
-      const goal = goals.find((g) => g.id === expandedGoalId);
+      const goal = goals.find((g: Goal) => g.id === expandedGoalId);
       if (goal && !initializedGoals.current.has(expandedGoalId)) {
         initializedGoals.current.add(expandedGoalId);
         dispatch({
@@ -121,7 +201,7 @@ function GoalsPanel({
 
   //saves the edits in state even of the panel closes
   const hasUnsavedChanges = (goalId: string): boolean => {
-    const goal = goals.find((g) => g.id === goalId);
+    const goal = goals.find((g: Goal) => g.id === goalId);
     const edits = editValues[goalId];
     if (!goal || !edits) return false;
 
@@ -144,7 +224,7 @@ function GoalsPanel({
       </div>
 
       <div className="space-y-3 max-h-[calc(80vh-120px)] overflow-y-auto">
-        {goals.map((goal) => {
+        {goals.map((goal: Goal) => {
           const progress = goal.progress_percentage;
           const isExpanded = expandedGoalId === goal.id;
           const currentEdits = editValues[goal.id];
