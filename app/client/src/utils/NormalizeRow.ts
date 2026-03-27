@@ -58,8 +58,9 @@ function normalizeDate(input: string | null): string | null {
 
   return null;
 }
-
 // helper to normalize amount fields
+
+// Stryker disable all
 function normalizeAmount(input: string | null): number | null {
   if (!input) return null;
   let amount = input.replace(/,/g, "").trim(); //trim

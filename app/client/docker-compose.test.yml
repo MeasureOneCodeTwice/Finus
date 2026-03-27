@@ -1,0 +1,21 @@
+services:
+  webserver-base:
+    image: finus-webserver-base:local
+    build:
+      dockerfile: Dockerfile.base
+
+  user-input:
+    build:
+      dockerfile: Dockerfile.test
+    depends_on:
+      - webserver-base
+
+  mutation-tests:
+    build:
+      context: .
+      dockerfile: Dockerfile.mutation.test
+    depends_on:
+      - webserver-base
+    volumes:
+      - .:/app/client
+    working_dir: /app/client

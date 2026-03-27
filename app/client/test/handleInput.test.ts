@@ -90,3 +90,48 @@ describe("handleCurrencyBlur", () => {
     expect(setCurrency).toHaveBeenCalledWith("45.00");
   });
 });
+
+it("accepts whole numbers without decimals", () => {
+  const setCurrency = vi.fn();
+  const event = mockEvent("45");
+
+  handleCurrencyChange(event, setCurrency);
+
+  expect(setCurrency).toHaveBeenCalledWith("45");
+});
+
+it("does not accept whitespace-only input", () => {
+  const setCurrency = vi.fn();
+  const event = mockEvent("   ");
+
+  handleCurrencyChange(event, setCurrency);
+
+  expect(setCurrency).not.toHaveBeenCalled();
+});
+
+it("rejects non-empty strings that are not valid currency", () => {
+  const setCurrency = vi.fn();
+  const event = mockEvent("Stryker was here!");
+
+  handleCurrencyChange(event, setCurrency);
+
+  expect(setCurrency).not.toHaveBeenCalled();
+});
+
+it("does not strip non-leading zeros", () => {
+  const setCurrency = vi.fn();
+  const event = mockEvent("10.20");
+
+  handleCurrencyChange(event, setCurrency);
+
+  expect(setCurrency).toHaveBeenCalledWith("10.20");
+});
+
+it("does not strip zeros inside the number", () => {
+  const setCurrency = vi.fn();
+  const event = mockEvent("101");
+
+  handleCurrencyChange(event, setCurrency);
+
+  expect(setCurrency).toHaveBeenCalledWith("101");
+});

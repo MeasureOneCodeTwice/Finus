@@ -1,6 +1,7 @@
 import { Sidebar } from "react-pro-sidebar";
 import { Link, useLocation } from "react-router-dom";
 import { CgHome } from "react-icons/cg";
+import { MdCandlestickChart } from "react-icons/md";
 import { FaSignOutAlt, FaTimes } from "react-icons/fa";
 import { SIDEBAR_WIDTH } from "@/utils/constants";
 type NavigationBarProps = {
@@ -12,7 +13,10 @@ function NavBar({ isOpen, onClose, onLogout }: NavigationBarProps) {
   const location = useLocation();
   if (!isOpen) return null;
 
-  const navItems = [{ to: "/dashboard", label: "Dashboard", icon: <CgHome /> }];
+  const navItems = [
+    { to: "/dashboard", label: "Dashboard", icon: <CgHome /> },
+    { to: "/markets", label: "Markets", icon: <MdCandlestickChart /> },
+  ];
 
   return (
     <>
