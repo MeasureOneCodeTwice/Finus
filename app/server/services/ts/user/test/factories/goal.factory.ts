@@ -26,21 +26,6 @@ export function createMockReduceSpendingGoal(overrides?: Partial<Goal>): Goal {
   };
 }
 
-// export function createMockGoalWithProgress(overrides?: Partial<GoalWithProgress>): GoalWithProgress {
-//   return {
-//     id: 1,
-//     profile_id: 1,
-//     name: "Save for Vacation",
-//     type: "save",
-//     category: "vacation",
-//     target: 1000,
-//     current_amount: 250,
-//     progress_percentage: 25,
-//     period : "na",
-//     ...overrides,
-//   };
-// }
-
 export function createMockGoals(count: number = 3): Goal[] {
   return Array.from({ length: count }, (_, i) => ({
     id: i + 1,
@@ -61,7 +46,7 @@ export function createMockCreateGoalInput(
   overrides?: Partial<CreateGoalInput>,
 ): CreateGoalInput {
   return {
-    name: "New Goal",
+    name: "Save for Vacation",
     type: "save",
     category: "travel",
     target: 500,

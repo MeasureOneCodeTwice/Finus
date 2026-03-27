@@ -148,12 +148,25 @@ app.get("/goals", async (req: express.Request, res: express.Response) => {
 // POST create new goal
 app.post("/goals", async (req: express.Request, res: express.Response) => {
   try {
+    // const userId = authenticateJWT(req);
+    // const name = req.body.name;
+    // const type = req.body.type;
+    // const category = req.body.category;
+    // const target = req.body.target;
+    // const period = req.body.period;
+
     const userId = authenticateJWT(req);
-    const name = req.body.name;
-    const type = req.body.type;
-    const category = req.body.category;
-    const target = req.body.target;
-    const period = req.body.period;
+    let name = null;
+    let type = null;
+    let category = null;
+    let target = null;
+    let period = null;
+
+    if (req.body.name) name = req.body.name;
+    if (req.body.type) type = req.body.type;
+    if (req.body.category) category = req.body.category;
+    if (req.body.target) target = req.body.target;
+    if (req.body.period) period = req.body.period;
 
     if (!name || !type || !target || !period) {
       return res.status(400).json({ error: "Missing required fields" });
@@ -188,7 +201,14 @@ app.post("/goals", async (req: express.Request, res: express.Response) => {
 app.patch("/goals", async (req: express.Request, res: express.Response) => {
   try {
     const userId = authenticateJWT(req);
-    const goalId = parseInt(req.query.gid);
+    // const goalId = parseInt(req.query.gid);
+    let goalId = null;
+
+    if (req.query.gid) goalId = parseInt(req.query.gid);
+
+    if (!goalId) {
+      return res.status(404).json({ error: "Missing goal ID" });
+    }
 
     //verify goal exists and belongs to user
     const existingGoal = await getUserGoalById(pool, goalId, userId);
@@ -246,7 +266,15 @@ app.patch("/goals", async (req: express.Request, res: express.Response) => {
 app.delete("/goals", async (req: express.Request, res: express.Response) => {
   try {
     const userId = authenticateJWT(req);
-    const goalId = parseInt(req.query.gid);
+    // const goalId = parseInt(req.query.gid);
+
+    let goalId = null;
+
+    if (req.query.gid) goalId = parseInt(req.query.gid);
+
+    if (!goalId) {
+      return res.status(404).json({ error: "Missing goal ID" });
+    }
 
     const deleted = await deleteUserGoal(pool, goalId, userId);
     if (!deleted) {

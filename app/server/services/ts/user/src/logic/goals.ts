@@ -11,7 +11,7 @@ import type {
 const MAX_GOALS_PER_PROFILE = 5;
 
 //get current spending/achievement for a goal based on transactions
-async function calculateCurrentAmount(
+export async function calculateCurrentAmount(
   pool: Pool,
   goal: Goal,
   profileId: number | null,

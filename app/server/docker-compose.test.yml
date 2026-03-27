@@ -2,7 +2,7 @@
 #It depends on the main compose file being built
 #as all the test images inherit from the regular images.
 #you can use the following command to run the tests
-#docker compose build -q && docker compose -f docker-compose.test.yml build -q && docker compose -f docker-compose.test.yml up --abort-on-container-failure
+#docker compose build -q && docker compose -f docker-compose.yml -f docker-compose.test.yml build -q && docker compose -f docker-compose.yml -f docker-compose.test.yml up --abort-on-container-failure
 services:
     auth-test:
       build: 
@@ -18,3 +18,23 @@ services:
       build: 
         context: services/python/analytics
         dockerfile: Dockerfile.test
+
+    user-integration-test:
+      build:
+        context: ./services/ts
+        dockerfile: user/Dockerfile.integration.test
+      env_file:
+        - ./default_container.env
+      environment:
+        - JWT_SECRET
+         
+      depends_on:
+        database:
+          condition: service_healthy
+        api-gateway: 
+          condition: service_started
+
+    user-mutation-test:
+      build:
+        context: ./services/ts
+        dockerfile: user/Dockerfile.mutation.test

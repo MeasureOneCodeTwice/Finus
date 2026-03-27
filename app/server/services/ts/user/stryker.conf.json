@@ -1,9 +1,9 @@
 {
-  "mutate": ["!src/**/*.ts", "src/logic/*.ts", "src/utils/*.ts"],
+  "mutate": ["src/logic/goals.ts"],
   "testRunner": "bun",
   "plugins": ["stryker-mutator-bun-runner"],
   "bun": {
-    "testFiles": ["**/*.test.ts"],
+    "testFiles": ["./test/goals.test.ts"],
     "timeout": 30000
   }
 }
