@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [ "*" ]
   push:
-    branches: [ "main", "development", "release/*", "feature-stock-tracking" ]
+    branches: [ "main", "development", "release/*", "feature-stock-tracking", "development-combined" ]
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
