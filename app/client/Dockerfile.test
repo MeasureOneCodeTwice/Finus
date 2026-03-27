@@ -1,8 +1,8 @@
-FROM finus-webserver:local
+FROM finus-webserver-base:local
 
 COPY test ./test
 COPY vitest.config.ts .
 
 ENV CI=true
 
-CMD ["bun", "run", "vitest", "--run"]
+ENTRYPOINT ["bun", "run", "vitest", "--run"]
