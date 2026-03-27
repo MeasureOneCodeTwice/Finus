@@ -36,13 +36,14 @@ export default function PopupForm({
     let interest = undefined;
     const accountBalance = Number(balance);
 
-    if ((accountType === "SAVING" || accountType === "CREDIT_CARD") && formInput.subType) {
+    if (
+      (accountType === "SAVING" || accountType === "CREDIT_CARD") &&
+      formInput.subType
+    ) {
       subtype = formInput.subType;
     }
 
-    if (
-      accountType === accountCategory.SAVING
-    ) {
+    if (accountType === accountCategory.SAVING) {
       interest = formInput.interest;
     }
 
@@ -62,7 +63,7 @@ export default function PopupForm({
       const newAccount: Account = {
         id: 0,
         name: formInput.name,
-        type: accountCategory[accountType],
+        type: accountType,
         balance: accountBalance,
         subtype: subtype,
         value: 0,
@@ -161,6 +162,7 @@ export default function PopupForm({
   const [accountType, setAccountType] = useState<typeofAccount | undefined>(
     () => {
       if (edit && selectedAccount) {
+        console.log(selectedAccount.type);
         return selectedAccount.type as typeofAccount;
       } else {
         //Default value
@@ -200,7 +202,7 @@ export default function PopupForm({
           >
             <option value="">Select Account type</option>
             {accountCat.map((category) => (
-              <option key={category} value={category}>
+              <option key={category} value={accountCategory[category]}>
                 {accountCategory[category]}
               </option>
             ))}
@@ -219,12 +221,19 @@ export default function PopupForm({
             placeholder="0.00"
           />
           <br></br>
-          
 
-          {accountType === "SAVING" ? (
+          {accountType === accountCategory.SAVING ? (
             <>
               <label htmlFor="subType">Type of saving account</label>
-              <select id="subType" name="subType" onChange={handleChange}>
+              <select
+                id="subType"
+                value={formInput.subType}
+                name="subType"
+                onChange={(event) => {
+                  handleChange(event);
+                  setFormInput({ ...formInput, ["subType"]: "" });
+                }}
+              >
                 <option value="">Select saving type</option>
                 <option value="TFSA">TFSA</option>
                 <option value="RRSP">RRSP</option>
@@ -239,14 +248,17 @@ export default function PopupForm({
           {accountType === "CREDIT_CARD" ? (
             <>
               <label htmlFor="subType">Type of credit:</label>
-              <select id="subType" name="subType" onChange={handleChange}>
-                <option value = "">Select subtype</option>
-                <option value ="Loan">Loan</option>
+              <select
+                id="subType"
+                name="subType"
+                value={formInput.subType}
+                onChange={handleChange}
+              >
+                <option value="">Select subtype</option>
+                <option value="Loan">Loan</option>
               </select>
-
             </>
-
-          ):null}
+          ) : null}
 
           <div className="bottomButtons">
             <button onClick={toggle}>Close</button>

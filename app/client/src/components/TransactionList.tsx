@@ -86,7 +86,13 @@ export default function TransactionList({ session }: listProp) {
     <>
       <div>
         <div>
-        <SelectAccount accounts={userAccounts} selectedAccount={selectedAccount} setSelectedAccount={setSelectedAccount}/>
+          <SelectAccount
+            accounts={userAccounts}
+            selectedAccount={selectedAccount}
+            handleSelectAccount={(
+              event: React.ChangeEvent<HTMLSelectElement>,
+            ) => setSelectedAccount(Number(event.target.value))}
+          />
         </div>
 
         <div>

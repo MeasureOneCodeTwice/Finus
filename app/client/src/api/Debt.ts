@@ -1,8 +1,7 @@
-import type {DebtPayoffResponse } from "../types/responseTypes";
+import type { DebtPayoffResponse } from "../types/responseTypes";
 import type { AuthSession } from "@/types/authTypes";
 import type { Account } from "@/types/AccountType";
 import type { projectionDebtRequest } from "@/types/requestTypes";
-
 
 const requestUrl = "http://localhost:3000/api/debts";
 
@@ -30,10 +29,13 @@ export async function getDebt(session: AuthSession): Promise<Account[]> {
 }
 
 //Post request, even tho it says get in the function
-export async function getDebtProjection(session: AuthSession, request:projectionDebtRequest ): Promise<DebtPayoffResponse>{
-  const url = requestUrl + "/predict-payoff"
-  
-    try {
+export async function getDebtProjection(
+  session: AuthSession,
+  request: projectionDebtRequest,
+): Promise<DebtPayoffResponse> {
+  const url = "http://localhost:3000/predict-debt-payoff";
+
+  try {
     //Create post request and wait for response
     const response = await fetch(url, {
       method: "POST",
@@ -49,11 +51,9 @@ export async function getDebtProjection(session: AuthSession, request:projection
       console.error(response.status);
     }
 
-    return response.json()
+    return response.json();
   } catch (error) {
     console.error(error);
     throw error;
   }
-
-
 }

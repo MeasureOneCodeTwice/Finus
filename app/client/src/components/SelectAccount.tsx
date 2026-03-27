@@ -1,30 +1,34 @@
 import type { Account } from "@/types/AccountType";
-import React, {type SetStateAction } from "react";
+import React from "react";
 
-interface selectProp{
-    accounts: Account[]
-    selectedAccount: number
-    setSelectedAccount: React.Dispatch<SetStateAction<number>>
+interface selectProp {
+  accounts: Account[];
+  selectedAccount: number;
+  handleSelectAccount: (event: React.ChangeEvent<HTMLSelectElement>) => void;
 }
 
-export default function SelectAccount({accounts, selectedAccount, setSelectedAccount}:selectProp){
-    console.log(accounts)
-    return(
-        <>
-        <label htmlFor="selectAccount">User Account:</label>
-          <select
-            id="selectAccount"
-            value={selectedAccount}
-            onChange={(event) => setSelectedAccount(Number(event.target.value))}
-          >
-            <option value="">Select Account</option>
-            {accounts &&
-              accounts.map((account) => (
-                <option key={account.id} value={account.id}>
-                  {account.name} ({account.type})
-                </option>
-              ))}
-          </select>
-        </>
-    )
+export default function SelectAccount({
+  accounts,
+  selectedAccount,
+  handleSelectAccount,
+}: selectProp) {
+  console.log(accounts);
+  return (
+    <>
+      <label htmlFor="selectAccount">User Account:</label>
+      <select
+        id="selectAccount"
+        value={selectedAccount}
+        onChange={handleSelectAccount}
+      >
+        <option value="">Select Account</option>
+        {accounts &&
+          accounts.map((account) => (
+            <option key={account.id} value={account.id}>
+              {account.name} ({account.type})
+            </option>
+          ))}
+      </select>
+    </>
+  );
 }

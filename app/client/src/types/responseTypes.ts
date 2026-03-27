@@ -5,10 +5,14 @@ export interface updateResponse {
 }
 
 export interface projectedDataResponse {
-  dataPoint: number[];
+  lineInfo: LineInfo[];
   dateLabel: string[];
 }
 
+export interface LineInfo {
+  data: number[];
+  name: string;
+}
 
 export type DebtPayoffResponse = {
   id: string;
@@ -19,9 +23,16 @@ export type DebtPayoffResponse = {
 };
 
 export type AdvancedDebtStage = {
-  id: number
+  id: number;
   principalAmount: number;
   interestAmount: number;
   remainingDebt: number;
   installmentDate: string; // YYYY-MM-DD
 };
+
+export interface savingProjectionResponseData {
+  accumulative_best_balance: number;
+  accumlative_expected_balance: number;
+  accumulative_worst_balence: number;
+  date: string;
+}

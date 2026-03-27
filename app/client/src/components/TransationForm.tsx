@@ -9,7 +9,7 @@ import { type Transaction } from "../types/Transaction";
 import { type Account } from "@/types/AccountType";
 import { transactionCategory } from "@/enum/TransactionCategory";
 import type { AuthSession } from "@/types/authTypes";
-import SelectAccount from "@/components/SelectAccount"
+import SelectAccount from "@/components/SelectAccount";
 
 interface popupProp {
   toggle: () => void;
@@ -218,8 +218,16 @@ export default function PopupForm({
         <div className="popupForm">
           {edit ? <h2>Edit Transaction</h2> : <h2>Create Transaction</h2>}
 
-          {account && <SelectAccount accounts={account} selectedAccount={selectedAccount} setSelectedAccount={setSelectedAccount}/>}
-         
+          {account && (
+            <SelectAccount
+              accounts={account}
+              selectedAccount={selectedAccount}
+              handleSelectAccount={(
+                event: React.ChangeEvent<HTMLSelectElement>,
+              ) => setSelectedAccount(Number(event.target.value))}
+            />
+          )}
+
           <br></br>
 
           {selectedType == transactionCategory.INCOME ? (

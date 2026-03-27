@@ -1,9 +1,8 @@
 import { type Account } from "@/types/AccountType";
-import {type  AuthSession } from "@/types/authTypes";
+import { type AuthSession } from "@/types/authTypes";
 import type { projectionSavingRequest } from "@/types/requestTypes";
-import {type projectedDataResponse } from "@/types/responseTypes";
+import { type savingProjectionResponseData } from "@/types/responseTypes";
 const requestUrl = "http://localhost:3000/api/savings";
-
 
 //Sends a request to get different debts the user has
 export async function getSaving(session: AuthSession): Promise<Account[]> {
@@ -29,11 +28,13 @@ export async function getSaving(session: AuthSession): Promise<Account[]> {
 }
 
 //Post request, even tho it says get in the function
-export async function getSavingProjection(session: AuthSession, request:projectionSavingRequest ): Promise<projectedDataResponse>{
-  const url = requestUrl + "/projected"
-  console.log(url)
-  
-    try {
+export async function getSavingProjection(
+  session: AuthSession,
+  request: projectionSavingRequest,
+): Promise<savingProjectionResponseData[]> {
+  const url = "http://localhost:3000/compound-interest";
+
+  try {
     //Create post request and wait for response
     const response = await fetch(url, {
       method: "POST",
@@ -47,9 +48,9 @@ export async function getSavingProjection(session: AuthSession, request:projecti
     //Determine if our post was a success
     if (!response.ok) {
       console.error(response.status);
-      throw new Error("Failed to get projection for saving")
+      return [];
     }
-    console.log(response)
+    console.log(response);
 
     return response.json();
   } catch (error) {
