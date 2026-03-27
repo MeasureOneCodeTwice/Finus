@@ -84,3 +84,86 @@ export async function createAuthenticatedAccount(
 
   throw new Error(`Timed out creating authenticated account: ${lastFailure}`);
 }
+
+export interface GoalData {
+  name: string;
+  type: "save" | "reduce_spending";
+  category: string;
+  target: number;
+  period?: "w" | "m";
+}
+
+export async function createGoal(
+  baseUrl: string,
+  token: string,
+  goalData: GoalData,
+) {
+  const response = await request(baseUrl)
+    .post("/goals")
+    .set("Authorization", `Bearer ${token}`)
+    .send(goalData);
+
+  if (response.status !== 201) {
+    throw new Error(
+      `Failed to create goal: ${response.status} ${JSON.stringify(response.body)}`,
+    );
+  }
+
+  return response.body;
+}
+
+export async function createMultipleGoals(
+  baseUrl: string,
+  token: string,
+  goalsData: GoalData[],
+) {
+  const createdGoals = [];
+  for (const goalData of goalsData) {
+    const goal = await createGoal(baseUrl, token, goalData);
+    createdGoals.push(goal);
+  }
+  return createdGoals;
+}
+
+export async function deleteAllGoals(baseUrl: string, token: string) {
+  // Fetch all goals
+  const listRes = await request(baseUrl)
+    .get("/goals")
+    .set("Authorization", `Bearer ${token}`);
+
+  if (listRes.status === 200 && Array.isArray(listRes.body)) {
+    // Delete each goal
+    for (const goal of listRes.body) {
+      await request(baseUrl)
+        .delete(`/goals?gid=${goal.id}`)
+        .set("Authorization", `Bearer ${token}`);
+    }
+  }
+}
+
+export async function setupUserWithGoals(
+  baseUrl: string,
+  prefix: string,
+  goalsData: GoalData[],
+) {
+  // First create the user account
+  const { token } = await createAuthenticatedAccount(baseUrl, prefix, {
+    name: "Test Account",
+    type: "chequing",
+    balance: 5000,
+    value: 5000,
+    subtype: "na",
+  });
+
+  // Clean up any existing goals (in case of leftover data)
+  await deleteAllGoals(baseUrl, token);
+
+  // Create the specified goals
+  const createdGoals = await createMultipleGoals(baseUrl, token, goalsData);
+
+  return {
+    token,
+    goals: createdGoals,
+    deleteAllGoals: () => deleteAllGoals(baseUrl, token),
+  };
+}
