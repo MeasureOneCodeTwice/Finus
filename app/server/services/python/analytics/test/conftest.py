@@ -1,7 +1,8 @@
 import pytest
+import pandas as pd
 from unittest.mock import patch, MagicMock
 from datetime import datetime, timedelta
-from src.models.schemas import BudgetCategory, BudgetResponse
+from src.models.schemas import BudgetCategory, BudgetResponse, DebtPayoffRequest
 from src.utils.trans_cat_classifier import CategoryClassifier
 import jwt
 import os
@@ -79,6 +80,13 @@ def mock_savings_transactions():
         {'financialAccount_id': 2, 'amount': 150, 'date': base_date + timedelta(days=15)},
         {'financialAccount_id': 1, 'amount': -75, 'date': base_date + timedelta(days=20)},
     ]
+@pytest.fixture
+def mock_savings_transactions_by_financial_account():
+    return pd.DataFrame([
+        {"financialAccountId": "1", "date": "2026-01-10", "amount": 100},
+        {"financialAccountId": "1", "date": "2025-01-20", "amount": 50},
+        {"financialAccountId": "1", "date": "2026-02-01", "amount": 200},
+    ])
 
 @pytest.fixture
 def mock_incomeflow_transactions():
@@ -95,7 +103,35 @@ def mock_incomeflow_transactions():
         {'amount': -100, 'category': 'entertainment', 'date': base_date + timedelta(days=8)},
         {'amount': -400, 'category': 'utilities', 'date': base_date + timedelta(days=12)},
     ]
+@pytest.fixture
+def mock_transactions_with_same_amount():
+    return [
+        {"date": "2026-01-01", "amount": 100},
+        {"date": "2026-02-01", "amount": 100},
+        {"date": "2026-03-01", "amount": 100},
+        {"date": "2026-04-01", "amount": 100},
+        {"date": "2026-05-01", "amount": 100},
+    ]
 
+@pytest.fixture
+def mock_monthly_diff():
+    return pd.DataFrame({
+        "month": [1, 2, 3],
+        "amount": [0, 0, 100],
+        "balance": [0, 0, 100]
+    })
+
+@pytest.fixture
+def mock_debt_payoff_request():
+    return DebtPayoffRequest(
+        id="1",
+        category="credit_card",
+        remainingAmount=1000.0,
+        minimumPayment=200.0,
+        interestRate=12.0,
+        nextDueDate="2024-01-01",
+        period=30
+    )
 
 @pytest.fixture
 def mock_env_vars():

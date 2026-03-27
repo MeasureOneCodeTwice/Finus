@@ -119,11 +119,11 @@ def compute_monthly_growth_rates(monthly_df: pd.DataFrame):
     # Compute increase rate between months
     monthly_df['growth_rate'] = monthly_df['balance'].pct_change()
 
+    # Replace inf and -inf with NaN and drop NaN
+    monthly_df['growth_rate'].replace([np.inf, -np.inf], np.nan, inplace=True)
+
     # Replace NaN with 0
     monthly_df['growth_rate'].fillna(0, inplace=True)
-
-    # Replace inf and -inf with NaN and drop NaN
-    monthly_df['growth_rate'] = monthly_df['growth_rate'].replace([np.inf, -np.inf], np.nan).dropna()
 
     growth_rates = monthly_df['growth_rate']
     growth_rates = growth_rates.round(3)
@@ -138,7 +138,6 @@ def generate_savings_growth_rate(transactions: List[Dict]) -> MonthlySavingGrowt
 
     monthly_balances = get_monthly_balances(df)
     growth_rates = compute_monthly_growth_rates(monthly_balances)
-    print("Growth rates: \n", growth_rates)
 
     mean_growth = growth_rates.mean()
     standard_deviation_growth = growth_rates.std()
