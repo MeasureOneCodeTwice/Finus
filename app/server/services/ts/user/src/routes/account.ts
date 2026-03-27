@@ -3,7 +3,11 @@
 //TODO import db connection
 import { Router } from "express";
 import type { Request, Response } from "express";
-import type { ResultSetHeader, PoolConnection } from "mysql2/promise";
+import type {
+  ResultSetHeader,
+  PoolConnection,
+  RowDataPacket,
+} from "mysql2/promise";
 import type { financialAccount } from "@/types.js";
 import { authenticateJWT } from "../handleJWT.js";
 import { checkUserId } from "../CheckUser.ts";
@@ -48,6 +52,18 @@ accountsRouter.post("/", async (req: Request, res: Response) => {
         .json({ error: "Not authorized to create an account" });
     }
 
+    //need the user account's profile id first. This should be just a single item returned unless stretch feature 7 is implemented
+    const [profileRows] = await connection.query(
+      `SELECT profile_id FROM finusAccount_profile WHERE account_id = ?`,
+      [userId],
+    );
+
+    if (!profileRows || (profileRows as RowDataPacket[]).length === 0) {
+      return res.status(404).json({ error: "User profile not found" });
+    }
+
+    const profileId = (profileRows as RowDataPacket[])[0].profile_id;
+
     const [result] = await connection.query<ResultSetHeader>(
       `INSERT INTO financialAccount (name, type, balance, value, last_updated, subtype)
        VALUES (?, ?, ?, ?, ?, ?)`,
@@ -56,8 +72,8 @@ accountsRouter.post("/", async (req: Request, res: Response) => {
 
     await connection.query(
       `INSERT INTO profile_financialAccount (profile_id, financialAccount_id)
-      VALUES (?,?)`,
-      [userId, result.insertId],
+      VALUES (?, ?)`,
+      [profileId, result.insertId],
     );
 
     console.log("Created account " + name);
@@ -89,11 +105,24 @@ accountsRouter.get("/", async (req: Request, res: Response) => {
   if (userId) {
     try {
       connection = await pool.getConnection();
+
+      //need the user account's profile id first. This should be just a single item returned unless stretch feature 7 is implemented
+      const [profileRows] = await connection.query(
+        `SELECT profile_id FROM finusAccount_profile WHERE account_id = ?`,
+        [userId],
+      );
+
+      if (!profileRows || (profileRows as RowDataPacket[]).length === 0) {
+        return res.status(404).json({ error: "User profile not found" });
+      }
+
+      const profileId = (profileRows as RowDataPacket[])[0].profile_id;
+
       const [rows] = await connection.query<financialAccount[]>(
         `SELECT * FROM financialAccount JOIN profile_financialAccount pfa 
         ON financialAccount.id = pfa.financialAccount_id
         WHERE pfa.profile_id = ?`,
-        [userId],
+        [profileId],
       );
 
       console.log(rows);
