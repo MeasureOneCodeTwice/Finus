@@ -28,7 +28,12 @@ export default function SelectAccount({
           accounts.map((account) => (
             <option key={account.id} value={account.id}>
               {account.name} (
-              {accountCategory[account.type as keyof typeof accountCategory]})
+              {
+                accountCategory[
+                  account.type.toUpperCase() as keyof typeof accountCategory
+                ]
+              }
+              )
             </option>
           ))}
       </select>
