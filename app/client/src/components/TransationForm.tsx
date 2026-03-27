@@ -216,7 +216,11 @@ export default function PopupForm({
     <>
       <div className="popup">
         <div className="popupForm">
-          {edit ? <h2>Edit Transaction</h2> : <h2>Create Transaction</h2>}
+          {edit ? (
+            <h2 className="formH2">Edit Transaction</h2>
+          ) : (
+            <h2 className="formH2">Create Transaction</h2>
+          )}
 
           {account && (
             <SelectAccount
@@ -239,6 +243,7 @@ export default function PopupForm({
             id="other"
             type="text"
             value={other}
+            className="formInput"
             onChange={(event) => setOther(event.target.value)}
           ></input>
           <br></br>
@@ -247,6 +252,7 @@ export default function PopupForm({
           <select
             id="transferType"
             value={selectedType}
+            className="formSelect"
             onChange={(event) =>
               setSelectedType(event.target.value as typeOfTransaction)
             }
@@ -260,9 +266,9 @@ export default function PopupForm({
           </select>
           <br></br>
 
-          <label htmlFor="amount">Amount: $</label>
+          <label htmlFor="amount">Amount:$</label>
           <input
-            className="moneyInput"
+            className="formInput"
             min="0"
             step={"0.01"}
             type="text"
@@ -279,6 +285,7 @@ export default function PopupForm({
             type="date"
             id="inputDate"
             name="inputDate"
+            className="formInput"
             value={selectedDate}
             onChange={(event) => setSelectedDate(event.target.value)}
           />

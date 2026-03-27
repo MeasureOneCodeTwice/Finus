@@ -52,6 +52,7 @@ export default function ProjectionGraph({ data, name }: graphProp) {
     },
   };
 
+  console.log(data);
   const chartData: ChartData<"line"> = {
     labels: data.dateLabel,
     datasets: data.lineInfo.map((line, index) => ({

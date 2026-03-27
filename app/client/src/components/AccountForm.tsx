@@ -179,13 +179,18 @@ export default function PopupForm({
     <>
       <div className="popup">
         <div className="popupForm">
-          {edit ? <h2>Edit Account</h2> : <h2>Create Account</h2>}
+          {edit ? (
+            <h2 className="formH2">Edit Account</h2>
+          ) : (
+            <h2 className="formH2">Create Account</h2>
+          )}
 
           <label htmlFor="name">Account Name:</label>
           <input
             type="text"
             name="name"
             value={formInput.name}
+            className="formInput"
             onChange={handleChange}
             placeholder="Enter account name"
           />
@@ -196,6 +201,7 @@ export default function PopupForm({
             value={accountType}
             id="type"
             name="type"
+            className="formSelect"
             onChange={(event) =>
               setAccountType(event.target.value as typeofAccount)
             }
@@ -215,6 +221,7 @@ export default function PopupForm({
             min="0"
             step="0.01"
             name="balance"
+            className="formInput"
             value={balance}
             onChange={(event) => handleCurrencyChange(event, setBalance)}
             onBlur={(event) => handleCurrencyBlur(event, balance, setBalance)}
@@ -229,6 +236,7 @@ export default function PopupForm({
                 id="subType"
                 value={formInput.subType}
                 name="subType"
+                className="formSelect"
                 onChange={(event) => {
                   handleChange(event);
                   setFormInput({ ...formInput, ["subType"]: "" });
@@ -245,12 +253,13 @@ export default function PopupForm({
             </>
           ) : null}
 
-          {accountType === "CREDIT_CARD" ? (
+          {accountType === accountCategory.CREDIT_CARD ? (
             <>
               <label htmlFor="subType">Type of credit:</label>
               <select
                 id="subType"
                 name="subType"
+                className="formSelect"
                 value={formInput.subType}
                 onChange={handleChange}
               >

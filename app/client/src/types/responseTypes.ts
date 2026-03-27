@@ -32,7 +32,7 @@ export type AdvancedDebtStage = {
 
 export interface savingProjectionResponseData {
   accumulative_best_balance: number;
-  accumlative_expected_balance: number;
-  accumulative_worst_balence: number;
+  accumulative_expected_balance: number;
+  accumulative_worst_balance: number;
   date: string;
 }

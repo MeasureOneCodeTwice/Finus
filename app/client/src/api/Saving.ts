@@ -50,7 +50,6 @@ export async function getSavingProjection(
       console.error(response.status);
       return [];
     }
-    console.log(response);
 
     return response.json();
   } catch (error) {

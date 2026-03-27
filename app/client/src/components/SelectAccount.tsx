@@ -20,6 +20,7 @@ export default function SelectAccount({
         id="selectAccount"
         value={selectedAccount}
         onChange={handleSelectAccount}
+        className="formSelect"
       >
         <option value="">Select Account</option>
         {accounts &&

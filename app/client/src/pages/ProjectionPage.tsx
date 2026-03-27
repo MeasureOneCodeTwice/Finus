@@ -102,11 +102,11 @@ function ProjectionPage({ session }: ProjectionProp) {
           )
         ) {
           const newDebtRequest: projectionDebtRequest = {
-            id: selectedAccount,
+            id: selectedAccount.toString(),
             category: accountCategory.CREDIT_CARD,
             remainingAmount: inputAmount,
             minimumPayment: inputMinPay,
-            interestRate: inputInterest,
+            interestRate: inputInterest / 100,
             nextDueDate: nextDueDate,
             period: inputPeriod,
           };
@@ -163,7 +163,7 @@ function ProjectionPage({ session }: ProjectionProp) {
             financial_account_id: selectedAccount,
             balance: inputAmount,
             monthly_deposit: inputMinPay,
-            annual_interest_rate: inputInterest,
+            annual_interest_rate: inputInterest / 100,
             time_frame: inputPeriod,
           };
 
@@ -171,6 +171,7 @@ function ProjectionPage({ session }: ProjectionProp) {
 
           getSavingProjection(session, newSavingRequest)
             .then((data) => {
+              console.log(data);
               const graphData: projectedDataResponse = {
                 dateLabel: [],
                 lineInfo: [],
@@ -188,9 +189,9 @@ function ProjectionPage({ session }: ProjectionProp) {
                   graphData.dateLabel.push(datapoint.date);
                   bestCase.data.push(datapoint.accumulative_best_balance);
                   expectedCase.data.push(
-                    datapoint.accumlative_expected_balance,
+                    datapoint.accumulative_expected_balance,
                   );
-                  worstCase.data.push(datapoint.accumulative_worst_balence);
+                  worstCase.data.push(datapoint.accumulative_worst_balance);
                 });
 
                 graphData.lineInfo = [bestCase, expectedCase, worstCase];
@@ -214,7 +215,7 @@ function ProjectionPage({ session }: ProjectionProp) {
     if (selectedType === "Debt") {
       if (debtRequest) {
         //Set the fields to what was used in the debt projection graph
-        setSelectedAccount(debtRequest.id);
+        setSelectedAccount(Number(debtRequest.id));
         setAmount(debtRequest.remainingAmount.toFixed(2));
         setInterest(debtRequest.interestRate.toString());
         setMinPay(debtRequest.minimumPayment.toFixed(2));

@@ -1,5 +1,5 @@
 export interface projectionDebtRequest {
-  id: number;
+  id: string;
   category: string;
   remainingAmount: number;
   minimumPayment: number;
