@@ -1,6 +1,7 @@
 export const accountCategory = {
-  SAVING: "Saving",
+  SAVING: "Savings",
   CHEQUING: "Chequing",
   INVESTMENT: "Investment",
-  DEBT: "Debt",
+  CREDIT_CARD: "Credit Card",
+  UNCONFIRMED: "Unconfirmed",
 };

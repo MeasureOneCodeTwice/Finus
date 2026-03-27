@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   BrowserRouter as Router,
   Navigate,
@@ -10,7 +10,10 @@ import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
 import type { AuthSession, AuthUser, AuthApiResponse } from "./types/authTypes";
 import DashboardPage from "./pages/DashboardPage.tsx";
+import MarketsPage from "./pages/MarketsPage";
 import AppLayout from "./components/AppLayout.tsx";
+import ProjectionPage from "./pages/ProjectionPage.tsx";
+import { syncPinnedMarketsResetKey } from "./utils/marketStorage";
 //import { loadSession, saveSession, clearSession } from "./utils/storage.ts";
 //import { requestAuth } from "./api/AuthAPI";
 //import { resolveUserFromToken } from "./utils/token";
@@ -139,6 +142,35 @@ function App() {
     loadSession(),
   );
 
+  useEffect(() => {
+    let cancelled = false;
+
+    async function syncServerResetKey() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/client-state/reset-key`);
+        const data = (await response.json().catch(() => null)) as {
+          resetKey?: unknown;
+        } | null;
+
+        if (cancelled || !response.ok) {
+          return;
+        }
+
+        if (typeof data?.resetKey === "string" && data.resetKey.length > 0) {
+          syncPinnedMarketsResetKey(data.resetKey);
+        }
+      } catch {
+        // Ignore reset-key sync failures and keep the client usable offline.
+      }
+    }
+
+    void syncServerResetKey();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   function handleAuthSuccess(token: string, fallbackUser: Partial<AuthUser>) {
     const nextSession: AuthSession = {
       token,
@@ -203,14 +235,29 @@ function App() {
               )
             }
           />
+
           {session && (
             <Route element={<AppLayout onLogout={handleLogout} />}>
               <Route
                 path="/dashboard"
                 element={<DashboardPage session={session} />}
               />
+              <Route
+                path="/markets"
+                element={<MarketsPage session={session} />}
+              />
             </Route>
           )}
+
+          {session && (
+            <Route element={<AppLayout onLogout={handleLogout} />}>
+              <Route
+                path="/projection"
+                element={<ProjectionPage session={session} />}
+              />
+            </Route>
+          )}
+
           <Route path="*" element={<Navigate to="/" replace />} />
 
           {/**Code below is only used for dashboard development purposes */}

@@ -1,4 +1,4 @@
-FROM measureonecodetwice/finus-user:local 
+FROM measureonecodetwice/finus-user:local
 
 COPY user/integration ./integration
 

@@ -136,3 +136,67 @@ describe("parseCsvFile", () => {
     );
   });
 });
+
+it("removes BOM using beforeFirstChunk", async () => {
+  const file = mockFile("bom.csv");
+  const mockParse = Papa.parse as unknown as Mock;
+
+  mockParse.mockImplementation((_file, config: FixedParseConfig<unknown>) => {
+    // Simulate Papa calling beforeFirstChunk
+    const cleaned = config.beforeFirstChunk?.("\uFEFFa,b,c");
+
+    expect(cleaned).toBe("a,b,c");
+
+    const result: ParseResult<unknown> = {
+      data: [],
+      errors: [],
+      meta: mockMeta,
+    };
+
+    config.complete?.(result, _file);
+  });
+
+  await parseCsvFile(file);
+});
+
+it("normalizes headers using transformHeader", async () => {
+  const file = mockFile("headers.csv");
+  const mockParse = Papa.parse as unknown as Mock;
+
+  mockParse.mockImplementation((_file, config: FixedParseConfig<unknown>) => {
+    const transformed = config.transformHeader?.("  Amount ", 0);
+
+    expect(transformed).toBe("amount");
+
+    const result: ParseResult<unknown> = {
+      data: [],
+      errors: [],
+      meta: mockMeta,
+    };
+
+    config.complete?.(result, _file);
+  });
+
+  await parseCsvFile(file);
+});
+
+it("does not remove BOM when it is not at the start", async () => {
+  const file = mockFile("bom-middle.csv");
+  const mockParse = Papa.parse as unknown as Mock;
+
+  mockParse.mockImplementation((_file, config: FixedParseConfig<unknown>) => {
+    const cleaned = config.beforeFirstChunk?.("a\uFEFF,b,c");
+
+    expect(cleaned).toBe("a\uFEFF,b,c");
+
+    const result: ParseResult<unknown> = {
+      data: [],
+      errors: [],
+      meta: mockMeta,
+    };
+
+    config.complete?.(result, _file);
+  });
+
+  await parseCsvFile(file);
+});

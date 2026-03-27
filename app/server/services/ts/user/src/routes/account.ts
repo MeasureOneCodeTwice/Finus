@@ -3,22 +3,43 @@
 //TODO import db connection
 import { Router } from "express";
 import type { Request, Response } from "express";
-import type { ResultSetHeader } from "mysql2";
-import { getConnectionPool } from "@/sqlUtil";
+import type {
+  ResultSetHeader,
+  PoolConnection,
+  RowDataPacket,
+} from "mysql2/promise";
 import type { financialAccount } from "@/types.js";
 import { authenticateJWT } from "../handleJWT.js";
+import { checkUserId } from "../CheckUser.ts";
+import { pool } from "../db.ts";
 
 //import { authenticateJWT } from "../handleJWT.js";
 
 //import { error } from "node:console";
 export const accountsRouter = Router();
 
-const db = getConnectionPool();
-
 accountsRouter.post("/", async (req: Request, res: Response) => {
+  let connection: PoolConnection | undefined;
   try {
+    connection = await pool.getConnection();
     const { name, type, balance, value, subtype } = req.body;
     const last_updated = new Date();
+
+    if (!name || name.trim() === "") {
+      return res.status(400).json({ error: "Name is required" });
+    }
+
+    if (!type || typeof type !== "string") {
+      return res.status(400).json({ error: "Type is required" });
+    }
+
+    if (balance === undefined || balance === null || isNaN(balance)) {
+      return res.status(400).json({ error: "Balance is required" });
+    }
+
+    if (value === undefined || value === null || isNaN(value)) {
+      return res.status(400).json({ error: "Value is required" });
+    }
 
     let userId;
 
@@ -31,16 +52,28 @@ accountsRouter.post("/", async (req: Request, res: Response) => {
         .json({ error: "Not authorized to create an account" });
     }
 
-    const [result] = await db.query<ResultSetHeader>(
+    //need the user account's profile id first. This should be just a single item returned unless stretch feature 7 is implemented
+    const [profileRows] = await connection.query(
+      `SELECT profile_id FROM finusAccount_profile WHERE account_id = ?`,
+      [userId],
+    );
+
+    if (!profileRows || (profileRows as RowDataPacket[]).length === 0) {
+      return res.status(404).json({ error: "User profile not found" });
+    }
+
+    const profileId = (profileRows as RowDataPacket[])[0].profile_id;
+
+    const [result] = await connection.query<ResultSetHeader>(
       `INSERT INTO financialAccount (name, type, balance, value, last_updated, subtype)
        VALUES (?, ?, ?, ?, ?, ?)`,
       [name, type, balance, value, last_updated, subtype ?? null],
     );
 
-    await db.query(
+    await connection.query(
       `INSERT INTO profile_financialAccount (profile_id, financialAccount_id)
-      VALUES (?,?)`,
-      [userId, result.insertId],
+      VALUES (?, ?)`,
+      [profileId, result.insertId],
     );
 
     console.log("Created account " + name);
@@ -52,12 +85,16 @@ accountsRouter.post("/", async (req: Request, res: Response) => {
   } catch (err) {
     console.error("Account creation failed", err);
     return res.status(500).json({ error: "Account creation failed" });
+  } finally {
+    if (connection) {
+      connection.release();
+    }
   }
 });
 
 accountsRouter.get("/", async (req: Request, res: Response) => {
   let userId;
-
+  let connection: PoolConnection | undefined;
   try {
     userId = authenticateJWT(req);
   } catch (err) {
@@ -67,11 +104,25 @@ accountsRouter.get("/", async (req: Request, res: Response) => {
 
   if (userId) {
     try {
-      const [rows] = await db.query<financialAccount[]>(
+      connection = await pool.getConnection();
+
+      //need the user account's profile id first. This should be just a single item returned unless stretch feature 7 is implemented
+      const [profileRows] = await connection.query(
+        `SELECT profile_id FROM finusAccount_profile WHERE account_id = ?`,
+        [userId],
+      );
+
+      if (!profileRows || (profileRows as RowDataPacket[]).length === 0) {
+        return res.status(404).json({ error: "User profile not found" });
+      }
+
+      const profileId = (profileRows as RowDataPacket[])[0].profile_id;
+
+      const [rows] = await connection.query<financialAccount[]>(
         `SELECT * FROM financialAccount JOIN profile_financialAccount pfa 
         ON financialAccount.id = pfa.financialAccount_id
         WHERE pfa.profile_id = ?`,
-        [userId],
+        [profileId],
       );
 
       console.log(rows);
@@ -80,12 +131,17 @@ accountsRouter.get("/", async (req: Request, res: Response) => {
     } catch (err) {
       console.error("Failed to retrieve user's account", err);
       return res.status(500).json({ error: "Failed to retrieve account(s)" });
+    } finally {
+      if (connection) {
+        connection.release();
+      }
     }
   }
 });
 
 accountsRouter.put("/", async (req: Request, res: Response) => {
   let userId;
+  let connection: PoolConnection | undefined;
 
   //Checks if was given by the requests
   if (isAccount(req.body)) {
@@ -105,20 +161,22 @@ accountsRouter.put("/", async (req: Request, res: Response) => {
       .json({ error: "User not authorized to update account" });
   }
 
-  //Check if the user is the owner of the account that's bineg updated
-  if (!(await checkUserId(userId, account.id))) {
-    console.error("User is not own of the account");
-    return res
-      .status(401)
-      .json({ error: "User is not authorized to update accounts" });
-  }
-
   try {
+    connection = await pool.getConnection();
+
+    //Check if the user is the owner of the account that's bineg updated
+    if (!(await checkUserId(connection, userId, account.id))) {
+      console.error("User is not own of the account");
+      return res
+        .status(401)
+        .json({ error: "User is not authorized to update accounts" });
+    }
+
     const { id, name, type, balance, value, subtype } = req.body;
 
     const last_updated = new Date();
 
-    await db.query<ResultSetHeader>(
+    await connection.query<ResultSetHeader>(
       `UPDATE financialAccount 
       SET name = ?, type = ?, balance = ?, value = ?, last_updated = ?, subtype = ?
       WHERE id= ?`,
@@ -133,12 +191,16 @@ accountsRouter.put("/", async (req: Request, res: Response) => {
   } catch (err) {
     console.error("Failed to update user's account", err);
     return res.status(500).json({ error: "Failed to update user's account" });
+  } finally {
+    if (connection) {
+      connection.release();
+    }
   }
 });
 
 accountsRouter.delete("/", async (req: Request, res: Response) => {
   let userId;
-
+  let connection: PoolConnection | undefined;
   const { id } = req.body;
 
   try {
@@ -158,18 +220,25 @@ accountsRouter.delete("/", async (req: Request, res: Response) => {
       .json({ error: "Bad request: No account was givens" });
   }
 
-  //Checks if user is owner of the acount
-  if (!(await checkUserId(userId, id))) {
-    console.error("User cannot delete account they didn't create");
-    return res
-      .status(401)
-      .json({ error: "User not authorized to delete this account" });
-  }
-
   try {
-    await db.query(
+    connection = await pool.getConnection();
+
+    //Checks if user is owner of the acount
+    if (!(await checkUserId(connection, userId, id))) {
+      console.error("User cannot delete account they didn't create");
+      return res
+        .status(401)
+        .json({ error: "User not authorized to delete this account" });
+    }
+
+    await connection.query(
       `DELETE FROM financialAccount
       WHERE id=?`,
+      [id],
+    );
+
+    await connection.query(
+      "DELETE FROM transaction WHERE financialAccount_id=?",
       [id],
     );
 
@@ -177,33 +246,12 @@ accountsRouter.delete("/", async (req: Request, res: Response) => {
   } catch (err) {
     console.error("Failed to delete user's account", err);
     return res.status(500).json({ error: "Failed to delete user's account" });
+  } finally {
+    if (connection) {
+      connection.release();
+    }
   }
 });
-
-//Checks the user is the owner of the account
-async function checkUserId(
-  userId: number,
-  accountId: number,
-): Promise<boolean> {
-  let result = false;
-  try {
-    //Checks if the profile has an account with that id
-    const [rows] = await db.query(
-      `SELECT 1 FROM profile_financialAccount 
-      WHERE profile_id =? AND financialAccount_id =?`,
-      [userId, accountId],
-    );
-
-    console.log(rows.length);
-    if (rows.length > 0) {
-      result = true;
-    }
-  } catch (error) {
-    console.error(error);
-  }
-
-  return result;
-}
 
 function isAccount(reqBody: unknown): reqBody is financialAccount {
   //Checks if it exists and is an object

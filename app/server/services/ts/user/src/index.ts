@@ -21,30 +21,28 @@ import { getGoalCountByProfileId } from "./queries/goals.ts";
 import { accountsRouter } from "./routes/account.js";
 import { profilesRouter } from "./routes/profile.js";
 import { transactionsRouter } from "./routes/transaction.js";
+import { debtRouter } from "./routes/debt.ts";
+import { savingRouter } from "./routes/saving.ts";
 
 const app = express();
 app.use(buildCorsConfig());
-onExit(async () => await server.close());
 
 app.use(express.json());
 
-app.use(
-  (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    // console.log("USER Incoming request: " + req.method + " " + req.url);
-    // console.log(req.body);
-    next();
-  },
-);
+app.use((req, res, next) => {
+  console.log("USER Incoming request: " + req.method + " " + req.url);
+  console.log(req.body);
+  next();
+});
 
+// Mount routers
 app.use("/accounts", accountsRouter);
 app.use("/transactions", transactionsRouter);
 app.use("/profiles", profilesRouter);
+app.use("/debts", debtRouter);
+app.use("/savings", savingRouter);
 
-const server = app.listen(PORT, () => {
-  console.log(`User Service running on port ${PORT}`);
-});
-process.on("SIGTERM", () => server.close());
-
+// ============ Chart Endpoints ============
 app.get(
   "/charts/expenses",
   async (req: express.Request, res: express.Response) => {
@@ -79,7 +77,7 @@ app.get(
       const transactions = await getTransactionsData(pool, userId);
 
       if (!transactions || transactions.length === 0) {
-        return res.json([]); // Return empty array for no transactions
+        return res.json([]);
       }
 
       res.json(transactions);
@@ -123,17 +121,13 @@ app.get(
   },
 );
 
-export { generateDateRange }; //for testing purposes only
-
-// Goal stuff is below------------------------------------------------------
+// ============ Goal Endpoints ============
 
 // GET all goals
 app.get("/goals", async (req: express.Request, res: express.Response) => {
   try {
     const userId = authenticateJWT(req);
-
     const goals = await getUserGoals(pool, userId);
-
     res.json(goals);
   } catch (error) {
     console.error("Error fetching goals:", error);
@@ -148,30 +142,14 @@ app.get("/goals", async (req: express.Request, res: express.Response) => {
 // POST create new goal
 app.post("/goals", async (req: express.Request, res: express.Response) => {
   try {
-    // const userId = authenticateJWT(req);
-    // const name = req.body.name;
-    // const type = req.body.type;
-    // const category = req.body.category;
-    // const target = req.body.target;
-    // const period = req.body.period;
-
     const userId = authenticateJWT(req);
-    let name = null;
-    let type = null;
-    let category = null;
-    let target = null;
-    let period = null;
-
-    if (req.body.name) name = req.body.name;
-    if (req.body.type) type = req.body.type;
-    if (req.body.category) category = req.body.category;
-    if (req.body.target) target = req.body.target;
-    if (req.body.period) period = req.body.period;
+    const { name, type, category, target, period } = req.body;
 
     if (!name || !type || !target || !period) {
       return res.status(400).json({ error: "Missing required fields" });
     }
-    //check goal limit (max 5)
+
+    // check goal limit (max 5)
     const goalCount = await getGoalCountByProfileId(pool, userId);
     if (goalCount >= 5) {
       return res
@@ -201,33 +179,28 @@ app.post("/goals", async (req: express.Request, res: express.Response) => {
 app.patch("/goals", async (req: express.Request, res: express.Response) => {
   try {
     const userId = authenticateJWT(req);
-    // const goalId = parseInt(req.query.gid);
-    let goalId = null;
-
-    if (req.query.gid) goalId = parseInt(req.query.gid);
+    const goalId = req.query.gid ? parseInt(req.query.gid as string) : null;
 
     if (!goalId) {
-      return res.status(404).json({ error: "Missing goal ID" });
+      return res.status(400).json({ error: "Missing goal ID" });
     }
 
-    //verify goal exists and belongs to user
+    // verify goal exists and belongs to user
     const existingGoal = await getUserGoalById(pool, goalId, userId);
     if (!existingGoal) {
       return res.status(404).json({ error: "Goal not found" });
     }
 
-    //build updates object with only provided fields - for security
+    // build updates object with only provided fields
     const updates: UpdateGoalInput = {};
     if (req.body.name !== undefined) updates.name = req.body.name;
     if (req.body.category !== undefined)
       updates.category = req.body.category.toLowerCase();
     if (req.body.target !== undefined) updates.target = req.body.target;
-    if (req.body.period !== undefined) {
-      updates.period = req.body.period;
-    } //period can be 'na' if goal is savings
+    if (req.body.period !== undefined) updates.period = req.body.period;
     if (req.body.type !== undefined) updates.type = req.body.type;
 
-    //check that period exists if the goal type is reduce_spending, it doesn't matter if type is 'save' because period is ignored
+    // validate period for reduce_spending goals
     if (
       updates.type &&
       updates.type === ("reduce_spending" as GoalType) &&
@@ -238,7 +211,7 @@ app.patch("/goals", async (req: express.Request, res: express.Response) => {
         .json({ error: "Period is required for reduce_spending goals" });
     }
 
-    //validate updates
+    // validate target amount
     if (updates.target !== undefined && updates.target <= 0) {
       return res
         .status(400)
@@ -266,14 +239,10 @@ app.patch("/goals", async (req: express.Request, res: express.Response) => {
 app.delete("/goals", async (req: express.Request, res: express.Response) => {
   try {
     const userId = authenticateJWT(req);
-    // const goalId = parseInt(req.query.gid);
-
-    let goalId = null;
-
-    if (req.query.gid) goalId = parseInt(req.query.gid);
+    const goalId = req.query.gid ? parseInt(req.query.gid as string) : null;
 
     if (!goalId) {
-      return res.status(404).json({ error: "Missing goal ID" });
+      return res.status(400).json({ error: "Missing goal ID" });
     }
 
     const deleted = await deleteUserGoal(pool, goalId, userId);
@@ -291,3 +260,24 @@ app.delete("/goals", async (req: express.Request, res: express.Response) => {
     }
   }
 });
+
+// ============ Server Setup ============
+const server = app.listen(PORT, () => {
+  console.log(`User Service running on port ${PORT}`);
+});
+
+async function cleanup() {
+  try {
+    server.close();
+    await pool.end();
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+process.on("SIGTERM", cleanup);
+process.on("SIGINT", cleanup);
+onExit(async () => await cleanup());
+
+// For testing purposes only
+export { generateDateRange };

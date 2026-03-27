@@ -47,7 +47,9 @@ export default function Card({
 
         <div>
           <p>
-            {account.type + " " + (account.subtype ? " " + account.type : "")}
+            {account.type +
+              " " +
+              (account.subtype ? " " + account.subtype : "")}
           </p>
           <p>{Number(account.balance).toFixed(2)}</p>
         </div>
