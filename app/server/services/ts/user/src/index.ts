@@ -9,31 +9,18 @@ import { getSnapshotData } from "./logic/snapshot.ts";
 import { onExit } from "@/hooks";
 import { buildCorsConfig } from "@/expressUtils";
 import { PORT } from "@/port";
-
-// import express from "express";
+import {
+  deleteUserGoal,
+  createUserGoal,
+  updateUserGoal,
+  getUserGoals,
+  getUserGoalById,
+} from "./logic/goals.ts";
+import type { GoalType, UpdateGoalInput } from "./types/Goals.ts";
+import { getGoalCountByProfileId } from "./queries/goals.ts";
 import { accountsRouter } from "./routes/account.js";
 import { profilesRouter } from "./routes/profile.js";
 import { transactionsRouter } from "./routes/transaction.js";
-// import { PORT } from "@/port";
-// import { onExit } from "@/hooks";
-// import { buildCorsConfig } from "@/expressUtils";
-// import { getExpensesChartData } from "./logic/expenses.ts";
-// import { authenticateJWT } from "./utils/auth.ts";
-// import { pool } from "./db.ts";
-// import type { Request } from "express";
-// import type { RowDataPacket } from "mysql2/promise";
-// import mysql from "mysql2/promise";
-// import jwt from "jsonwebtoken";
-
-// const pool = mysql.createPool({
-//   host: process.env.MYSQL_HOST,
-//   port: Number(process.env.MYSQL_PORT),
-//   user: process.env.MYSQL_USER,
-//   password: process.env.MYSQL_PASSWORD,
-//   database: process.env.DB_NAME,
-// });
-
-// const JWT_SECRET = process.env.JWT_SECRET;
 
 const app = express();
 app.use(buildCorsConfig());
@@ -41,49 +28,13 @@ onExit(async () => await server.close());
 
 app.use(express.json());
 
-app.use((req, res, next) => {
-  console.log("USER Incoming request: " + req.method + " " + req.url);
-  console.log(req.body);
-  next();
-});
-
-/*
-function verifyToken(
-  req: express.Request,
-  res: express.Response,
-  next: NextFunction,
-) {
-  const authHeader = req.headers.authorization;
-  console.log(authHeader)
-  //Determine if jwt header was passed
-  if (authHeader) {
-    const token = authHeader.split(" ")[1];
-    try {
-      const payload = jwt.verify(token, process.env.JWT_SECRET);
-
-      console.log(payload);
-      
-      next();
-    } catch (err) {
-      console.error(err);
-      res.status(401).json({ error: "Invalid token" });
-    }
-  } else {
-    res
-      .status(401)
-      .json({
-        error: "Failed to pass token, user not authorized to send request",
-      });
-  }
-}
-*/
-
-//app.use(verifyToken);
-
-//test endpoint
-// app.get("/health", (req: express.Request, res: express.Response) => {
-//   res.send("ok");
-// });
+app.use(
+  (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    // console.log("USER Incoming request: " + req.method + " " + req.url);
+    // console.log(req.body);
+    next();
+  },
+);
 
 app.use("/accounts", accountsRouter);
 app.use("/transactions", transactionsRouter);
@@ -94,442 +45,249 @@ const server = app.listen(PORT, () => {
 });
 process.on("SIGTERM", () => server.close());
 
-// interface Transaction extends RowDataPacket {
-//   id: number;
-//   financialAccount_id: string;
-//   amount: number;
-//   category: string;
-//   description: string;
-//   sender: string;
-//   recipient: string;
-//   date: string;
-// }
+app.get(
+  "/charts/expenses",
+  async (req: express.Request, res: express.Response) => {
+    try {
+      const userId = authenticateJWT(req);
+      const period = req.query.period as string;
 
-//authenticaion of JWT - returns user id
-// export const authenticateJWT = (req: Request) => {
-//   const authHeader = req.headers.authorization;
-//   console.log(req.headers);
-//   if (!authHeader) {
-//     throw new Error("Authorization header missing");
-//   }
+      if (!validatePeriod(period)) {
+        return res
+          .status(400)
+          .json({ error: "Invalid period. Must be 'w', 'm', or 'y'." });
+      }
 
-//   const parts = authHeader.split(" ");
-//   if (parts.length !== 2 || parts[0].toLowerCase() !== "bearer") {
-//     throw new Error("Invalid authorization header format");
-//   }
-//   const token = parts[1];
-
-//   const decoded = jwt.verify(token, JWT_SECRET) as jwt.JwtPayload;
-//   const userId = decoded.sub;
-//   //console.log("user id: " + userId);
-//   if (!userId) {
-//     throw new Error("User ID not found in token");
-//   }
-
-//   return userId;
-// };
-
-// //interface for expense data so that rows of the query result can be typed and traversed
-// interface ExpenseRow {
-//   label: string;
-//   total_expenses: number;
-//   date_group?: string;
-// }
-
-app.get("/charts/expenses", async (req, res) => {
-  try {
-    const userId = authenticateJWT(req);
-    const period = req.query.period as string;
-
-    if (!validatePeriod(period)) {
-      return res
-        .status(400)
-        .json({ error: "Invalid period. Must be 'w', 'm', or 'y'." });
-    }
-
-    const chartData = await getExpensesChartData(pool, userId, period);
-    res.json(chartData);
-  } catch (error) {
-    console.error("Error fetching expenses chart data:", error);
-    if (error instanceof Error && error.message.includes("Authorization")) {
-      res.status(401).json({ error: error.message });
-    } else {
-      res.status(500).json({ error: "Failed to fetch expenses chart data" });
-    }
-  }
-});
-
-app.get("/table/transactions", async (req, res) => {
-  try {
-    const userId = authenticateJWT(req);
-    const transactions = await getTransactionsData(pool, userId);
-
-    if (!transactions || transactions.length === 0) {
-      return res.json([]); // Return empty array for no transactions
-    }
-
-    res.json(transactions);
-  } catch (error) {
-    console.error("Error fetching transactions:", error);
-    if (error instanceof Error && error.message.includes("Authorization")) {
-      res.status(401).json({ error: error.message });
-    } else {
-      res.status(500).json({ error: "Failed to fetch transactions" });
-    }
-  }
-});
-
-app.get("/table/snapshot", async (req, res) => {
-  try {
-    const userId = authenticateJWT(req);
-
-    if (!userId) {
-      return res.status(401).json({ error: "User not authenticated" });
-    }
-
-    const snapshotData = await getSnapshotData(pool, userId);
-    res.json(snapshotData);
-  } catch (error) {
-    console.error("Error fetching snapshot data:", error);
-    if (error instanceof Error) {
-      if (error.message.includes("Authorization")) {
+      const chartData = await getExpensesChartData(pool, userId, period);
+      res.json(chartData);
+    } catch (error) {
+      console.error("Error fetching expenses chart data:", error);
+      if (error instanceof Error && error.message.includes("Authorization")) {
         res.status(401).json({ error: error.message });
-      } else if (error.message.includes("No snapshot data")) {
-        res.status(404).json({ error: "No snapshot data found" });
+      } else {
+        res.status(500).json({ error: "Failed to fetch expenses chart data" });
+      }
+    }
+  },
+);
+
+app.get(
+  "/table/transactions",
+  async (req: express.Request, res: express.Response) => {
+    try {
+      const userId = authenticateJWT(req);
+      const transactions = await getTransactionsData(pool, userId);
+
+      if (!transactions || transactions.length === 0) {
+        return res.json([]); // Return empty array for no transactions
+      }
+
+      res.json(transactions);
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+      if (error instanceof Error && error.message.includes("Authorization")) {
+        res.status(401).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: "Failed to fetch transactions" });
+      }
+    }
+  },
+);
+
+app.get(
+  "/table/snapshot",
+  async (req: express.Request, res: express.Response) => {
+    try {
+      const userId = authenticateJWT(req);
+
+      if (!userId) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
+
+      const snapshotData = await getSnapshotData(pool, userId);
+      res.json(snapshotData);
+    } catch (error) {
+      console.error("Error fetching snapshot data:", error);
+      if (error instanceof Error) {
+        if (error.message.includes("Authorization")) {
+          res.status(401).json({ error: error.message });
+        } else if (error.message.includes("No snapshot data")) {
+          res.status(404).json({ error: "No snapshot data found" });
+        } else {
+          res.status(500).json({ error: "Failed to fetch snapshot data" });
+        }
       } else {
         res.status(500).json({ error: "Failed to fetch snapshot data" });
       }
+    }
+  },
+);
+
+export { generateDateRange }; //for testing purposes only
+
+// Goal stuff is below------------------------------------------------------
+
+// GET all goals
+app.get("/goals", async (req: express.Request, res: express.Response) => {
+  try {
+    const userId = authenticateJWT(req);
+
+    const goals = await getUserGoals(pool, userId);
+
+    res.json(goals);
+  } catch (error) {
+    console.error("Error fetching goals:", error);
+    if (error instanceof Error && error.message.includes("Authorization")) {
+      res.status(401).json({ error: error.message });
     } else {
-      res.status(500).json({ error: "Failed to fetch snapshot data" });
+      res.status(500).json({ error: "Failed to fetch goals" });
     }
   }
 });
 
-export { generateDateRange }; //for testing purposes only
+// POST create new goal
+app.post("/goals", async (req: express.Request, res: express.Response) => {
+  try {
+    // const userId = authenticateJWT(req);
+    // const name = req.body.name;
+    // const type = req.body.type;
+    // const category = req.body.category;
+    // const target = req.body.target;
+    // const period = req.body.period;
 
-// app.get(
-//   "/charts/expenses",
-//   async (req: express.Request, res: express.Response) => {
-//     try {
-//       const userId = authenticateJWT(req);
-//       // console.log("User authenticated with ID:", userId);
-//       const period = req.query.period as string;
-//       const connection = await pool.getConnection();
+    const userId = authenticateJWT(req);
+    let name = null;
+    let type = null;
+    let category = null;
+    let target = null;
+    let period = null;
 
-//       if (!["w", "m", "y"].includes(period)) {
-//         return res
-//           .status(400)
-//           .json({ error: "Invalid period. Must be 'w', 'm', or 'y'." });
-//       }
-//       const endDate = new Date();
-//       const startDate = new Date();
-//       let dateFormat: string = "%Y-%m-%d";
-//       let selectFormat: string;
+    if (req.body.name) name = req.body.name;
+    if (req.body.type) type = req.body.type;
+    if (req.body.category) category = req.body.category;
+    if (req.body.target) target = req.body.target;
+    if (req.body.period) period = req.body.period;
 
-//       switch (period) {
-//         case "w":
-//           startDate.setDate(endDate.getDate() - 7);
-//           dateFormat = "%Y-%m-%d";
-//           selectFormat = "DATE(date)";
-//           break;
-//         case "m":
-//           startDate.setDate(endDate.getDate() - 30);
-//           dateFormat = "%Y-%m-%d";
-//           selectFormat = "DATE(date)";
-//           break;
-//         case "y":
-//           startDate.setDate(endDate.getDate() - 365);
-//           dateFormat = "%Y-%m";
-//           selectFormat = 'DATE_FORMAT(date, "%Y-%m-01")'; //first day of month for grouping
-//           break;
-//         default:
-//           return res
-//             .status(400)
-//             .json({ error: "Invalid period. Must be 'w', 'm', or 'y'." });
-//       }
+    if (!name || !type || !target || !period) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+    //check goal limit (max 5)
+    const goalCount = await getGoalCountByProfileId(pool, userId);
+    if (goalCount >= 5) {
+      return res
+        .status(400)
+        .json({ error: "Maximum 5 goals allowed per profile" });
+    }
 
-//       const startDateStr = startDate.toISOString().slice(0, 10); // YYYY-MM-DD
-//       const endDateStr = endDate.toISOString().slice(0, 10);
+    const newGoal = await createUserGoal(pool, userId, {
+      name,
+      type,
+      category,
+      target,
+      period,
+    });
+    res.status(201).json(newGoal);
+  } catch (error) {
+    console.error("Error creating goal:", error);
+    if (error instanceof Error && error.message.includes("Authorization")) {
+      res.status(401).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: "Failed to create goal" });
+    }
+  }
+});
 
-//       //grabs all transactions that are less than 0 in amount
-//       const query = `
-//             SELECT
-//                 ${selectFormat} as date_group,
-//                 DATE_FORMAT(t.date, ?) as label,
-//                 SUM(ABS(t.amount)) as total_expenses
-//             FROM finus.transaction t
-//             JOIN finus.financialAccount fa ON t.financialAccount_id = fa.id
-//             JOIN finus.profile_financialAccount pfa ON fa.id = pfa.financialAccount_id
-//             JOIN finus.profile p ON pfa.profile_id = p.id
-//             JOIN finus.finusAccount_profile uap ON p.id = uap.profile_id
-//             JOIN finus.finusAccount u ON uap.account_id = u.id
-//             WHERE t.amount < 0
-//                 AND u.id = ?
-//                 AND t.date >= ?
-//                 AND t.date <= ?
-//             GROUP BY date_group, DATE_FORMAT(t.date, ?)
-//             ORDER BY date_group ASC
-//         `;
+// PATCH update goal
+app.patch("/goals", async (req: express.Request, res: express.Response) => {
+  try {
+    const userId = authenticateJWT(req);
+    // const goalId = parseInt(req.query.gid);
+    let goalId = null;
 
-//       const [rows] = await connection.query(query, [
-//         dateFormat,
-//         userId,
-//         startDateStr,
-//         endDateStr,
-//         dateFormat,
-//       ]);
-//       const expenses = rows as ExpenseRow[];
-//       connection.release();
+    if (req.query.gid) goalId = parseInt(req.query.gid);
 
-//       //makes a complete date range even with days of no transactions
-//       const allLabels = generateDateRange(startDate, endDate, period);
-//       const dataMap = new Map();
+    if (!goalId) {
+      return res.status(404).json({ error: "Missing goal ID" });
+    }
 
-//       if (Array.isArray(expenses)) {
-//         expenses.forEach((row) => {
-//           dataMap.set(row.label, Number(row.total_expenses));
-//         });
-//       }
+    //verify goal exists and belongs to user
+    const existingGoal = await getUserGoalById(pool, goalId, userId);
+    if (!existingGoal) {
+      return res.status(404).json({ error: "Goal not found" });
+    }
 
-//       const data = allLabels.map((label) => dataMap.get(label) || 0);
+    //build updates object with only provided fields - for security
+    const updates: UpdateGoalInput = {};
+    if (req.body.name !== undefined) updates.name = req.body.name;
+    if (req.body.category !== undefined)
+      updates.category = req.body.category.toLowerCase();
+    if (req.body.target !== undefined) updates.target = req.body.target;
+    if (req.body.period !== undefined) {
+      updates.period = req.body.period;
+    } //period can be 'na' if goal is savings
+    if (req.body.type !== undefined) updates.type = req.body.type;
 
-//       const periodLabels = {
-//         w: "Weekly Expenses",
-//         m: "Monthly Expenses",
-//         y: "Yearly Expenses",
-//       };
-//       //console.log("Found data:", data);
-//       res.json({
-//         labels: allLabels,
-//         datasets: [
-//           {
-//             label: periodLabels[period as keyof typeof periodLabels],
-//             data,
-//           },
-//         ],
-//       });
-//     } catch (error) {
-//       console.error("Error fetching expenses chart data:", error);
-//       res.status(500).json({ error: "Failed to fetch expenses chart data" });
-//     }
-//   },
-// );
+    //check that period exists if the goal type is reduce_spending, it doesn't matter if type is 'save' because period is ignored
+    if (
+      updates.type &&
+      updates.type === ("reduce_spending" as GoalType) &&
+      !updates.period
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Period is required for reduce_spending goals" });
+    }
 
-//this gets all transactions for now - can be capped to a certain amount in the future when any user reaches over 100k transactions
-// app.get(
-//   "/table/trasactions",
-//   async (req: express.Request, res: express.Response) => {
-//     try {
-//       //console.log("Fetching transactions...");
-//       const userId = authenticateJWT(req);
-//       const connection = await pool.getConnection();
-//       const query = `
-//             SELECT *
-//             FROM finus.transaction t
-//             JOIN finus.financialAccount fa ON t.financialAccount_id = fa.id
-//             JOIN finus.profile_financialAccount pfa ON fa.id = pfa.financialAccount_id
-//             JOIN finus.profile p ON pfa.profile_id = p.id
-//             JOIN finus.finusAccount_profile uap ON p.id = uap.profile_id
-//             JOIN finus.finusAccount u ON uap.account_id = u.id
-//             WHERE u.id = ?
-//             ORDER BY t.date DESC
-//         `;
+    //validate updates
+    if (updates.target !== undefined && updates.target <= 0) {
+      return res
+        .status(400)
+        .json({ error: "Target amount must be greater than 0" });
+    }
 
-//       const [rows] = await connection.query<Transaction[]>(query, [userId]);
-//       connection.release();
+    const updatedGoal = await updateUserGoal(pool, goalId, userId, updates);
 
-//       //get first and last names of the user associated with the first transaction
-//       const first_name = rows[0] ? rows[0].first_name : "";
-//       const last_name = rows[0] ? rows[0].last_name : "";
+    if (!updatedGoal) {
+      return res.status(404).json({ error: "Goal not found" });
+    }
 
-//       if (Array.isArray(rows)) {
-//         rows.forEach((row: Transaction) => {
-//           if (!row.sender) {
-//             //these cases really only appear because of the populator script
-//             row.sender = first_name + " " + last_name;
-//           }
-//           if (!row.recipient) {
-//             row.recipient = first_name + " " + last_name;
-//           }
-//         });
-//       }
-//       res.json(rows);
-//     } catch (error) {
-//       console.error("Error fetching transactions:", error);
-//       res.status(500).json({ error: "Failed to fetch transactions" });
-//     }
-//   },
-// );
+    res.json(updatedGoal);
+  } catch (error) {
+    console.error("Error updating goal:", error);
+    if (error instanceof Error && error.message.includes("Authorization")) {
+      res.status(401).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: "Failed to update goal" });
+    }
+  }
+});
 
-// interface SnapshotRow extends RowDataPacket {
-//   total_balance: number;
-//   current_income: number;
-//   total_expenses: number;
-//   transaction_count: number;
-//   current_debt: number;
-//   total_savings: number;
-// }
+// DELETE goal
+app.delete("/goals", async (req: express.Request, res: express.Response) => {
+  try {
+    const userId = authenticateJWT(req);
+    // const goalId = parseInt(req.query.gid);
 
-//gets the following totals as massively aggregated values:
-// total balance - combined sum of all account balances
-// current income - YTD sum of all positive transactions
-// average expenses - YTD average of all negative transactions
-// current debt - sum of all credit_card accounts of subtype 'loan'
-// total savings - sum of all savings accounts
-// app.get(
-//   "/table/snapshot",
-//   async (req: express.Request, res: express.Response) => {
-//     let connection;
-//     try {
-//       const userId = authenticateJWT(req);
-//       if (!userId) {
-//         return res.status(401).json({ error: "User not authenticated" });
-//       }
+    let goalId = null;
 
-//       connection = await pool.getConnection();
+    if (req.query.gid) goalId = parseInt(req.query.gid);
 
-//       const today = new Date();
-//       const ytdStart = new Date(today.getFullYear(), 0, 1);
-//       const ytdStartStr = ytdStart.toISOString().slice(0, 10);
-//       const todayStr = today.toISOString().slice(0, 10);
-//       const monthsPassed = today.getMonth() + 1;
-//       //single massive query to get all the data - this is apparently more efficient than multiple queries
-//       const [results] = await connection.query<SnapshotRow[]>(
-//         `
-//             SELECT
-//                 -- Total Balance
-//                 (SELECT COALESCE(SUM(fa.balance), 0)
-//                  FROM finus.financialAccount fa
-//                  JOIN finus.profile_financialAccount pfa ON fa.id = pfa.financialAccount_id
-//                  JOIN finus.profile p ON pfa.profile_id = p.id
-//                  JOIN finus.finusAccount_profile uap ON p.id = uap.profile_id
-//                  WHERE uap.account_id = ?) as total_balance,
+    if (!goalId) {
+      return res.status(404).json({ error: "Missing goal ID" });
+    }
 
-//                 -- Current Income (YTD)
-//                 (SELECT COALESCE(SUM(t.amount), 0)
-//                  FROM finus.transaction t
-//                  JOIN finus.financialAccount fa ON t.financialAccount_id = fa.id
-//                  JOIN finus.profile_financialAccount pfa ON fa.id = pfa.financialAccount_id
-//                  JOIN finus.profile p ON pfa.profile_id = p.id
-//                  JOIN finus.finusAccount_profile uap ON p.id = uap.profile_id
-//                  WHERE uap.account_id = ?
-//                      AND t.amount > 0
-//                      AND t.date BETWEEN ? AND ?) as current_income,
+    const deleted = await deleteUserGoal(pool, goalId, userId);
+    if (!deleted) {
+      return res.status(404).json({ error: "Goal not found" });
+    }
 
-//                 -- Total Expenses (YTD)
-//                 (SELECT COALESCE(SUM(ABS(t.amount)), 0)
-//                  FROM finus.transaction t
-//                  JOIN finus.financialAccount fa ON t.financialAccount_id = fa.id
-//                  JOIN finus.profile_financialAccount pfa ON fa.id = pfa.financialAccount_id
-//                  JOIN finus.profile p ON pfa.profile_id = p.id
-//                  JOIN finus.finusAccount_profile uap ON p.id = uap.profile_id
-//                  WHERE uap.account_id = ?
-//                      AND t.amount < 0
-//                      AND t.date BETWEEN ? AND ?) as total_expenses,
-
-//                 -- Transaction Count (for averaging)
-//                 (SELECT COUNT(*)
-//                  FROM finus.transaction t
-//                  JOIN finus.financialAccount fa ON t.financialAccount_id = fa.id
-//                  JOIN finus.profile_financialAccount pfa ON fa.id = pfa.financialAccount_id
-//                  JOIN finus.profile p ON pfa.profile_id = p.id
-//                  JOIN finus.finusAccount_profile uap ON p.id = uap.profile_id
-//                  WHERE uap.account_id = ?
-//                      AND t.amount < 0
-//                      AND t.date BETWEEN ? AND ?) as transaction_count,
-
-//                 -- Current Debt (credit_card with loan subtype)
-//                 (SELECT COALESCE(SUM(fa.balance), 0)
-//                  FROM finus.financialAccount fa
-//                  JOIN finus.profile_financialAccount pfa ON fa.id = pfa.financialAccount_id
-//                  JOIN finus.profile p ON pfa.profile_id = p.id
-//                  JOIN finus.finusAccount_profile uap ON p.id = uap.profile_id
-//                  WHERE uap.account_id = ?
-//                      AND fa.type = 'credit_card'
-//                      AND fa.subtype = 'loan') as current_debt,
-
-//                 -- Total Savings
-//                 (SELECT COALESCE(SUM(fa.balance), 0)
-//                  FROM finus.financialAccount fa
-//                  JOIN finus.profile_financialAccount pfa ON fa.id = pfa.financialAccount_id
-//                  JOIN finus.profile p ON pfa.profile_id = p.id
-//                  JOIN finus.finusAccount_profile uap ON p.id = uap.profile_id
-//                  WHERE uap.account_id = ?
-//                      AND fa.type = 'savings') as total_savings
-//         `,
-//         [
-//           userId,
-//           userId,
-//           ytdStartStr,
-//           todayStr, // for total_balance and current_income
-//           userId,
-//           ytdStartStr,
-//           todayStr, // for total_expenses
-//           userId,
-//           ytdStartStr,
-//           todayStr, // for transaction_count
-//           userId, // for current_debt
-//           userId, // for total_savings
-//         ],
-//       );
-
-//       connection.release();
-
-//       const data = results[0];
-//       const avgMonthlyExpenses =
-//         monthsPassed > 0 ? data.total_expenses / monthsPassed : 0;
-//       const response = {
-//         totalBalance: data.total_balance || 0,
-//         currentIncome: data.current_income || 0,
-//         averageExpenses: Math.round(avgMonthlyExpenses * 100) / 100,
-//         currentDebt: data.current_debt || 0,
-//         totalSavings: data.total_savings || 0,
-//         metadata: {
-//           ytdPeriod: {
-//             start: ytdStartStr,
-//             end: todayStr,
-//           },
-//           monthsInYTD: monthsPassed,
-//           transactionCount: data.transaction_count || 0,
-//         },
-//       };
-
-//       res.json(response);
-//     } catch (error) {
-//       console.error("Error fetching snapshot data:", error);
-//       if (connection) {
-//         connection.release();
-//       }
-//       res.status(500).json({ error: "Failed to fetch snapshot data" });
-//     }
-//   },
-// );
-
-//helper method for making a complete date range
-// function generateDateRange(start: Date, end: Date, period: string): string[] {
-//   const dates: string[] = [];
-//   const current = new Date(start);
-
-//   current.setHours(0, 0, 0, 0);
-//   const endDate = new Date(end);
-//   endDate.setHours(0, 0, 0, 0);
-
-//   while (current <= endDate) {
-//     if (period === "y") {
-//       //monthly labels for year period
-//       const year = current.getFullYear();
-//       const month = String(current.getMonth() + 1).padStart(2, "0");
-//       dates.push(`${year}-${month}`);
-//       current.setMonth(current.getMonth() + 1);
-//     } else {
-//       //day-basis labels for everything else - week and month
-//       const year = current.getFullYear();
-//       const month = String(current.getMonth() + 1).padStart(2, "0");
-//       const day = String(current.getDate()).padStart(2, "0");
-//       dates.push(`${year}-${month}-${day}`);
-//       current.setDate(current.getDate() + 1);
-//     }
-//   }
-
-//   return dates;
-// }
+    res.status(204).send();
+  } catch (error) {
+    console.error("Error deleting goal:", error);
+    if (error instanceof Error && error.message.includes("Authorization")) {
+      res.status(401).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: "Failed to delete goal" });
+    }
+  }
+});

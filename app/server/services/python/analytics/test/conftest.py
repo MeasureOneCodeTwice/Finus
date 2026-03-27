@@ -62,23 +62,6 @@ def mock_db_queries():
         yield mock
 
 
-@pytest.fixture
-def mock_savings_accounts():
-    return [
-        {'id': 1, 'balance': 5000},
-        {'id': 2, 'balance': 3000},
-    ]
-
-@pytest.fixture
-def mock_savings_transactions():
-    base_date = datetime.now() - timedelta(days=30)
-    return [
-        {'financialAccount_id': 1, 'amount': 100, 'date': base_date + timedelta(days=5)},
-        {'financialAccount_id': 1, 'amount': 200, 'date': base_date + timedelta(days=10)},
-        {'financialAccount_id': 2, 'amount': -50, 'date': base_date + timedelta(days=7)},
-        {'financialAccount_id': 2, 'amount': 150, 'date': base_date + timedelta(days=15)},
-        {'financialAccount_id': 1, 'amount': -75, 'date': base_date + timedelta(days=20)},
-    ]
 
 @pytest.fixture
 def mock_incomeflow_transactions():
