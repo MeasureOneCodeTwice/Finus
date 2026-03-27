@@ -55,6 +55,8 @@ export async function createAuthenticatedAccount(
       }
 
       const token = login.body.token as string;
+
+      // Create the account
       const account = await request(baseUrl)
         .post("/api/accounts")
         .set("Authorization", `Bearer ${token}`)
@@ -65,6 +67,9 @@ export async function createAuthenticatedAccount(
           value: accountOverrides?.value ?? 1000,
           subtype: accountOverrides?.subtype ?? "na",
         });
+
+      console.log("Account creation response:", account.status, account.body);
+
       if (account.status !== 200 || !account.body.id) {
         lastFailure = `account=${account.status} ${JSON.stringify(account.body)}`;
         await sleep(500);
@@ -78,6 +83,7 @@ export async function createAuthenticatedAccount(
     } catch (error) {
       lastFailure =
         error instanceof Error ? error.message : "unknown setup error";
+      console.log("Setup error:", lastFailure);
       await sleep(500);
     }
   }
