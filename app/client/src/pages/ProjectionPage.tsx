@@ -106,7 +106,7 @@ function ProjectionPage({ session }: ProjectionProp) {
             category: accountCategory.CREDIT_CARD,
             remainingAmount: inputAmount,
             minimumPayment: inputMinPay,
-            interestRate: inputInterest / 100,
+            interestRate: inputInterest,
             nextDueDate: nextDueDate,
             period: inputPeriod,
           };
@@ -163,7 +163,7 @@ function ProjectionPage({ session }: ProjectionProp) {
             financial_account_id: selectedAccount,
             balance: inputAmount,
             monthly_deposit: inputMinPay,
-            annual_interest_rate: inputInterest / 100,
+            annual_interest_rate: inputInterest,
             time_frame: inputPeriod,
           };
 
@@ -217,7 +217,7 @@ function ProjectionPage({ session }: ProjectionProp) {
         //Set the fields to what was used in the debt projection graph
         setSelectedAccount(Number(debtRequest.id));
         setAmount(debtRequest.remainingAmount.toFixed(2));
-        setInterest((debtRequest.interestRate * 100).toString());
+        setInterest(debtRequest.interestRate.toString());
         setMinPay(debtRequest.minimumPayment.toFixed(2));
         setNextDueDate(debtRequest.nextDueDate);
         setPeriod(debtRequest.period.toString());
