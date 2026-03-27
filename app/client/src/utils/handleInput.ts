@@ -11,7 +11,7 @@ export const handleCurrencyChange = (
   console.log(input);
   console.log(pattern.test(input));
   //Determine if the input follows the format/pattern
-  if (pattern.test(input) || input === "") {
+  if (pattern.test(input)) {
     input = input.replace(/^0+(?=\d)/, "");
     setCurrency(input);
   }

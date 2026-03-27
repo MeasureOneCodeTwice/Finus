@@ -1,0 +1,10 @@
+FROM oven/bun:1
+
+WORKDIR /app
+
+COPY bun.lockb package.json ./
+RUN bun add -g @stryker-mutator/core @stryker-mutator/typescript-checker
+
+COPY . .
+
+CMD ["bun","run", "mutate"]

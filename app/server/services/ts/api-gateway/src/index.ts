@@ -3,9 +3,39 @@ import { onExit } from "@/hooks";
 import express from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import { buildCorsConfig } from "@/expressUtils";
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { randomUUID } from "node:crypto";
 
 const app = express();
 app.use(buildCorsConfig());
+
+const CLIENT_STATE_DIR =
+  process.env.CLIENT_STATE_DIR ?? "/var/lib/finus-client-state";
+const CLIENT_STATE_RESET_KEY_PATH = path.join(
+  CLIENT_STATE_DIR,
+  "reset-key.txt",
+);
+
+function resolveClientStateResetKey() {
+  try {
+    const existingKey = fs
+      .readFileSync(CLIENT_STATE_RESET_KEY_PATH, "utf8")
+      .trim();
+    if (existingKey.length > 0) {
+      return existingKey;
+    }
+  } catch {
+    // Fall through and create a new reset key.
+  }
+
+  const nextKey = randomUUID();
+  fs.mkdirSync(CLIENT_STATE_DIR, { recursive: true });
+  fs.writeFileSync(CLIENT_STATE_RESET_KEY_PATH, nextKey, "utf8");
+  return nextKey;
+}
+
+const clientStateResetKey = resolveClientStateResetKey();
 
 const pathMatches = (path, valid) => {
   path = path.replace("/api/", "");
@@ -27,6 +57,16 @@ app.use(
   createProxyMiddleware({
     pathFilter: (path) => pathMatches(path, USER_PATHS),
     target: process.env.USER_SERVICE_ADDR,
+    changeOrigin: true,
+    pathRewrite: { "^/api": "" },
+  }),
+);
+
+const MARKET_PATHS = ["markets/search", "markets/quote", "markets/history"];
+app.use(
+  createProxyMiddleware({
+    pathFilter: (path) => pathMatches(path, MARKET_PATHS),
+    target: process.env.MARKET_SERVICE_ADDR,
     changeOrigin: true,
     pathRewrite: { "^/api": "" },
   }),
@@ -67,6 +107,13 @@ app.get("/health", async (req: express.Request, res: express.Response) => {
 
   res.json(result);
 });
+
+app.get(
+  "/client-state/reset-key",
+  (_req: express.Request, res: express.Response) => {
+    res.json({ resetKey: clientStateResetKey });
+  },
+);
 
 const server = app.listen(PORT, () => {
   console.log(`API Gateway running on port ${PORT}`);
@@ -178,5 +225,13 @@ app.use(
     target: process.env.USER_SERVICE_ADDR,
     changeOrigin: true,
     pathRewrite: { "^/api/savings": "/savings" },
+  }),
+);
+// market search, quote, and history endpoints from market service
+app.use(
+  createProxyMiddleware({
+    pathFilter: ["/markets/search", "/markets/quote", "/markets/history"],
+    target: process.env.MARKET_SERVICE_ADDR,
+    changeOrigin: true,
   }),
 );

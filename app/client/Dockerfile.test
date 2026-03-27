@@ -1,0 +1,8 @@
+FROM finus-webserver-base:local
+
+COPY test ./test
+COPY vitest.config.ts .
+
+ENV CI=true
+
+ENTRYPOINT ["bun", "run", "vitest", "--run"]

@@ -345,3 +345,30 @@ transactionsRouter.post(
     }
   },
 );
+
+//Checks the user is the owner of the account
+async function checkUserId(
+  userId: number,
+  accountId: number,
+): Promise<boolean> {
+  let result = false;
+  try {
+    //Checks if the profile has an account with that id
+    const [rows] = await db.query(
+      `SELECT * FROM profile_financialAccount 
+      WHERE profile_id =? AND financialAccount_id =?`,
+      [userId, accountId],
+    );
+
+    console.log(rows.length);
+    result = rows.length > 0;
+  } catch (error) {
+    console.error(error);
+  }
+
+  return result;
+}
+
+function convertToDateTime(date: string) {
+  return date.slice(0, 19).replace("T", " ");
+}

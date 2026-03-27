@@ -1,0 +1,8 @@
+[tool.mutmut]
+paths_to_mutate = ["market_src/"]
+pytest_add_cli_args_test_selection = ["mutation_test/"]
+pytest_add_cli_args = ["-q"]
+mutate_only_covered_lines = true
+do_not_mutate = ["market_src/__init__.py"]
+also_copy = ["mutation_test/"]
+debug = true
