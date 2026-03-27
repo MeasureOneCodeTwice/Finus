@@ -76,3 +76,12 @@ describe("validateFile", () => {
     });
   });
 });
+
+it("does not flag tooManyInvalid when rows are empty even if invalid rows exist conceptually", () => {
+  // simulate invalid rows but pass empty array
+  const result = validateFile([]);
+
+  expect(result.validCount).toBe(0);
+  expect(result.invalidCount).toBe(0);
+  expect(result.tooManyInvalid).toBe(false);
+});
