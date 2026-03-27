@@ -217,7 +217,7 @@ function ProjectionPage({ session }: ProjectionProp) {
         //Set the fields to what was used in the debt projection graph
         setSelectedAccount(Number(debtRequest.id));
         setAmount(debtRequest.remainingAmount.toFixed(2));
-        setInterest(debtRequest.interestRate.toString());
+        setInterest((debtRequest.interestRate * 100).toString());
         setMinPay(debtRequest.minimumPayment.toFixed(2));
         setNextDueDate(debtRequest.nextDueDate);
         setPeriod(debtRequest.period.toString());
@@ -233,7 +233,7 @@ function ProjectionPage({ session }: ProjectionProp) {
       if (savingRequest) {
         //Assigns the fields to what the projection of the saving account used
         setSelectedAccount(savingRequest.financial_account_id);
-        setAmount(savingRequest.balance.toFixed(2));
+        setAmount((savingRequest.balance * 100).toFixed(2));
         setInterest(savingRequest.annual_interest_rate.toString());
         setMinPay(savingRequest.monthly_deposit.toFixed(2));
         setPeriod(savingRequest.time_frame.toString());

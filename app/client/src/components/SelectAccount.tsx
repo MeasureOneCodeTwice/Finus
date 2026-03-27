@@ -1,5 +1,6 @@
 import type { Account } from "@/types/AccountType";
 import React from "react";
+import { accountCategory } from "@/enum/AccountCategory.ts";
 
 interface selectProp {
   accounts: Account[];
@@ -26,7 +27,8 @@ export default function SelectAccount({
         {accounts &&
           accounts.map((account) => (
             <option key={account.id} value={account.id}>
-              {account.name} ({account.type})
+              {account.name} (
+              {accountCategory[account.type as keyof typeof accountCategory]})
             </option>
           ))}
       </select>

@@ -208,7 +208,7 @@ export default function PopupForm({
           >
             <option value="">Select Account type</option>
             {accountCat.map((category) => (
-              <option key={category} value={accountCategory[category]}>
+              <option key={category} value={category}>
                 {accountCategory[category]}
               </option>
             ))}
@@ -229,7 +229,7 @@ export default function PopupForm({
           />
           <br></br>
 
-          {accountType === accountCategory.SAVING ? (
+          {accountType === "SAVING" ? (
             <>
               <label htmlFor="subType">Type of saving account</label>
               <select
@@ -253,7 +253,7 @@ export default function PopupForm({
             </>
           ) : null}
 
-          {accountType === accountCategory.CREDIT_CARD ? (
+          {accountType === "CREDIT_CARD" ? (
             <>
               <label htmlFor="subType">Type of credit:</label>
               <select
