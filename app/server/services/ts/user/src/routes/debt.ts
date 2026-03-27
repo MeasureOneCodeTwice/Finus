@@ -30,7 +30,7 @@ debtRouter.post("/", async (req: Request, res: Response) => {
     try {
         const userId = authenticateJWT(req);
         const newDebt = await createNewDebt(req.body, userId);
-        res.status(201).json({ message: "Debt created successfully", data: newDebt });
+        res.status(201).json(newDebt);
     } catch (err: any) {
         switch (err.constructor) {
             case UnauthorizedAccessError:

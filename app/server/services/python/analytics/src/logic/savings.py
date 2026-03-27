@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from typing import List, Dict
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
@@ -57,42 +58,75 @@ def calculate_savings_over_time(
         }]
     }
 
+# def get_monthly_balances(transactions: pd.DataFrame):
+#     df = transactions.copy()
+#     df['date'] = pd.to_datetime(df['date'])
+
+#     # Sort by date
+#     df = df.sort_values('date')
+
+#     # Group by month
+#     df['year_month'] = df['date'].dt.to_period('M')
+
+#     monthly_sums = df.groupby('year_month')['amount'].sum().reset_index()
+
+#     monthly_sums['year_month'] = monthly_sums['year_month'].dt.to_timestamp()
+
+#     # Create full monthly range
+#     full_range = pd.date_range(
+#         start=monthly_sums['year_month'].min(),
+#         end=monthly_sums['year_month'].max(),
+#         freq='MS'  # month start
+#     )
+
+#     monthly_sums = monthly_sums.set_index('year_month').reindex(full_range, fill_value=0)
+#     monthly_sums = monthly_sums.rename_axis('date').reset_index()
+
+#     # Convert to cumulative balance
+#     monthly_sums['balance'] = monthly_sums['amount'].cumsum()
+#     print(monthly_sums)
+
+#     return monthly_sums
+
 def get_monthly_balances(transactions: pd.DataFrame):
     df = transactions.copy()
     df['date'] = pd.to_datetime(df['date'])
 
-    # Sort by date
-    df = df.sort_values('date')
+    # Extract month only (1–12)
+    df['month'] = df['date'].dt.month
 
-    # Group by month
-    df['year_month'] = df['date'].dt.to_period('M')
+    # Initialize 12 months with no balance
+    monthly_totals = {month: 0 for month in range(1, 13)}
 
-    monthly_sums = df.groupby('year_month')['amount'].sum().reset_index()
+    # Aggregate ignoring year
+    for _, row in df.iterrows():
+        monthly_totals[row['month']] += row['amount']
 
-    monthly_sums['year_month'] = monthly_sums['year_month'].dt.to_timestamp()
+    # Convert to DataFrame (ordered)
+    monthly_df = pd.DataFrame([
+        {"month": m, "amount": monthly_totals[m]}
+        for m in range(1, 13)
+    ])
 
-    # Create full monthly range
-    full_range = pd.date_range(
-        start=monthly_sums['year_month'].min(),
-        end=monthly_sums['year_month'].max(),
-        freq='MS'  # month start
-    )
+    # Compute cumulative balance for each month
+    monthly_df['balance'] = monthly_df['amount'].cumsum()
 
-    monthly_sums = monthly_sums.set_index('year_month').reindex(full_range, fill_value=0)
-    monthly_sums = monthly_sums.rename_axis('date').reset_index()
+    print(monthly_df)
 
-    # Convert to cumulative balance
-    monthly_sums['balance'] = monthly_sums['amount'].cumsum()
-    print(monthly_sums)
-
-    return monthly_sums
+    return monthly_df
 
 def compute_monthly_growth_rates(monthly_df: pd.DataFrame):
     # Compute increase rate between months
     monthly_df['growth_rate'] = monthly_df['balance'].pct_change()
 
-    # Drop first NaN
-    growth_rates = monthly_df['growth_rate'].dropna()
+    # Replace NaN with 0
+    monthly_df['growth_rate'].fillna(0, inplace=True)
+
+    # Replace inf and -inf with NaN and drop NaN
+    monthly_df['growth_rate'] = monthly_df['growth_rate'].replace([np.inf, -np.inf], np.nan).dropna()
+
+    growth_rates = monthly_df['growth_rate']
+    growth_rates = growth_rates.round(3)
 
     return growth_rates
 
@@ -104,6 +138,7 @@ def generate_savings_growth_rate(transactions: List[Dict]) -> MonthlySavingGrowt
 
     monthly_balances = get_monthly_balances(df)
     growth_rates = compute_monthly_growth_rates(monthly_balances)
+    print("Growth rates: \n", growth_rates)
 
     mean_growth = growth_rates.mean()
     standard_deviation_growth = growth_rates.std()
@@ -122,6 +157,10 @@ def calculate_compound_interest(request: ProjectedSavingsRequest) -> List[Compou
         
     cursor = connection.cursor(dictionary=True)
     transactions = get_savings_transactions(cursor, [request.financial_account_id])
+    print(transactions)
+    if len(transactions) == 0:
+        return []
+    
     monthly_savings_rate = generate_savings_growth_rate(transactions)
     print(monthly_savings_rate)
 

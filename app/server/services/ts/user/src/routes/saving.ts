@@ -28,7 +28,7 @@ savingRouter.get("/:financialAccountId/transactions", async (req: Request, res: 
         const financialAccountId = req.params.financialAccountId?.toString()
         console.log("Financial account id: ", financialAccountId)
         const transactions = await getSavingAccountTransactionBy(financialAccountId)
-        res.status(200).json({ data: transactions})
+        res.status(200).json(transactions)
     } catch (err: any) {
         switch (err.constructor) {
             case BadRequestError:
