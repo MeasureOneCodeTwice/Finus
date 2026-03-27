@@ -143,7 +143,7 @@ function App() {
 
     async function syncServerResetKey() {
       try {
-        const response = await fetch(`${API_BASE_URL}/client-state/reset-key`);
+        const response = await fetch(`${BASE_URL}/client-state/reset-key`);
         const data = (await response.json().catch(() => null)) as {
           resetKey?: unknown;
         } | null;

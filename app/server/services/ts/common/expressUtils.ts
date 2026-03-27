@@ -24,7 +24,7 @@ export async function handleServerError(
 ) {
   await func().catch((e) =>
     res.status(500).json({
-      message: message ?? e.message,
+      message: e.message ?? message,
     }),
   );
 }
