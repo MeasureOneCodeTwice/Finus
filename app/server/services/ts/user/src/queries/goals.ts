@@ -75,7 +75,11 @@ export async function createGoal(
   goalData: CreateGoalInput,
 ): Promise<Goal | null> {
   const connection = await pool.getConnection();
-
+  const goalType = goalData.type;
+  let period = goalData.period;
+  if (goalType === "save") {
+    period = "m";
+  }
   try {
     await connection.beginTransaction();
     const [result] = await connection.query(
@@ -86,7 +90,7 @@ export async function createGoal(
         goalData.type,
         goalData.category?.toLowerCase() || "unknown",
         goalData.target,
-        goalData.period,
+        period,
       ],
     );
 
@@ -130,7 +134,7 @@ export async function updateGoal(
   //dynamic update query
   const allowedFields = ["name", "category", "target", "period", "type"];
   const setClauses: string[] = [];
-  const values: unknown[] = []; //---------------------------------------------------this might be an issue
+  const values: unknown[] = [];
 
   //build update query dunamically since some fields may not be provided
   for (const field of allowedFields) {

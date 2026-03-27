@@ -16,7 +16,7 @@ interface EditValueReduceSpending extends EditValueBase {
 
 interface EditValueSave extends EditValueBase {
   type: "save";
-  period?: "na";
+  period?: "m";
 }
 
 type EditValue = EditValueReduceSpending | EditValueSave;
@@ -67,7 +67,7 @@ function editValuesReducer(
           [goalId]: {
             ...baseValues,
             type: "save",
-            period: "na",
+            period: "m",
           },
         };
       }
@@ -100,7 +100,7 @@ function editValuesReducer(
               category: current.category,
               target: current.target,
               type: "save",
-              period: "na",
+              period: "m",
             } as EditValueSave,
           };
         }

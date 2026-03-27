@@ -1,5 +1,5 @@
 export type GoalType = "save" | "reduce_spending";
-export type GoalPeriod = "m" | "w" | "na";
+export type GoalPeriod = "m" | "w"; // | "na";
 
 export interface Goal {
   id: number;
