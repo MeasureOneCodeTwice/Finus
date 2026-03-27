@@ -32,6 +32,8 @@ export async function findTransactionsBy(
   `;
 
   const [rows] = await db.execute<Transaction[]>(query, [financialAccountId]);
+  return rows;
+}
 
 export async function getDateCategoryTransactionsQuery(
   pool: Pool,
