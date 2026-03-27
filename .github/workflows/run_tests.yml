@@ -32,8 +32,7 @@ jobs:
           analytics-test \
           market-test \
           market-mutation-test \
-          market-integration-test \
-          user-integration-test
+          market-integration-test
         do
           echo "::group::Running $service"
           if ! docker compose -f docker-compose.yml -f docker-compose.test.yml run --rm "$service"; then

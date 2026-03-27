@@ -1,3 +1,4 @@
+from numpy import number
 from pydantic import BaseModel
 from typing import List, Literal, Optional
 from datetime import datetime
@@ -52,3 +53,51 @@ class BudgetPerformanceResponse(BaseModel):
     categories: List[str]
     budgetAmounts: List[float]
     actualAmounts: List[float]
+
+class DebtPayoffRequest(BaseModel):
+    id: str
+    category: str
+    remainingAmount: float
+    minimumPayment: float
+    interestRate: Optional[float] = 0
+    nextDueDate: str  # YYYY-MM-DD
+    period: int  # days
+
+class DebtPayoffStage(BaseModel):
+    id: int
+    principalAmount: float
+    interestAmount: float
+    remainingDebt: float
+    installmentDate: str
+
+class DebtPayoffResponse(BaseModel):
+    id: str
+    category: str
+    minimumPayment: float
+    interestRate: float
+    debtStages: List[DebtPayoffStage]
+
+class ProjectedSavingsRequest(BaseModel):
+    financial_account_id: int
+    balance: float
+    monthly_deposit: float
+    annual_interest_rate: float | None  # annual interest rate in percentage
+    time_frame: int  # in years
+class MonthlySavingGrowthRate(BaseModel):
+    best_case: float
+    expected_case: float
+    worst_case: float
+class ProjectedSavingsResponse(BaseModel):
+    balance: float
+    monthly_contribution: float
+    interest_rate: float | None  # annual interest rate in percentage
+    time_frame: int  # in years
+    stat: List[MonthlySavingGrowthRate]
+class CompoundInterestResponse(BaseModel):
+    accumulative_best_balance: float
+    accumulative_expected_balance: float
+    accumulative_worst_balance: float
+    date: str
+
+class BadRequestError(Exception):
+    pass

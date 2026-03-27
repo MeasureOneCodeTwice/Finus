@@ -1,5 +1,4 @@
 from typing import List, Dict
-import mysql.connector
 
 def get_savings_accounts(cursor, user_id: int) -> List[Dict]:
     cursor.execute("""

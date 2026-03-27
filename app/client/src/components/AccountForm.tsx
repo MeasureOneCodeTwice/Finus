@@ -36,14 +36,14 @@ export default function PopupForm({
     let interest = undefined;
     const accountBalance = Number(balance);
 
-    if (accountType === accountCategory.SAVING) {
+    if (
+      (accountType === "SAVING" || accountType === "CREDIT_CARD") &&
+      formInput.subType
+    ) {
       subtype = formInput.subType;
     }
 
-    if (
-      accountType === accountCategory.SAVING ||
-      accountType === accountCategory.DEBT
-    ) {
+    if (accountType === accountCategory.SAVING) {
       interest = formInput.interest;
     }
 
@@ -162,6 +162,7 @@ export default function PopupForm({
   const [accountType, setAccountType] = useState<typeofAccount | undefined>(
     () => {
       if (edit && selectedAccount) {
+        console.log(selectedAccount.type);
         return selectedAccount.type as typeofAccount;
       } else {
         //Default value
@@ -178,13 +179,18 @@ export default function PopupForm({
     <>
       <div className="popup">
         <div className="popupForm">
-          {edit ? <h2>Edit Account</h2> : <h2>Create Account</h2>}
+          {edit ? (
+            <h2 className="formH2">Edit Account</h2>
+          ) : (
+            <h2 className="formH2">Create Account</h2>
+          )}
 
           <label htmlFor="name">Account Name:</label>
           <input
             type="text"
             name="name"
             value={formInput.name}
+            className="formInput"
             onChange={handleChange}
             placeholder="Enter account name"
           />
@@ -195,13 +201,14 @@ export default function PopupForm({
             value={accountType}
             id="type"
             name="type"
+            className="formSelect"
             onChange={(event) =>
               setAccountType(event.target.value as typeofAccount)
             }
           >
             <option value="">Select Account type</option>
             {accountCat.map((category) => (
-              <option key={category} value={category}>
+              <option key={category} value={accountCategory[category]}>
                 {accountCategory[category]}
               </option>
             ))}
@@ -214,6 +221,7 @@ export default function PopupForm({
             min="0"
             step="0.01"
             name="balance"
+            className="formInput"
             value={balance}
             onChange={(event) => handleCurrencyChange(event, setBalance)}
             onBlur={(event) => handleCurrencyBlur(event, balance, setBalance)}
@@ -221,31 +229,43 @@ export default function PopupForm({
           />
           <br></br>
 
-          {accountType === "DEBT" || accountType === "SAVING" ? (
-            <>
-              <label htmlFor="interst">Interest %</label>
-              <input
-                id="interest"
-                name="interest"
-                type="number"
-                min="0"
-                max="100"
-                onChange={handleChange}
-              />
-              <br></br>
-            </>
-          ) : null}
-
-          {accountType === "SAVING" ? (
+          {accountType === accountCategory.SAVING ? (
             <>
               <label htmlFor="subType">Type of saving account</label>
-              <select id="subType" name="subType" onChange={handleChange}>
+              <select
+                id="subType"
+                value={formInput.subType}
+                name="subType"
+                className="formSelect"
+                onChange={(event) => {
+                  handleChange(event);
+                  setFormInput({ ...formInput, ["subType"]: "" });
+                }}
+              >
                 <option value="">Select saving type</option>
                 <option value="TFSA">TFSA</option>
                 <option value="RRSP">RRSP</option>
                 <option value="FHSA">FHSA</option>
+                <option value="RESP">RESP</option>
+                <option value="RDSP">RDSP</option>
               </select>
               <br></br>
+            </>
+          ) : null}
+
+          {accountType === accountCategory.CREDIT_CARD ? (
+            <>
+              <label htmlFor="subType">Type of credit:</label>
+              <select
+                id="subType"
+                name="subType"
+                className="formSelect"
+                value={formInput.subType}
+                onChange={handleChange}
+              >
+                <option value="">Select subtype</option>
+                <option value="Loan">Loan</option>
+              </select>
             </>
           ) : null}
 

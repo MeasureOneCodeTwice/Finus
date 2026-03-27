@@ -12,6 +12,7 @@ import type { AuthSession, AuthUser, AuthApiResponse } from "./types/authTypes";
 import DashboardPage from "./pages/DashboardPage.tsx";
 import MarketsPage from "./pages/MarketsPage";
 import AppLayout from "./components/AppLayout.tsx";
+import ProjectionPage from "./pages/ProjectionPage.tsx";
 import { syncPinnedMarketsResetKey } from "./utils/marketStorage";
 //import { loadSession, saveSession, clearSession } from "./utils/storage.ts";
 //import { requestAuth } from "./api/AuthAPI";
@@ -234,6 +235,8 @@ function App() {
               )
             }
           />
+
+
           {session && (
             <Route element={<AppLayout onLogout={handleLogout} />}>
               <Route
@@ -246,6 +249,16 @@ function App() {
               />
             </Route>
           )}
+
+          {session && (
+            <Route element={<AppLayout onLogout={handleLogout} />}>
+              <Route
+                path="/projection"
+                element={<ProjectionPage session={session} />}
+              />
+            </Route>
+          )}
+          
           <Route path="*" element={<Navigate to="/" replace />} />
 
           {/**Code below is only used for dashboard development purposes */}

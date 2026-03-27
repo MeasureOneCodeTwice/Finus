@@ -21,6 +21,8 @@ import { getGoalCountByProfileId } from "./queries/goals.ts";
 import { accountsRouter } from "./routes/account.js";
 import { profilesRouter } from "./routes/profile.js";
 import { transactionsRouter } from "./routes/transaction.js";
+import { debtRouter } from "./routes/debt.ts";
+import { savingRouter } from "./routes/saving.ts";
 
 const app = express();
 app.use(buildCorsConfig());
@@ -28,21 +30,33 @@ onExit(async () => await server.close());
 
 app.use(express.json());
 
-app.use(
-  (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    // console.log("USER Incoming request: " + req.method + " " + req.url);
-    // console.log(req.body);
-    next();
-  },
-);
+app.use((req, res, next) => {
+  console.log("USER Incoming request: " + req.method + " " + req.url);
+  console.log(req.body);
+  next();
+});
 
 app.use("/accounts", accountsRouter);
 app.use("/transactions", transactionsRouter);
 app.use("/profiles", profilesRouter);
+app.use("/debts", debtRouter);
+app.use("/savings", savingRouter);
 
 const server = app.listen(PORT, () => {
   console.log(`User Service running on port ${PORT}`);
 });
+process.on("SIGTERM", () => cleanup);
+
+ async function cleanup() {
+  try{
+    server.close()
+    await pool.end()
+  } catch(error){
+    console.log(error)
+  }
+}
+
+app.get("/charts/expenses", async (req, res) => {
 process.on("SIGTERM", () => server.close());
 
 app.get(
@@ -123,7 +137,7 @@ app.get(
   },
 );
 
-export { generateDateRange }; //for testing purposes only
+//export { generateDateRange }; //for testing purposes only
 
 // Goal stuff is below------------------------------------------------------
 
@@ -291,3 +305,5 @@ app.delete("/goals", async (req: express.Request, res: express.Response) => {
     }
   }
 });
+
+export { generateDateRange }; //for testing purposes only
