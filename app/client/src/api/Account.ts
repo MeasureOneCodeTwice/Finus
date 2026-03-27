@@ -1,8 +1,9 @@
 import type { updateResponse } from "../types/responseTypes";
 import type { Account } from "../types/AccountType";
 import type { AuthSession } from "@/types/authTypes";
+import { BASE_URL } from "@/utils/constants";
 
-const requestUrl = "http://localhost:3000/api/accounts";
+const requestUrl = `${BASE_URL}/api/accounts`;
 
 //Sends a request to get different accounts the user has
 export async function getUserAccounts(

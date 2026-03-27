@@ -14,7 +14,15 @@ from src.logic import savings as savings_service, incomeflow as incomeflow_servi
 app = FastAPI()
 
 # CORS setup
-origins = ["http://localhost:8080", "http://localhost:3000", "http://127.0.0.1:8080", "http://127.0.0.1:3000"]
+origins = [
+        "http://localhost:8080",
+        "http://localhost:3000",
+        "http://127.0.0.1:8080",
+        "http://127.0.0.1:3000",
+        "http://18.190.215.135", #prod webserver
+        "http://3.142.125.202",  #dev webserver
+]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,

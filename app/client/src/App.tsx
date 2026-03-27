@@ -15,10 +15,7 @@ import AppLayout from "./components/AppLayout.tsx";
 //import { requestAuth } from "./api/AuthAPI";
 //import { resolveUserFromToken } from "./utils/token";
 // import type { AuthApiResponse, AuthSession, AuthUser } from "./pages/authTypes";
-
-const SESSION_STORAGE_KEY = "finus-session";
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000";
+import { BASE_URL, SESSION_STORAGE_KEY } from "@/utils/constants";
 
 function isValidAuthUser(value: unknown): value is AuthUser {
   if (!value || typeof value !== "object") {
@@ -106,7 +103,7 @@ async function requestAuth(
   payload: Record<string, unknown>,
 ): Promise<AuthApiResponse> {
   try {
-    const response = await fetch(`${API_BASE_URL}${path}`, {
+    const response = await fetch(`${BASE_URL}${path}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
