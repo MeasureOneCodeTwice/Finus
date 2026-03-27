@@ -1,8 +1,9 @@
+from src.models.schemas import ProjectedSavingsRequest
 import pytest
 import pandas as pd
 from datetime import datetime
 from unittest.mock import patch, MagicMock
-from src.logic.savings import calculate_savings_over_time
+from src.logic.savings import calculate_savings_over_time, calculate_compound_interest, generate_savings_growth_rate, compute_monthly_growth_rates, get_monthly_balances
 
 class TestSavings:
     
@@ -97,3 +98,36 @@ class TestSavings:
         # Should return empty structure
         assert result['labels'] == []
         assert result['datasets'][0]['data'] == []
+
+    def test_get_monthly_balances(self, mock_savings_transactions_by_financial_account):
+
+        result = get_monthly_balances(mock_savings_transactions_by_financial_account)
+
+        # January = 150, February = 200
+        assert result.loc[result['month'] == 1, 'amount'].values[0] == 150
+        assert result.loc[result['month'] == 2, 'amount'].values[0] == 200
+
+        # cumulative balance
+        assert result.loc[result['month'] == 1, 'balance'].values[0] == 150
+        assert result.loc[result['month'] == 2, 'balance'].values[0] == 350
+
+    def test_compute_growth_rates_handles_nan_and_inf(self, mock_monthly_diff):
+
+        growth_rates = compute_monthly_growth_rates(mock_monthly_diff)
+
+        # Should not contain NaN or inf
+        assert not growth_rates.isnull().any()
+        assert not (growth_rates == float("inf")).any()
+
+    def test_generate_growth_rate(self, mock_transactions_with_same_amount):
+
+        result = generate_savings_growth_rate(mock_transactions_with_same_amount)
+
+        assert result is not None
+        assert result.best_case >= result.expected_case
+        assert result.expected_case >= result.worst_case
+
+    def test_generate_growth_rate_empty(self):
+        result = generate_savings_growth_rate([])
+
+        assert result is None
