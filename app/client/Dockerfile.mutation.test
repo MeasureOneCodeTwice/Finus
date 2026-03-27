@@ -1,10 +1,17 @@
-FROM oven/bun:1
+FROM finus-webserver-base:local AS bun-base
 
 WORKDIR /app
 
-COPY bun.lockb package.json ./
-RUN bun add -g @stryker-mutator/core @stryker-mutator/typescript-checker
+COPY stryker.conf.json .
+COPY test .
 
-COPY . .
+#SUPRISE! Stryker needs node to run.
+FROM node:20
 
-CMD ["bun","run", "mutate"]
+WORKDIR /app
+
+# Copy everything (including node_modules) from Bun stage
+COPY --from=bun-base /app /app
+
+# Run Stryker with Node
+ENTRYPOINT ["npx", "stryker", "run"]

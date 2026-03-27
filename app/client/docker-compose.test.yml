@@ -12,10 +12,6 @@ services:
 
   mutation-tests:
     build:
-      context: .
       dockerfile: Dockerfile.mutation.test
     depends_on:
       - webserver-base
-    volumes:
-      - .:/app/client
-    working_dir: /app/client
