@@ -1,20 +1,16 @@
 import cors from "cors";
 
 const defaultMethods = ["GET", "POST", "PUT", "DELETE", "OPTIONS"];
-const defaultOrigins = [
+const origins = [
   "http://localhost",
   "http://localhost:8080",
-  "http://3.150.23.72",
   "http://18.190.215.135", //prod webserver
   "http://3.142.125.202", //dev webserver
 ];
 
-export function buildCorsConfig(opts?: {
-  origins?: string | string[];
-  methods?: string[];
-}) {
+export function buildCorsConfig(opts?: { methods?: string[] }) {
   return cors({
-    origin: opts?.origin ?? defaultOrigins,
+    origin: origins,
     methods: opts?.methods ?? defaultMethods,
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
