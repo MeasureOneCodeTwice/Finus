@@ -24,7 +24,11 @@ import {
 import ProjectionGraph from "@/components/ProjectionGraph";
 import { TbGraph } from "react-icons/tb";
 import NoItemState from "@/components/NoItemState";
-import { handleCurrencyChange, handleCurrencyBlur } from "@/utils/handleInput";
+import {
+  handleCurrencyChange,
+  handleCurrencyBlur,
+  handleNumberChange,
+} from "@/utils/handleInput";
 import type {
   projectionDebtRequest,
   projectionSavingRequest,
@@ -270,36 +274,6 @@ function ProjectionPage({ session }: ProjectionProp) {
     }
   };
 
-  //Handles on change of percentage
-  const handleNumberChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-    setNumber: React.Dispatch<React.SetStateAction<string>>,
-    min: number,
-    max: number,
-  ) => {
-    let input = event.target.value;
-    let changeInterest;
-    const pattern = /^\d*\.?\d{0,2}$/;
-
-    console.log(input);
-    console.log(pattern.test(input));
-
-    //Determine if the input follows the format/pattern
-    if (pattern.test(input) || input === "") {
-      input = input.replace(/^0+(?=\d)/, "");
-      changeInterest = Number(input);
-
-      if (changeInterest > max) {
-        changeInterest = max;
-      }
-
-      if (changeInterest < min) {
-        changeInterest = min;
-      }
-      console.log(changeInterest);
-      setNumber(changeInterest.toString());
-    }
-  };
   //Get the saving accounts
   useEffect(() => {
     if (selectedType === "Saving") {
