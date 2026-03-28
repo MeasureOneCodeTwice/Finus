@@ -1,14 +1,7 @@
 services:
-  webserver-base:
-    image: finus-webserver-base:local
-    build:
-      dockerfile: Dockerfile.base
-
   webserver:
     image: $DOCKER_HUB_USERNAME/finus-webserver:$RELEASE_VERSION
-    build: 
+    build:
       dockerfile: Dockerfile
     ports:
       - "80:80"
-    depends_on: 
-      - webserver-base
