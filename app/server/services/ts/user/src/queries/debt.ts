@@ -13,7 +13,7 @@ export async function findDebtsBy(db: Pool, userId: string) : Promise<DebtInfoRe
         JOIN finus.profile p ON pfa.profile_id = p.id
         JOIN finus.finusAccount_profile uap ON p.id = uap.profile_id
         WHERE uap.account_id = ? 
-        AND fa.type = 'Credit Card' 
+        AND fa.type = 'CREDIT_CARD' 
         AND fa.subtype = 'Loan'
         GROUP BY fa.id
     `;
