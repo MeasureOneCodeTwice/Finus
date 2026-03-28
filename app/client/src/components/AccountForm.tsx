@@ -208,7 +208,7 @@ export default function PopupForm({
           >
             <option value="">Select Account type</option>
             {accountCat.map((category) => (
-              <option key={category} value={category}>
+              <option key={category} value={accountCategory[category]}>
                 {accountCategory[category]}
               </option>
             ))}
