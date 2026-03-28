@@ -3,7 +3,7 @@ import type { RowDataPacket } from "mysql2";
 import type { PoolConnection, ResultSetHeader, Pool } from "mysql2/promise";
 import type { SavingInfoResponse } from "../types/SavingInfoResponse.ts";
 import type { FinancialAccountRequest } from "../types/FinancialAccountRequest.ts";
-import type { FinancialAccountType } from "../types/FinancialAccountType.ts";
+// import type { FinancialAccountType } from "../types/FinancialAccountType.ts";
 import type { SavingAccountType } from "../types/SavingAccountType.ts";
 // const db = getConnectionPool();
 
@@ -28,7 +28,7 @@ export async function findSavingsBy(
     id: Number(row.id),
     name: String(row.name),
     balance: Number(row.balance),
-    type: "Savings" as FinancialAccountType,
+    type: "Savings" as const,
     subtype: String(row.subtype) as SavingAccountType,
     lastUpdated: row.last_updated
       ? new Date(row.last_updated).toISOString()

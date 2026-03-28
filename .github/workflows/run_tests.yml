@@ -23,7 +23,34 @@ jobs:
         docker compose -f docker-compose.yml -f docker-compose.test.yml build
     - name: Start backend services
       run: docker compose -f docker-compose.yml up -d database auth user analytics market api-gateway
+        docker compose -f docker-compose.yml -f docker-compose.test.yml build
+    - name: Start backend services
+      run: docker compose -f docker-compose.yml up -d database auth user analytics market api-gateway
     - name: Run tests
+      run: |
+        failed=()
+        for service in \
+          auth-test \
+          user-test \
+          analytics-test \
+          market-test \
+          market-mutation-test \
+          market-integration-test
+        do
+          echo "::group::Running $service"
+          if ! docker compose -f docker-compose.yml -f docker-compose.test.yml run --rm "$service"; then
+            failed+=("$service")
+          fi
+          echo "::endgroup::"
+        done
+
+        if [ ${#failed[@]} -gt 0 ]; then
+          echo "Failed test services: ${failed[*]}"
+          exit 1
+        fi
+    - name: Stop services
+      if: always()
+      run: docker compose -f docker-compose.yml -f docker-compose.test.yml down -v --remove-orphans
       run: |
         failed=()
         for service in \

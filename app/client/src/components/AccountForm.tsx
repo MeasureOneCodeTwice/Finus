@@ -37,7 +37,8 @@ export default function PopupForm({
     const accountBalance = Number(balance);
 
     if (
-      (accountType === "SAVING" || accountType === "CREDIT_CARD") &&
+      (accountType === accountCategory.SAVING ||
+        accountType === accountCategory.CREDIT_CARD) &&
       formInput.subType
     ) {
       subtype = formInput.subType;
@@ -202,9 +203,10 @@ export default function PopupForm({
             id="type"
             name="type"
             className="formSelect"
-            onChange={(event) =>
-              setAccountType(event.target.value as typeofAccount)
-            }
+            onChange={(event) => {
+              setAccountType(event.target.value as typeofAccount);
+              setFormInput({ ...formInput, ["subType"]: "" });
+            }}
           >
             <option value="">Select Account type</option>
             {accountCat.map((category) => (
@@ -239,7 +241,6 @@ export default function PopupForm({
                 className="formSelect"
                 onChange={(event) => {
                   handleChange(event);
-                  setFormInput({ ...formInput, ["subType"]: "" });
                 }}
               >
                 <option value="">Select saving type</option>
