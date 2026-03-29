@@ -1,12 +1,13 @@
 #!/bin/bash
 #first argument ($1) is the directory to format the files of.
-changed_files=$(git diff --cached --name-only --diff-filter=ACMRd | grep -E $1/)
+changed_files=$(git diff --cached --name-only --diff-filter=ACMRd | grep -E $1/ | grep -E '\.json|\.ts|\.js^')
 if [ -z "$changed_files" ]; then
     exit 0
 fi
 
 normalized_files=$(echo $changed_files | sed "s|$1/||g" )
 cd $1
+echo $normalized_files
 bun eslint $normalized_files
 if [[ $? != 0 ]]; then
     echo "❌ Failed to format files"
@@ -14,5 +15,5 @@ if [[ $? != 0 ]]; then
 fi
 bun prettier $normalized_files --write --ignore-unknown
 
-git update-index --again
+git update-index --again --ignore-missing
 
