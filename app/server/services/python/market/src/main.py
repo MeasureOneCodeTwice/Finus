@@ -2,6 +2,7 @@ import os
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.responses import PlainTextResponse
 
 from .config import DEFAULT_SEARCH_LIMIT, SUPPORTED_INTERVALS, SUPPORTED_PERIODS
 from .service import build_history, enrich_search_results, fetch_quote_snapshot
@@ -14,7 +15,7 @@ from .yahoo_client import (
 app = FastAPI()
 
 
-@app.get("/health")
+@app.get('/health', response_class=PlainTextResponse)
 def test_endpoint():
     return "ok"
 
