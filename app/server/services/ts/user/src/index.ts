@@ -27,7 +27,6 @@ import { savingRouter } from "./routes/saving.ts";
 const pool = getConnectionPool();
 const app = express();
 app.use(buildCorsConfig());
-onExit(async () => await server.close());
 
 app.use(express.json());
 
@@ -46,19 +45,10 @@ app.use("/savings", savingRouter);
 const server = app.listen(PORT, () => {
   console.log(`User Service running on port ${PORT}`);
 });
-process.on("SIGTERM", () => cleanup);
-
-async function cleanup() {
-  try {
-    server.close();
-    await pool.end();
-  } catch (error) {
-    console.log(error);
-  }
-}
-
-app.get("/charts/expenses", async () => {
-  process.on("SIGTERM", () => server.close());
+onExit(async () => {
+  await new Promise((res) => server.close(res));
+  await pool.end();
+  process.exit(0);
 });
 
 app.get(

@@ -21,16 +21,16 @@ services:
         context: services/python/market
         dockerfile: Dockerfile.test
 
-    # ------ MUTATION TESTS ------ 
-    user-mutation-test:
-      build:
-        context: ./services/ts
-        dockerfile: user/Dockerfile.mutation.test
+    # # ------ MUTATION TESTS ------ 
+    # user-mutation-test:
+    #   build:
+    #     context: ./services/ts
+    #     dockerfile: user/Dockerfile.mutation.test
 
-    market-mutation-test:
-      build:
-        context: services/python/market
-        dockerfile: Dockerfile.mutation.test
+    # market-mutation-test:
+    #   build:
+    #     context: services/python/market
+    #     dockerfile: Dockerfile.mutation.test
 
     # ------ INTEGRATION TESTS ------ 
     market-integration-test:

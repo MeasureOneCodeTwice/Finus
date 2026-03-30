@@ -16,7 +16,7 @@ def wait_for_market_service(base_url: str, timeout_seconds: float) -> None:
     while time.monotonic() < deadline:
         try:
             response = httpx.get(f"{base_url}/health", timeout=5.0)
-            if response.status_code == 200 and response.json() == "ok":
+            if response.status_code == 200 and response.text == "ok":
                 return
             last_error = f"unexpected health response: {response.status_code} {response.text}"
         except httpx.HTTPError as exc:
@@ -39,7 +39,7 @@ def test_market_health_endpoint(market_client: httpx.Client) -> None:
     response = market_client.get("/health")
 
     assert response.status_code == 200
-    assert response.json() == "ok"
+    assert response.text == "ok"
 
 
 def test_search_endpoint_returns_enriched_market_results(

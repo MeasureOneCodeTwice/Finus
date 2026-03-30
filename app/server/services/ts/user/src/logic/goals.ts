@@ -168,8 +168,8 @@ export async function createUserGoal(
   validateGoalInput(goalData);
 
   const newGoal = await goalsQueries.createGoal(pool, profileId, goalData);
-  if (!newGoal) {
-    throw new Error("Failed to create goal");
+  if(!newGoal) {
+    throw new Error("Failed to create goal.");
   }
 
   const enrichedGoal = await enrichGoalWithProgress(pool, newGoal, profileId);

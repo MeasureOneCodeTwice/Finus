@@ -4,10 +4,13 @@ quitting=false
 quit() {
     if ! $quitting; then
         quitting=true
-        echo "Cleaning up..."
-        docker compose -f docker-compose.test.yml -f docker-compose.yml down
+        cleanup
         exit 0
     fi
+}
+cleanup() {
+    echo "Cleaning up..."
+    docker compose -f docker-compose.test.yml -f docker-compose.yml down
 }
 trap quit SIGINT
 
@@ -55,6 +58,16 @@ fi
 docker compose -f docker-compose.test.yml up --abort-on-container-failure
 test_status=$?
 
-quit
+if [ $test_status -eq 0 ]; then
+    echo '+--------------------+'
+    echo '| ✅ All tests pass! |'
+    echo '+--------------------+'
+else 
+    echo '+--------------------+'
+    echo '|  ❌ Tests failed   |'
+    echo '+--------------------+'
+
+fi
+cleanup
 
 exit $test_status
