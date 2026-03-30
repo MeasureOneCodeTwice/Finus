@@ -8,13 +8,8 @@ const app = express();
 app.use(buildCorsConfig());
 
 const pathMatches = (path, valid): boolean => {
-  console.log(`Checking ${path} against ${valid}`)
-  const pathBefore = path;
   path = path.replace("/api", "");
-  console.log(`${pathBefore} -> ${path}`)
-  const matches = valid.includes(path);
-  console.log(`matches: ${matches}`);
-  return matches;
+  return valid.includes(path);
 };
 
 const registerProxy = (target: string, paths: string[]): void => {
@@ -45,7 +40,7 @@ registerProxy(process.env.USER_SERVICE_ADDR, [
   "/charts/expenses",
   "/table/transactions",
   "/table/snapshot",
-  "/transactions/csvTransaction"
+  "/transactions/csvTransaction",
 ]);
 
 registerProxy(process.env.ANALYTICS_SERVICE_ADDR, [

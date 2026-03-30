@@ -168,7 +168,7 @@ export async function createUserGoal(
   validateGoalInput(goalData);
 
   const newGoal = await goalsQueries.createGoal(pool, profileId, goalData);
-  if(!newGoal) {
+  if (!newGoal) {
     throw new Error("Failed to create goal.");
   }
 
