@@ -8,10 +8,18 @@ const requestUrl = `${BASE_URL}/api/accounts`;
 //Sends a request to get different accounts the user has
 export async function getUserAccounts(
   session: AuthSession,
+  type?: string,
 ): Promise<Account[]> {
+  let url = requestUrl;
+
+  //Determine if we're targetting a specific type
+  if (type) {
+    url = `${requestUrl}/?type=${type}`;
+  }
+
   try {
     //Sends a http request and waits for a response
-    const response = await fetch(requestUrl, {
+    const response = await fetch(url, {
       method: "GET",
       headers: { Authorization: `Bearer ${session.token}` },
     });

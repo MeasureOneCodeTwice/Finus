@@ -21,6 +21,20 @@ export async function getAllTransactionsQuery(
   return rows;
 }
 
+export async function findTransactionsBy(
+  db: Pool,
+  financialAccountId: string,
+): Promise<Transaction[]> {
+  const query = `
+    SELECT * FROM finus.transaction t
+    WHERE t.financialAccount_id = ?
+    ORDER BY t.date DESC
+  `;
+
+  const [rows] = await db.execute<Transaction[]>(query, [financialAccountId]);
+  return rows;
+}
+
 export async function getDateCategoryTransactionsQuery(
   pool: Pool,
   profileId: number,

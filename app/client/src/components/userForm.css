@@ -1,33 +1,44 @@
 .popupForm {
-  background-color: lightgrey;
+  background-color: rgba(14, 15, 15, 0.776);
   padding: 15px;
   place-content: start;
+  width: max-content;
   height: auto;
+  white-space: nowrap;
 }
 
-input {
+.formInput {
   margin-top: 2.5%;
   margin-bottom: 2.5%;
   margin-left: 1%;
+  margin-right: 1%;
+  background-color: rgba(0, 0, 0, 0.566);
+  padding-left: 2%;
+  border-color: black;
+  border-width: 2px;
 }
 
-select {
+.formSelect {
   margin-top: 2.5%;
   margin-bottom: 2.5%;
   margin-left: 1%;
+  background-color: rgba(0, 0, 0, 0.566);
+  padding-left: 2%;
+  border-color: black;
+  border-width: 2px;
 }
 
 .popup {
   color: black;
-  background-color: floralwhite;
-  padding: 15px;
+  background-color: rgb(34, 206, 66);
+  padding: 10px;
   border-radius: 5px;
   border-style: solid;
   border-width: 2px;
-  border-color: black;
+  border-color: rgba(34, 250, 94, 1);
 
   position: fixed;
-  top: 0;
+  top: 10%;
   bottom: 0;
   right: 35%;
   left: 35%;
@@ -36,20 +47,29 @@ select {
   height: max-content;
 
   font-size: 10pt;
+  color: antiquewhite;
 
   justify-content: center;
   align-items: center;
 }
 
-button {
+.formButton {
   padding: 5px;
   border-width: 1px;
   border-color: black;
   border-radius: 5px;
 }
 
+.formH2 {
+  font-weight: bold;
+  text-align: center;
+  padding-bottom: 2%;
+}
+
 .bottomButtons {
+  margin-top: 5px;
   display: flex;
+  color: black;
 }
 
 .bottomButtons :first-child {

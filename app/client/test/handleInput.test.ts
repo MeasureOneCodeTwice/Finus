@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import {
   handleCurrencyChange,
   handleCurrencyBlur,
+  handleNumberChange,
 } from "../src/utils/handleInput";
 //tests for handleCurrencyChange and handleCurrencyBlur functions
 function mockEvent(value: string) {
@@ -134,4 +135,69 @@ it("does not strip zeros inside the number", () => {
   handleCurrencyChange(event, setCurrency);
 
   expect(setCurrency).toHaveBeenCalledWith("101");
+});
+
+describe("handleNumberChange", () => {
+  it("accepts valid number input", () => {
+    const setNumber = vi.fn();
+    const event = mockEvent("12");
+
+    handleNumberChange(event, setNumber, 0, 100);
+
+    expect(setNumber).toHaveBeenCalledWith("12");
+  });
+
+  it("Doesn't accept decimals", () => {
+    const setNumber = vi.fn();
+    const event = mockEvent("12.");
+
+    handleNumberChange(event, setNumber, 0, 100);
+
+    expect(setNumber).not.toHaveBeenCalledWith();
+  });
+
+  it("Empty string", () => {
+    const setNumber = vi.fn();
+    const event = mockEvent("");
+
+    handleNumberChange(event, setNumber, 0, 100);
+
+    expect(setNumber).toHaveBeenCalledWith("");
+  });
+
+  it("strip leading 0s", () => {
+    const setNumber = vi.fn();
+    const event = mockEvent("0000123");
+
+    handleNumberChange(event, setNumber, 0, 100);
+
+    expect(setNumber).toHaveBeenCalledWith("123");
+  });
+
+  it("rejects letters in input", () => {
+    const setNumber = vi.fn();
+    const event = mockEvent("12A");
+
+    handleNumberChange(event, setNumber, 0, 100);
+
+    expect(setNumber).not.toHaveBeenCalledWith();
+  });
+
+  it("Sets the value to the maximum", () => {
+    const setNumber = vi.fn();
+    const event = mockEvent("120");
+
+    handleNumberChange(event, setNumber, 0, 100);
+
+    expect(setNumber).not.toHaveBeenCalledWith("100");
+  });
+
+  it("Sets value to the minimum", () => {
+    const setNumber = vi.fn();
+    const event = mockEvent("1");
+
+    handleNumberChange(event, setNumber, 10, 100);
+
+    expect(setNumber).not.toHaveBeenCalledWith("10");
+  });
 });

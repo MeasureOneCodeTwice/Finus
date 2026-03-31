@@ -3,6 +3,7 @@ import { useState } from "react";
 import AccountPopup from "./AccountForm.tsx";
 import { type Account } from "../types/AccountType.ts";
 import type { AuthSession } from "@/types/authTypes.ts";
+import { accountCategory } from "@/enum/AccountCategory.ts";
 
 interface cardProp {
   account: Account;
@@ -47,7 +48,9 @@ export default function Card({
 
         <div>
           <p>
-            {account.type + " " + (account.subtype ? " " + account.type : "")}
+            {accountCategory[account.type as keyof typeof accountCategory] +
+              " " +
+              (account.subtype ? " " + account.subtype : "")}
           </p>
           <p>{Number(account.balance).toFixed(2)}</p>
         </div>

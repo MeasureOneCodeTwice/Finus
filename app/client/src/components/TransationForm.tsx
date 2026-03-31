@@ -9,6 +9,7 @@ import { type Transaction } from "../types/Transaction";
 import { type Account } from "@/types/AccountType";
 import { transactionCategory } from "@/enum/TransactionCategory";
 import type { AuthSession } from "@/types/authTypes";
+import SelectAccount from "@/components/SelectAccount";
 
 interface popupProp {
   toggle: () => void;
@@ -215,24 +216,22 @@ export default function PopupForm({
     <>
       <div className="popup">
         <div className="popupForm">
-          {edit ? <h2>Edit Transaction</h2> : <h2>Create Transaction</h2>}
+          {edit ? (
+            <h2 className="formH2">Edit Transaction</h2>
+          ) : (
+            <h2 className="formH2">Create Transaction</h2>
+          )}
 
-          <label htmlFor="sellectAccount">User Account:</label>
-          <select
-            id="selectAccount"
-            value={selectedAccount}
-            onChange={(event) => {
-              setSelectedAccount(Number(event.target.value));
-            }}
-          >
-            <option value="">Select Account</option>
-            {account &&
-              account.map((account) => (
-                <option key={account.id} value={account.id}>
-                  {account.name} ({account.type})
-                </option>
-              ))}
-          </select>
+          {account && (
+            <SelectAccount
+              accounts={account}
+              selectedAccount={selectedAccount}
+              handleSelectAccount={(
+                event: React.ChangeEvent<HTMLSelectElement>,
+              ) => setSelectedAccount(Number(event.target.value))}
+            />
+          )}
+
           <br></br>
 
           {selectedType == transactionCategory.INCOME ? (
@@ -244,6 +243,7 @@ export default function PopupForm({
             id="other"
             type="text"
             value={other}
+            className="formInput"
             onChange={(event) => setOther(event.target.value)}
           ></input>
           <br></br>
@@ -252,6 +252,7 @@ export default function PopupForm({
           <select
             id="transferType"
             value={selectedType}
+            className="formSelect"
             onChange={(event) =>
               setSelectedType(event.target.value as typeOfTransaction)
             }
@@ -265,9 +266,9 @@ export default function PopupForm({
           </select>
           <br></br>
 
-          <label htmlFor="amount">Amount: $</label>
+          <label htmlFor="amount">Amount:$</label>
           <input
-            className="moneyInput"
+            className="formInput"
             min="0"
             step={"0.01"}
             type="text"
@@ -284,6 +285,7 @@ export default function PopupForm({
             type="date"
             id="inputDate"
             name="inputDate"
+            className="formInput"
             value={selectedDate}
             onChange={(event) => setSelectedDate(event.target.value)}
           />
