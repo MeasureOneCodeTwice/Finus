@@ -125,7 +125,7 @@ accountsRouter.get("/", async (req: Request, res: Response) => {
         [profileId],
       );
 
-      console.log(rows);
+      // console.log(rows);
 
       return res.status(200).json(rows);
     } catch (err) {
@@ -183,7 +183,7 @@ accountsRouter.put("/", async (req: Request, res: Response) => {
       [name, type, balance, value, last_updated, subtype ?? null, id],
     );
 
-    console.log("Updated Account " + name);
+    // console.log("Updated Account " + name);
     return res.status(200).json({
       message: "Account successfully updated",
       lastUpdated: last_updated,

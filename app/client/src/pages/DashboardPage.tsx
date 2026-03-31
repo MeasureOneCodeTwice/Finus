@@ -17,7 +17,7 @@ import BudgetExpenditureChart from "@/components/BudgetExpenditureChart";
 import SnapshotSection from "@/components/SnapshotSection";
 
 import AccountList from "@/components/AccountList";
-import TransactionList from "@/components/TransactionList";
+// import TransactionList from "@/components/TransactionList";
 
 Chart.register(
   PointElement,
@@ -82,13 +82,13 @@ function DashboardPage({ session }: DashboardPageProps) {
       <DashboardChartSection />
       <BudgetExpenditureChart />
       <h2 className="text-2xl font-bold mb-4">Recent Transactions</h2>
-      <TransactionTable />
+      <TransactionTable initialLimit={100} loadMoreIncrement={100} />
 
       <h2 className="text-2xl font-bold mb-4">Account List</h2>
       {session && <AccountList session={session} />}
 
-      <h2 className="text-2xl font-bold mb-4">Transaction List</h2>
-      {session && <TransactionList session={session} />}
+      {/* <h2 className="text-2xl font-bold mb-4">Transaction List</h2>
+      {session && <TransactionList session={session} />} */}
     </section>
   );
 }

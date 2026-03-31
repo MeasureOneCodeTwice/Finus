@@ -4,6 +4,7 @@ import type { Transaction } from "@/types/Transaction";
 import { instance } from "./config";
 import type { BudgetWithExpenditure } from "@/types/BudgetWithExpenditure";
 import type { SnapshotData } from "@/types/AggregatedSnapshot";
+import type { MinimizedAccount } from "@/types/AccountType";
 
 async function getTransactions(): Promise<Transaction[] | null> {
   try {
@@ -28,12 +29,97 @@ async function getTransactions(): Promise<Transaction[] | null> {
         sender: response.data[i]["sender"],
         recipient: response.data[i]["recipient"],
         description: response.data[i]["description"],
+        account_name: response.data[i]["account_name"],
       });
     }
 
+    // console.log("Fetched transactions:", output);
     return output;
   } catch (error) {
     console.error("Error fetching transactions data:", error);
+    throw error;
+  }
+}
+
+//deletes a single transaciton based on id - returns true if successful, false otherwise
+export async function deleteTransaction(
+  transactionId: number,
+): Promise<boolean> {
+  try {
+    const response = await instance.delete(
+      `/table/transactions?tid=${transactionId}`,
+    );
+    if (response.status !== 200) {
+      console.error("Failed to delete transaction", response.status);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error("Error deleting transaction:", error);
+    return false;
+  }
+}
+
+//updates a single transaciton based on id - returns true if successful, false otherwise
+export async function updateTransaction(
+  transaction: Transaction,
+): Promise<boolean> {
+  try {
+    const response = await instance.put(
+      `/table/transactions?tid=${transaction.id}`,
+      transaction,
+    );
+    if (response.status !== 200) {
+      console.error("Failed to update transaction", response.status);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error("Error updating transaction:", error);
+    return false;
+  }
+}
+
+//creates a single transaciton - returns the created transaction with id if successful, throws error otherwise
+export async function createTransaction(
+  transaction: Transaction,
+): Promise<Transaction> {
+  try {
+    const response = await instance.post(
+      `/table/transactions?fid=${transaction.financialAccount_id}`,
+      transaction,
+    );
+    if (response.status !== 200) {
+      throw new Error(`Failed to create transaction: ${response.statusText}`);
+    }
+    return response.data;
+  } catch (error) {
+    console.error("Error creating transaction:", error);
+    throw error;
+  }
+}
+
+//gets a map of account ids to account names for a user id
+export async function getAccountIdsForUser(): Promise<
+  MinimizedAccount[] | null
+> {
+  try {
+    const response = await instance.get(`/table/transactions/accounts`);
+    if (response.status !== 200) {
+      throw new Error(
+        `Failed to fetch account IDs for user: ${response.statusText}`,
+      );
+    }
+    if (!response.data) {
+      return null;
+    }
+    const output: MinimizedAccount[] = [];
+    for (const account of response.data) {
+      output.push({ id: account.id, name: account.name });
+    }
+    return output;
+  } catch (error) {
+    console.error("Error fetching account IDs for user:", error);
     throw error;
   }
 }

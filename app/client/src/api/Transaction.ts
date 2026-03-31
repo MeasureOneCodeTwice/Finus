@@ -5,7 +5,7 @@ import type { TransactionDraft } from "@/utils/ConvertTransaction";
 
 const requestUrl = "http://localhost:3000/api/transactions";
 
-//Sends a GET request to get the list of user transactions for the account
+//Sends a GET request to get the list of user transactions for the account - no need for this
 export async function getTransactions(
   session: AuthSession,
   financialAccount_id: number,
@@ -32,7 +32,7 @@ export async function getTransactions(
   }
 }
 
-//Can send multiple transactions in a push request
+//Can send multiple transactions in a push request - no need for this
 export async function postTranscations(
   session: AuthSession,
   trans: Transaction,
