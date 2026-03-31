@@ -27,10 +27,14 @@ services:
     #     context: ./services/ts
     #     dockerfile: user/Dockerfile.mutation.test
 
-    # market-mutation-test:
-    #   build:
-    #     context: services/python/market
-    #     dockerfile: Dockerfile.mutation.test
+    market-mutation-test:
+      build:
+        context: services/python/market
+        dockerfile: Dockerfile.mutation.test
+
+    # MISSING
+    #  ANALYTICS
+    #  AUTH
 
     # ------ INTEGRATION TESTS ------ 
     market-integration-test:
