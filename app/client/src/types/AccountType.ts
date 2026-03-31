@@ -8,3 +8,8 @@ export interface Account {
   subtype?: string;
   last_updated: Date;
 }
+
+export interface MinimizedAccount {
+  id: number;
+  name: string;
+}
