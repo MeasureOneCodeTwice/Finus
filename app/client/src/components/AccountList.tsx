@@ -448,25 +448,48 @@ function AccountList({ session }: AccountListProps) {
                             <option value="investment">Investment</option>
                           </select>
                         </div>
-                        <div>
-                          <label className="text-xs text-gray-400 block mb-1">
-                            Subtype
-                          </label>
-                          <input
-                            type="text"
-                            value={editValues.subtype ?? account.subtype ?? ""}
-                            onChange={(e) =>
-                              handleFieldChange(
-                                account.id,
-                                "subtype",
-                                e.target.value,
-                              )
-                            }
-                            placeholder="Optional"
-                            className="w-full bg-black/50 border border-green-500/30 rounded px-3 py-2 text-white text-sm"
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                        </div>
+
+                        {account.subtype && (
+                          <div>
+                            <label className="text-xs text-gray-400 block mb-1">
+                              Subtype
+                            </label>
+                            {account.type === "savings" && (
+                              <select
+                                value={newAccount.subtype}
+                                onChange={(e) =>
+                                  setNewAccount({
+                                    ...newAccount,
+                                    subtype: e.target.value,
+                                  })
+                                }
+                                className="w-full bg-black/50 border border-green-500/30 rounded px-3 py-2 text-white text-sm"
+                              >
+                                <option value="">Subtype</option>
+                                <option value="TFSA">TFSA</option>
+                                <option value="RRSP">RRSP</option>
+                                <option value="FHSA">FHSA</option>
+                                <option value="RESP">RESP</option>
+                                <option value="RDSP">RDSP</option>
+                              </select>
+                            )}
+                            {account.type === "credit_card" && (
+                              <select
+                                value={newAccount.subtype}
+                                onChange={(e) =>
+                                  setNewAccount({
+                                    ...newAccount,
+                                    subtype: e.target.value,
+                                  })
+                                }
+                                className="w-full bg-black/50 border border-green-500/30 rounded px-3 py-2 text-white text-sm"
+                              >
+                                <option value="">Subtype</option>
+                                <option value="loan">Loan</option>
+                              </select>
+                            )}
+                          </div>
+                        )}
                         <div>
                           <label className="text-xs text-gray-400 block mb-1">
                             Balance
