@@ -11,10 +11,12 @@ import {
   AiOutlineSearch,
   AiOutlinePlus,
   AiOutlineClose,
+  AiOutlineUpload,
 } from "react-icons/ai";
 import { FiEdit2 } from "react-icons/fi";
 import NoItemState from "./NoItemState";
 import type { MinimizedAccount } from "@/types/AccountType.ts";
+import CSVImportModal from "./CSVImportModal";
 
 interface TransactionTableProps {
   initialLimit?: number;
@@ -41,6 +43,10 @@ function TransactionTable({
   }>({});
   const [userAccounts, setUserAccounts] = useState<MinimizedAccount[]>([]);
   const [selectedAccountId, setSelectedAccountId] = useState<number | "">("");
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [selectedAccountForImport, setSelectedAccountForImport] = useState<
+    number | null
+  >(null);
 
   // Fetch all transactions on component load
   useEffect(() => {
@@ -76,6 +82,15 @@ function TransactionTable({
     };
     fetchAccounts();
   }, []);
+
+  const handleImportSuccess = (newTransactions: Transaction[]) => {
+    setAllTransactions((prev) => [
+      ...newTransactions.map((tx) => ({ ...tx, isExpanded: false })),
+      ...prev,
+    ]);
+    setShowImportModal(false);
+    setSelectedAccountForImport(null);
+  };
 
   // Client-side search
   const filteredTransactions = useMemo(() => {
@@ -282,13 +297,45 @@ function TransactionTable({
             className="w-full pl-10 pr-4 py-2 bg-black/50 border border-green-500/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-green-500"
           />
         </div>
-        <button
-          onClick={() => setShowAddForm(!showAddForm)}
-          className="flex items-center gap-2 px-4 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-500/50 rounded-lg text-green-400 transition-all"
-        >
-          <AiOutlinePlus />
-          Add Transaction
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowAddForm(!showAddForm)}
+            className="flex items-center gap-2 px-4 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-500/50 rounded-lg text-green-400 transition-all"
+          >
+            <AiOutlinePlus />
+            Add Transaction
+          </button>
+          {/* Import CSV Modal */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                if (userAccounts.length === 0) {
+                  alert(
+                    "Please create an account first before importing transactions",
+                  );
+                  return;
+                }
+                setSelectedAccountForImport(userAccounts[0].id);
+                setShowImportModal(true);
+              }}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/50 rounded-lg text-blue-400 transition-all"
+            >
+              <AiOutlineUpload />
+              Import CSV
+            </button>
+          </div>
+          {showImportModal && selectedAccountForImport && (
+            <CSVImportModal
+              isOpen={showImportModal}
+              onClose={() => {
+                setShowImportModal(false);
+                setSelectedAccountForImport(null);
+              }}
+              onSuccess={handleImportSuccess}
+              accountId={selectedAccountForImport}
+            />
+          )}
+        </div>
       </div>
 
       {/* Add Transaction Form */}

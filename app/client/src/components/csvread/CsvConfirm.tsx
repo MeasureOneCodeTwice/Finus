@@ -22,7 +22,7 @@ export default function CsvConfirmation({ rows, onConfirm, onBack }: Props) {
     .reduce((sum, r) => sum + (r.amount ?? 0), 0);
 
   return (
-    <div style={{ marginTop: "1rem" }}>
+    <div style={{ marginTop: "1rem", color: "#888" }}>
       <h3>Summary</h3>
 
       <div style={{ marginBottom: "1rem" }}>
