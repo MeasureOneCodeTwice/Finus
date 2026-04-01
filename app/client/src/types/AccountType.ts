@@ -6,7 +6,7 @@ export interface Account {
   balance: number;
   value: number;
   subtype?: string;
-  last_updated: Date;
+  last_updated: string;
 }
 
 export interface MinimizedAccount {

@@ -4,7 +4,7 @@ import type { Transaction } from "@/types/Transaction";
 import { instance } from "./config";
 import type { BudgetWithExpenditure } from "@/types/BudgetWithExpenditure";
 import type { SnapshotData } from "@/types/AggregatedSnapshot";
-import type { MinimizedAccount } from "@/types/AccountType";
+import type { Account, MinimizedAccount } from "@/types/AccountType";
 
 async function getTransactions(): Promise<Transaction[] | null> {
   try {
@@ -287,6 +287,91 @@ async function getIncomeFlowChartData(
     return response.data;
   } catch (error) {
     console.error("Error fetching income flow chart data:", error);
+    throw error;
+  }
+}
+
+export async function getUserAccounts(): Promise<Account[] | null> {
+  try {
+    const response = await instance.get(`/api/accounts`);
+
+    if (response.status !== 200) {
+      throw new Error(`Failed to fetch accounts: ${response.statusText}`);
+    }
+    if (!response.data) {
+      return null;
+    }
+
+    console.log("Fetched accounts:", response.data);
+    const output: Account[] = [];
+    for (let i = 0; i < response.data.length; i++) {
+      output.push({
+        id: response.data[i]["id"],
+        name: response.data[i]["name"],
+        type: response.data[i]["type"],
+        balance: response.data[i]["balance"],
+        value: response.data[i]["value"] || response.data[i]["balance"],
+        subtype: response.data[i]["subtype"],
+        last_updated: response.data[i]["last_updated"],
+      });
+    }
+
+    return output;
+  } catch (error) {
+    console.error("Error fetching accounts:", error);
+    throw error;
+  }
+}
+
+//create a new account
+export async function createAccount(
+  accountData: Omit<Account, "id">,
+): Promise<Account> {
+  try {
+    const response = await instance.post(`/api/accounts`, accountData);
+
+    if (response.status !== 200) {
+      throw new Error(`Failed to create account: ${response.statusText}`);
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error creating account:", error);
+    throw error;
+  }
+}
+
+//update an existing account
+export async function updateAccount(
+  accountData: Partial<Account> & { id: number },
+): Promise<Account> {
+  try {
+    const response = await instance.put(
+      `/api/accounts/${accountData.id}`,
+      accountData,
+    );
+
+    if (response.status !== 200) {
+      throw new Error(`Failed to update account: ${response.statusText}`);
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error updating account:", error);
+    throw error;
+  }
+}
+
+//delete an account
+export async function deleteAccount(accountId: number): Promise<void> {
+  try {
+    const response = await instance.delete(`/api/accounts/${accountId}`);
+
+    if (response.status !== 200) {
+      throw new Error(`Failed to delete account: ${response.statusText}`);
+    }
+  } catch (error) {
+    console.error("Error deleting account:", error);
     throw error;
   }
 }
