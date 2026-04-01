@@ -1,5 +1,5 @@
 import express from "express";
-import { pool } from "./db.ts";
+import { getConnectionPool, getDatabaseStatus } from "@/sqlUtil";
 import { authenticateJWT } from "./utils/auth.ts";
 import { generateDateRange } from "./utils/dates.ts";
 import { validatePeriod } from "./validation.ts";
@@ -24,9 +24,9 @@ import { transactionsRouter } from "./routes/transaction.js";
 import { debtRouter } from "./routes/debt.ts";
 import { savingRouter } from "./routes/saving.ts";
 
+const pool = getConnectionPool();
 const app = express();
 app.use(buildCorsConfig());
-onExit(async () => await server.close());
 
 app.use(express.json());
 
@@ -45,20 +45,11 @@ app.use("/savings", savingRouter);
 const server = app.listen(PORT, () => {
   console.log(`User Service running on port ${PORT}`);
 });
-process.on("SIGTERM", () => cleanup);
-
- async function cleanup() {
-  try{
-    server.close()
-    await pool.end()
-  } catch(error){
-    console.log(error)
-  }
-}
-
-app.get("/charts/expenses", async (req, res) => {
-process.on("SIGTERM", () => server.close());
-})
+onExit(async () => {
+  await new Promise((res) => server.close(res));
+  await pool.end();
+  process.exit(0);
+});
 
 app.get(
   "/charts/expenses",
@@ -305,6 +296,11 @@ app.delete("/goals", async (req: express.Request, res: express.Response) => {
       res.status(500).json({ error: "Failed to delete goal" });
     }
   }
+});
+
+app.get("/health", async (_, res) => {
+  const status = await getDatabaseStatus();
+  res.send(status);
 });
 
 export { generateDateRange }; //for testing purposes only

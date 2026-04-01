@@ -169,7 +169,7 @@ export async function createUserGoal(
 
   const newGoal = await goalsQueries.createGoal(pool, profileId, goalData);
   if (!newGoal) {
-    throw new Error("Failed to create goal");
+    throw new Error("Failed to create goal.");
   }
 
   const enrichedGoal = await enrichGoalWithProgress(pool, newGoal, profileId);
