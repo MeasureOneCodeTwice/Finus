@@ -59,3 +59,12 @@ services:
         dockerfile: auth/Dockerfile.integration.test
       env_file:
         - ./default_container.env
+
+    analytics-integration-test:
+      build:
+        context: ./services/python/analytics
+        dockerfile: Dockerfile.integration.test
+      env_file:
+        - ./default_container.env
+      environment:
+        - JWT_SECRET
