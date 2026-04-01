@@ -14,7 +14,7 @@ client = TestClient(src.main.app)
 def test_health_endpoint():
     response = client.get("/health")
     assert response.status_code == 200
-    assert response.json() == "ok"
+    assert response.text == "ok"
 
 
 def test_search_route_combines_sources_and_enriches_results():

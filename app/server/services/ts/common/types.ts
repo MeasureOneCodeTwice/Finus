@@ -1,5 +1,7 @@
 import type { RowDataPacket } from "mysql2";
 
+export type DatabaseStatus = "unhealthy" | "ok";
+
 export type User = {
   id: number;
   username: string;

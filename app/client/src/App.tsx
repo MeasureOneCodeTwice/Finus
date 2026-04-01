@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   BrowserRouter as Router,
   Navigate,
@@ -13,11 +13,6 @@ import DashboardPage from "./pages/DashboardPage.tsx";
 import MarketsPage from "./pages/MarketsPage";
 import AppLayout from "./components/AppLayout.tsx";
 import ProjectionPage from "./pages/ProjectionPage.tsx";
-import { syncPinnedMarketsResetKey } from "./utils/marketStorage";
-//import { loadSession, saveSession, clearSession } from "./utils/storage.ts";
-//import { requestAuth } from "./api/AuthAPI";
-//import { resolveUserFromToken } from "./utils/token";
-// import type { AuthApiResponse, AuthSession, AuthUser } from "./pages/authTypes";
 import { BASE_URL, SESSION_STORAGE_KEY } from "@/utils/constants";
 
 function isValidAuthUser(value: unknown): value is AuthUser {
@@ -138,35 +133,6 @@ function App() {
   const [session, setSession] = useState<AuthSession | null>(() =>
     loadSession(),
   );
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function syncServerResetKey() {
-      try {
-        const response = await fetch(`${BASE_URL}/client-state/reset-key`);
-        const data = (await response.json().catch(() => null)) as {
-          resetKey?: unknown;
-        } | null;
-
-        if (cancelled || !response.ok) {
-          return;
-        }
-
-        if (typeof data?.resetKey === "string" && data.resetKey.length > 0) {
-          syncPinnedMarketsResetKey(data.resetKey);
-        }
-      } catch {
-        // Ignore reset-key sync failures and keep the client usable offline.
-      }
-    }
-
-    void syncServerResetKey();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   function handleAuthSuccess(token: string, fallbackUser: Partial<AuthUser>) {
     const nextSession: AuthSession = {

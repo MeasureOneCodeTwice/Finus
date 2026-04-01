@@ -3,7 +3,6 @@ import { loadSession } from "@/utils/storage";
 
 const PINNED_MARKETS_STORAGE_KEY_PREFIX = "finus-pinned-markets";
 const LEGACY_PINNED_MARKETS_STORAGE_KEY = PINNED_MARKETS_STORAGE_KEY_PREFIX;
-const SERVER_RESET_KEY_STORAGE_KEY = "finus-server-reset-key";
 const PINNED_MARKETS_CLEARED_EVENT = "finus:pinned-markets-cleared";
 
 function resolvePinnedMarketsStorageKey(): string | null {
@@ -24,21 +23,6 @@ function resolvePinnedMarketsStorageKey(): string | null {
 
 function clearLegacyPinnedMarkets() {
   localStorage.removeItem(LEGACY_PINNED_MARKETS_STORAGE_KEY);
-}
-
-function clearAllPinnedMarkets() {
-  clearLegacyPinnedMarkets();
-
-  for (let index = localStorage.length - 1; index >= 0; index -= 1) {
-    const key = localStorage.key(index);
-    if (!key) {
-      continue;
-    }
-
-    if (key.startsWith(`${PINNED_MARKETS_STORAGE_KEY_PREFIX}:`)) {
-      localStorage.removeItem(key);
-    }
-  }
 }
 
 function loadPinnedMarkets(): PinnedMarketInstrument[] {
@@ -84,23 +68,9 @@ function savePinnedMarkets(items: PinnedMarketInstrument[]) {
   localStorage.setItem(storageKey, JSON.stringify(items));
 }
 
-function syncPinnedMarketsResetKey(resetKey: string): boolean {
-  const previousResetKey = localStorage.getItem(SERVER_RESET_KEY_STORAGE_KEY);
-  if (previousResetKey === resetKey) {
-    return false;
-  }
-
-  clearAllPinnedMarkets();
-  localStorage.setItem(SERVER_RESET_KEY_STORAGE_KEY, resetKey);
-  window.dispatchEvent(new Event(PINNED_MARKETS_CLEARED_EVENT));
-  return true;
-}
-
 export {
-  clearAllPinnedMarkets,
   loadPinnedMarkets,
   PINNED_MARKETS_CLEARED_EVENT,
   savePinnedMarkets,
   PINNED_MARKETS_STORAGE_KEY_PREFIX,
-  syncPinnedMarketsResetKey,
 };

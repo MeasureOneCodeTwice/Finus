@@ -5,7 +5,7 @@ import { buildCorsConfig, handleServerError } from "@/expressUtils";
 import { signup, login } from "./logic";
 import type { LoginBody, SignupBody } from "./types";
 import { parseLoginBody, parseSignupBody } from "./parsing";
-import { getConnectionPool } from "@/sqlUtil";
+import { getConnectionPool, getDatabaseStatus } from "@/sqlUtil";
 
 const pool = getConnectionPool();
 const app = express();
@@ -37,8 +37,9 @@ app.post("/login", async (req, res) => {
   handleServerError(() => login(body, res, pool), res);
 });
 
-app.get("/health", (_, res) => {
-  res.send({ ok: true });
+app.get("/health", async (_, res) => {
+  const status = await getDatabaseStatus();
+  res.send(status);
 });
 
 const server = app.listen(PORT, () => {

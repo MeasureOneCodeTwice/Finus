@@ -21,7 +21,8 @@ class TestDatabaseConnection:
             host='localhost',
             user='test_user',
             password='test_password',
-            database='test_db'
+            database='test_db',
+            connection_timeout=10
         )
 
         assert result == mock_connection
