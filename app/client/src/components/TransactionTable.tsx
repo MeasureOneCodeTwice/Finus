@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { getAccountIdsForUser, getTransactions } from "../api/DashboardAPI";
 import {
   deleteTransaction,
@@ -22,11 +22,9 @@ interface TransactionTableProps {
 }
 
 interface EditableTransaction extends Transaction {
-  isEditing?: boolean;
   isExpanded?: boolean;
 }
 
-//the initial limit is how many transactions we load at first, the loadMoreIncrement is how many more we load each time we click load more
 function TransactionTable({
   initialLimit = 100,
   loadMoreIncrement = 50,
@@ -41,11 +39,10 @@ function TransactionTable({
   const [editingValues, setEditingValues] = useState<{
     [key: number]: Partial<Transaction>;
   }>({});
-  const tableContainerRef = useRef<HTMLDivElement>(null);
-  const [userAccounts, setUserAccounts] = useState<MinimizedAccount[]>([]); //will only be using the account id and account name in this table
+  const [userAccounts, setUserAccounts] = useState<MinimizedAccount[]>([]);
   const [selectedAccountId, setSelectedAccountId] = useState<number | "">("");
 
-  //fetches all transactions on component load
+  // Fetch all transactions on component load
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
@@ -63,13 +60,15 @@ function TransactionTable({
     fetchTransactions();
   }, []);
 
+  // Fetch accounts for dropdown
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
         const accounts = await getAccountIdsForUser();
-        setUserAccounts(accounts as MinimizedAccount[]);
         if (accounts && accounts.length > 0) {
-          setSelectedAccountId(accounts[0].id); //default to first account
+          setUserAccounts(accounts);
+          console.log("Fetched accounts:", accounts);
+          setSelectedAccountId(accounts[0].id);
         }
       } catch (error) {
         console.error("Error fetching accounts:", error);
@@ -78,7 +77,7 @@ function TransactionTable({
     fetchAccounts();
   }, []);
 
-  // client side search - this just looks for the search term in all columns of each row.
+  // Client-side search
   const filteredTransactions = useMemo(() => {
     if (!searchTerm.trim()) return allTransactions;
 
@@ -98,7 +97,7 @@ function TransactionTable({
   const displayedTransactions = filteredTransactions.slice(0, displayLimit);
   const hasMore = displayLimit < filteredTransactions.length;
 
-  // format helpers
+  // Format helpers
   const formatAmount = (amount: number): string => {
     return amount < 0
       ? `-$${Math.abs(amount).toFixed(2)}`
@@ -123,6 +122,7 @@ function TransactionTable({
     //initialize editing values when expanding
     const tx = allTransactions.find((t) => t.id === transactionId);
     if (tx && !editingValues[transactionId]) {
+      console.log("transaciton date is", tx.date);
       setEditingValues((prev) => ({
         ...prev,
         [transactionId]: {
@@ -138,7 +138,7 @@ function TransactionTable({
     }
   };
 
-  //handle field changes in expanded edit form - this is exactly like goals
+  // Handle field changes in expanded edit form
   const handleFieldChange = (
     transactionId: number,
     field: string,
@@ -153,31 +153,26 @@ function TransactionTable({
     }));
   };
 
-  // save edited transaction
+  // Save edited transaction
   const handleSaveEdit = async (transactionId: number) => {
     const updates = editingValues[transactionId];
     if (!updates) return;
 
-    const existingTx = allTransactions.find((tx) => tx.id === transactionId);
-    if (!existingTx) return;
-
-    const payload = {
-      ...existingTx,
-      ...updates,
-      id: transactionId,
-    } as Transaction;
-
     try {
-      const success = await updateTransaction(payload);
+      const success = await updateTransaction({
+        id: transactionId,
+        ...updates,
+      } as Transaction);
+
       if (!success) throw new Error("Update failed");
 
-      setAllTransactions((prev) =>
-        prev.map((tx) =>
-          tx.id === transactionId
-            ? { ...tx, ...updates, isExpanded: false }
-            : tx,
-        ),
+      //fetch the updated transaction to get fresh data
+      const updatedTxs = await getTransactions();
+      // console.log("Updated transactions after edit:", updatedTxs);
+      setAllTransactions(
+        (updatedTxs || []).map((tx) => ({ ...tx, isExpanded: false })),
       );
+
       setEditingValues((prev) => {
         const newState = { ...prev };
         delete newState[transactionId];
@@ -189,7 +184,7 @@ function TransactionTable({
     }
   };
 
-  //delete transaction
+  // Delete transaction
   const handleDelete = async (transactionId: number) => {
     if (!confirm("Are you sure you want to delete this transaction?")) return;
 
@@ -204,7 +199,7 @@ function TransactionTable({
     }
   };
 
-  //add new transaction
+  // Add new transaction state
   const [newTransaction, setNewTransaction] = useState<Partial<Transaction>>({
     date: new Date().toISOString().split("T")[0],
     description: "",
@@ -234,6 +229,7 @@ function TransactionTable({
         ...newTransaction,
         financialAccount_id: selectedAccountId as number,
       } as Transaction);
+
       setAllTransactions((prev) => [
         { ...created, isExpanded: false },
         ...prev,
@@ -274,7 +270,7 @@ function TransactionTable({
 
   return (
     <div className="my-10">
-      {/* search Bar */}
+      {/* Search Bar */}
       <div className="flex justify-between items-center mb-4 gap-4">
         <div className="relative flex-1 max-w-md">
           <AiOutlineSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
@@ -295,7 +291,7 @@ function TransactionTable({
         </button>
       </div>
 
-      {/* add Transaction Form */}
+      {/* Add Transaction Form */}
       {showAddForm && (
         <div className="mb-6 p-4 bg-black/50 border border-green-500/20 rounded-lg">
           <div className="flex justify-between items-center mb-3">
@@ -359,9 +355,6 @@ function TransactionTable({
               onChange={(e) => setSelectedAccountId(Number(e.target.value))}
               className="bg-black/50 border border-green-500/30 rounded px-3 py-2 text-white"
             >
-              <option value="" disabled>
-                Select an account
-              </option>
               {userAccounts.map((account) => (
                 <option key={account.id} value={account.id}>
                   {account.name}
@@ -407,41 +400,41 @@ function TransactionTable({
         </div>
       )}
 
-      {/* transactions Table */}
-      <div
-        ref={tableContainerRef}
-        className="bg-black rounded-[20px] border border-green-500/15 shadow-[0_0_40px_rgba(34,197,94,0.12)] overflow-hidden max-h-[600px] flex flex-col"
-      >
-        {/* header */}
+      {/* Transactions Table */}
+      <div className="bg-black rounded-[20px] border border-green-500/15 shadow-[0_0_40px_rgba(34,197,94,0.12)] overflow-hidden max-h-[600px] flex flex-col">
+        {/* Header */}
         <div className="grid grid-cols-[0.8fr_1.5fr_1fr_1fr_1.2fr_1fr_0.5fr] bg-gray-900/70 px-6 py-4 text-xs font-semibold text-green-400 uppercase tracking-wider border-b border-green-500/10 gap-x-2 flex-shrink-0">
           <div>Date</div>
           <div>Description</div>
           <div>Category</div>
           <div>Amount</div>
           <div>Account</div>
-          <div>From/To</div>
+          <div>From</div>
+          <div>To</div>
           <div></div>
         </div>
 
-        {/* body */}
+        {/* Body */}
         <div className="overflow-y-auto flex-grow dash-hover-scrollbar">
           <div className="divide-y divide-green-500/10">
             {displayedTransactions.map((tx, index) => {
               const isExpanded = tx.isExpanded;
               const editValues = editingValues[tx.id] || {};
+              const currentAccountId =
+                editValues.financialAccount_id ||
+                userAccounts.find((acc) => acc.name === tx.account_name)?.id ||
+                "";
 
               return (
                 <div key={tx.id}>
-                  {/* main row */}
+                  {/* Main Row */}
                   <div
-                    className={`grid grid-cols-[0.8fr_1.5fr_1fr_1fr_1.2fr_1fr_0.5fr] px-6 py-4 items-center text-sm transition duration-200 cursor-pointer
+                    className={`grid grid-cols-[0.8fr_1.5fr_1fr_1fr_1.2fr_1fr_1fr_0.5fr] px-6 py-4 items-center text-sm transition duration-200 cursor-pointer
                       ${index % 2 === 0 ? "bg-black" : "bg-gray-900/40"}
                       hover:bg-green-500/20 gap-x-2`}
                     onClick={() => toggleExpand(tx.id)}
                   >
-                    <div className="text-gray-400">
-                      {new Date(tx.date).toLocaleDateString()}
-                    </div>
+                    <div className="text-gray-400">{tx.date}</div>
                     <div
                       className="font-medium text-white truncate"
                       title={tx.description}
@@ -462,12 +455,14 @@ function TransactionTable({
                     >
                       {tx.account_name || "N/A"}
                     </div>
-                    <div className="text-gray-400 truncate">
-                      {tx.sender
-                        ? `From: ${tx.sender}`
-                        : tx.recipient
-                          ? `To: ${tx.recipient}`
-                          : "-"}
+                    <div className="text-gray-400 truncate" title={tx.sender}>
+                      {tx.sender || "-"}
+                    </div>
+                    <div
+                      className="text-gray-400 truncate"
+                      title={tx.recipient}
+                    >
+                      {tx.recipient || "-"}
                     </div>
                     <div className="flex gap-1">
                       <FiEdit2
@@ -477,7 +472,7 @@ function TransactionTable({
                     </div>
                   </div>
 
-                  {/* expanded edit row */}
+                  {/* Expanded Edit Row */}
                   {isExpanded && (
                     <div className="bg-gray-900/60 px-6 py-4 border-t border-green-500/10">
                       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -551,26 +546,32 @@ function TransactionTable({
                             onClick={(e) => e.stopPropagation()}
                           />
                         </div>
+
+                        {/* Account Selector for Edit Form */}
                         <div>
                           <label className="text-xs text-gray-400 block mb-1">
                             Account
                           </label>
-                          <input
-                            type="text"
-                            value={
-                              editValues.account_name ?? tx.account_name ?? ""
-                            }
+                          <select
+                            value={currentAccountId}
                             onChange={(e) =>
                               handleFieldChange(
                                 tx.id,
-                                "account_name",
-                                e.target.value,
+                                "financialAccount_id",
+                                Number(e.target.value),
                               )
                             }
                             className="w-full bg-black/50 border border-green-500/30 rounded px-3 py-2 text-white text-sm"
                             onClick={(e) => e.stopPropagation()}
-                          />
+                          >
+                            {userAccounts.map((account) => (
+                              <option key={account.id} value={account.id}>
+                                {account.name}
+                              </option>
+                            ))}
+                          </select>
                         </div>
+
                         <div>
                           <label className="text-xs text-gray-400 block mb-1">
                             From
@@ -633,7 +634,7 @@ function TransactionTable({
         </div>
       </div>
 
-      {/* load more button */}
+      {/* Load More Button */}
       {hasMore && (
         <div className="flex justify-center mt-4">
           <button

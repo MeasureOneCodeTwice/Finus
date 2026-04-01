@@ -206,6 +206,7 @@ export async function deleteTransactionQuery(
     transactionId,
     profileId,
   ]);
+  // console.log("Delete transaction result:", result);
   return result.affectedRows > 0;
 }
 

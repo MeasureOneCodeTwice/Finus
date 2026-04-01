@@ -57,6 +57,7 @@ const USER_PATHS = [
   "profiles",
   "/charts/expenses",
   "/table/transactions",
+  "/table/transactions/accounts",
   "/table/snapshot",
   "/goals",
 ];

@@ -42,7 +42,6 @@ app.use(express.json());
 
 app.use((req, res, next) => {
   console.log("USER Incoming request: " + req.method + " " + req.url);
-  console.log(req.body);
   next();
 });
 
@@ -65,10 +64,6 @@ async function cleanup() {
     console.log(error);
   }
 }
-
-// app.get("/charts/expenses", async (req, res) => { //why does this exist
-// process.on("SIGTERM", () => server.close());
-// })
 
 app.get(
   "/charts/expenses",
@@ -107,6 +102,7 @@ app.get(
         return res.json([]); // Return empty array for no transactions
       }
 
+      console.log("Fetched transactions for user:", transactions);
       res.json(transactions);
     } catch (error) {
       console.error("Error fetching transactions:", error);
@@ -124,8 +120,17 @@ app.get(
   async (req: express.Request, res: express.Response) => {
     try {
       const userId = authenticateJWT(req);
-      const accounts = await getAccountIDsForUser(pool, userId); //get account IDs and names
-      res.json(accounts);
+      const accountsMap = await getAccountIDsForUser(pool, userId);
+
+      //convert Map to array of objects
+      const accountsArray: { id: number; name: string }[] = [];
+      if (accountsMap instanceof Map) {
+        accountsMap.forEach((name, id) => {
+          accountsArray.push({ id: Number(id), name });
+        });
+      }
+
+      res.json(accountsArray);
     } catch (error) {
       console.error("Error fetching transactions:", error);
       if (error instanceof Error && error.message.includes("Authorization")) {
@@ -139,7 +144,7 @@ app.get(
 
 //create a new transaction through the table
 app.post(
-  "table/transactions",
+  "/table/transactions",
   async (req: express.Request, res: express.Response) => {
     try {
       const userId = authenticateJWT(req);
@@ -198,6 +203,8 @@ app.post(
         },
       };
 
+      console.log("Creating transaction with data:", transactionData);
+
       const transaction = await createTransaction(
         pool,
         financialAccountId as unknown as number,
@@ -218,7 +225,7 @@ app.post(
 
 //delete a transaction through the table
 app.delete(
-  "table/transactions",
+  "/table/transactions",
   async (req: express.Request, res: express.Response) => {
     try {
       const userId = authenticateJWT(req);
@@ -247,6 +254,7 @@ app.delete(
       if (!deleted) {
         return res.status(404).json({ error: "Transaction not found" });
       }
+      return res.status(200).send();
     } catch (error) {
       console.error("Error deleting transaction:", error);
       if (error instanceof Error && error.message.includes("Authorization")) {
@@ -260,7 +268,7 @@ app.delete(
 
 //update a transaction through the table
 app.patch(
-  "table/transactions",
+  "/table/transactions",
   async (req: express.Request, res: express.Response) => {
     try {
       const userId = authenticateJWT(req);
@@ -294,6 +302,8 @@ app.patch(
       if (req.body.sender !== undefined) updates.sender = req.body.sender;
       if (req.body.recipient !== undefined)
         updates.recipient = req.body.recipient;
+
+      console.log("Updating transaction with the following updates:", updates);
 
       const transaction = await updateTransactionQuery(
         pool,

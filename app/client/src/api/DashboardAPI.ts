@@ -20,12 +20,17 @@ async function getTransactions(): Promise<Transaction[] | null> {
     }
     const output: Transaction[] = [];
     for (let i = 0; i < response.data.length; i++) {
+      let formattedDate = response.data[i]["date"];
+      if (formattedDate) {
+        formattedDate = formattedDate.split("T")[0]; //database stores transacitons as datetime so split to get date and disregard time
+      }
+
       output.push({
         id: response.data[i]["id"],
         financialAccount_id: response.data[i]["financialAccount_id"],
         amount: response.data[i]["amount"],
         category: response.data[i]["category"],
-        date: response.data[i]["date"],
+        date: formattedDate,
         sender: response.data[i]["sender"],
         recipient: response.data[i]["recipient"],
         description: response.data[i]["description"],
@@ -65,7 +70,7 @@ export async function updateTransaction(
   transaction: Transaction,
 ): Promise<boolean> {
   try {
-    const response = await instance.put(
+    const response = await instance.patch(
       `/table/transactions?tid=${transaction.id}`,
       transaction,
     );
@@ -105,18 +110,26 @@ export async function getAccountIdsForUser(): Promise<
 > {
   try {
     const response = await instance.get(`/table/transactions/accounts`);
+
     if (response.status !== 200) {
       throw new Error(
         `Failed to fetch account IDs for user: ${response.statusText}`,
       );
     }
-    if (!response.data) {
+
+    if (!response.data || !Array.isArray(response.data)) {
       return null;
     }
-    const output: MinimizedAccount[] = [];
-    for (const account of response.data) {
-      output.push({ id: account.id, name: account.name });
-    }
+
+    //directly map the array
+    const output: MinimizedAccount[] = response.data.map(
+      (account: MinimizedAccount) => ({
+        id: account.id,
+        name: account.name,
+      }),
+    );
+
+    console.log("Fetched account IDs:", output);
     return output;
   } catch (error) {
     console.error("Error fetching account IDs for user:", error);
@@ -224,7 +237,7 @@ async function getSavingsContribChartData(
       );
     }
     const response = await instance.get(`/charts/savings?period=${period}`);
-    console.log("received savings data", response);
+    // console.log("received savings data", response);
     if (response.status !== 200) {
       throw new Error(
         `Failed to fetch savings contribution chart data: ${response.statusText}`,

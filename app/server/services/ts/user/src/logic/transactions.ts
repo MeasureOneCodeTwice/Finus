@@ -57,7 +57,6 @@ export async function getTransactionsData(
       pool,
       financialAccountIds,
     );
-    console.log("account names fetched for transactions:", accountNames);
     Object.assign(accountIdToNameMap, accountNames);
   }
 
