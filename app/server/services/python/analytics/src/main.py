@@ -141,7 +141,7 @@ async def predict_debt_payoff(
 
 
 @app.post('/compound-interest')
-async def compount_interest(
+async def compound_interest(
     requestBody: ProjectedSavingsRequest,
     user_id: int = Depends(get_current_user),
 ) -> List[CompoundInterestResponse]:

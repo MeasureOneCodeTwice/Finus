@@ -58,36 +58,6 @@ def calculate_savings_over_time(
         }]
     }
 
-# def get_monthly_balances(transactions: pd.DataFrame):
-#     df = transactions.copy()
-#     df['date'] = pd.to_datetime(df['date'])
-
-#     # Sort by date
-#     df = df.sort_values('date')
-
-#     # Group by month
-#     df['year_month'] = df['date'].dt.to_period('M')
-
-#     monthly_sums = df.groupby('year_month')['amount'].sum().reset_index()
-
-#     monthly_sums['year_month'] = monthly_sums['year_month'].dt.to_timestamp()
-
-#     # Create full monthly range
-#     full_range = pd.date_range(
-#         start=monthly_sums['year_month'].min(),
-#         end=monthly_sums['year_month'].max(),
-#         freq='MS'  # month start
-#     )
-
-#     monthly_sums = monthly_sums.set_index('year_month').reindex(full_range, fill_value=0)
-#     monthly_sums = monthly_sums.rename_axis('date').reset_index()
-
-#     # Convert to cumulative balance
-#     monthly_sums['balance'] = monthly_sums['amount'].cumsum()
-#     print(monthly_sums)
-
-#     return monthly_sums
-
 def get_monthly_balances(transactions: pd.DataFrame):
     df = transactions.copy()
     df['date'] = pd.to_datetime(df['date'])
