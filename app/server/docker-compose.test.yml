@@ -22,7 +22,7 @@ services:
     userinp-test:
       build: 
         context: services/ts
-        dockerfile: user/userInput/Dockerfile.userInp.test
+        dockerfile: user/Dockerfile.userInp.test
 
     # user-integration-test:#uncomment to run integration tests locally as it likely does not work properly in CI/CD
     #   build:
