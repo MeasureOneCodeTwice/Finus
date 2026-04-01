@@ -52,3 +52,10 @@ services:
         - ./default_container.env
       environment:
         - JWT_SECRET
+    
+    auth-integration-test:
+      build:
+        context: ./services/ts
+        dockerfile: auth/Dockerfile.integration.test
+      env_file:
+        - ./default_container.env

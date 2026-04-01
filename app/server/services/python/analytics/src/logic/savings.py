@@ -163,9 +163,9 @@ def calculate_compound_interest(request: ProjectedSavingsRequest) -> List[Compou
     monthly_savings_rate = generate_savings_growth_rate(transactions)
     print(monthly_savings_rate)
 
-    best_rate = monthly_savings_rate.best_case
-    worst_rate = monthly_savings_rate.worst_case
-    expected_rate = monthly_savings_rate.expected_case
+    best_rate = round(monthly_savings_rate.best_case / 12, 3)
+    worst_rate = round(monthly_savings_rate.worst_case / 12, 3)
+    expected_rate = round(monthly_savings_rate.expected_case / 12, 3)
 
     worst_balance = request.balance
     expected_balance = request.balance
