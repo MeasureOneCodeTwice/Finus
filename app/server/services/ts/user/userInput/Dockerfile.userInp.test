@@ -1,12 +1,12 @@
 FROM measureonecodetwice/finus-user:local
 
-COPY user/integration ./integration
+COPY userInput/*.test.ts ./test/
 
 WORKDIR /project
+
 COPY vitest.config.ts .
 
 ENV CI=true
 
-CMD ["bun", "test", "integration", "--coverage"]
-
-
+# Run tests
+CMD ["bun", "run", "vitest", "--run"]

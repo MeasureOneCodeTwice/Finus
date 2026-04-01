@@ -19,6 +19,11 @@ services:
         context: services/python/analytics
         dockerfile: Dockerfile.test
 
+    userinp-test:
+      build: 
+        context: services/ts
+        dockerfile: user/userInput/Dockerfile.userInp.test
+
     # user-integration-test:#uncomment to run integration tests locally as it likely does not work properly in CI/CD
     #   build:
     #     context: ./services/ts
