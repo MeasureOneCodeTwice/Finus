@@ -169,7 +169,7 @@ function ProjectionPage({ session }: ProjectionProp) {
           setSavingRequest(newSavingRequest);
 
           try {
-            const data = await getSavingProjection(session, newSavingRequest);
+            const data = await getSavingProjection(newSavingRequest);
             if (data) {
               const graphData: projectedDataResponse = {
                 dateLabel: [],
@@ -339,19 +339,21 @@ function ProjectionPage({ session }: ProjectionProp) {
                 ? "Select Savings Account"
                 : "Select Debt Account"}
             </label>
-            {selectedType === "Saving" ? (
-              <SelectAccount
-                accounts={accounts}
-                selectedAccount={selectedAccount}
-                handleSelectAccount={handleSelectAccount}
-              />
-            ) : (
-              <SelectAccount
-                accounts={debts}
-                selectedAccount={selectedDebt}
-                handleSelectAccount={handleSelectAccount}
-              />
-            )}
+            <div className="bg-black/50 px-3 py-2 text-gray-400">
+              {selectedType === "Saving" ? (
+                <SelectAccount
+                  accounts={accounts}
+                  selectedAccount={selectedAccount}
+                  handleSelectAccount={handleSelectAccount}
+                />
+              ) : (
+                <SelectAccount
+                  accounts={debts}
+                  selectedAccount={selectedDebt}
+                  handleSelectAccount={handleSelectAccount}
+                />
+              )}
+            </div>
           </div>
 
           {/* Input Grid */}
