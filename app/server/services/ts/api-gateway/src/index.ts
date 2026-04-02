@@ -36,6 +36,7 @@ registerProxy(process.env.USER_SERVICE_ADDR, [
   "/profiles",
   "/goals",
   "/debts",
+  "/savings",
   "/transactions",
   "/charts/expenses",
   "/table/transactions",

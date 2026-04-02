@@ -27,6 +27,12 @@ import { profilesRouter } from "./routes/profile.js";
 import { transactionsRouter } from "./routes/transaction.js";
 import { debtRouter } from "./routes/debt.ts";
 import { savingRouter } from "./routes/saving.ts";
+import type { Transaction } from "./types/Transaction.ts";
+import {
+  createTransaction,
+  deleteTransactionQuery,
+  updateTransactionQuery,
+} from "./queries/transactions.ts";
 
 const pool = getConnectionPool();
 const app = express();
@@ -91,7 +97,7 @@ app.get(
         return res.json([]); // Return empty array for no transactions
       }
 
-      console.log("Fetched transactions for user:", transactions);
+      // console.log("Fetched transactions for user:", transactions);
       res.json(transactions);
     } catch (error) {
       console.error("Error fetching transactions:", error);
@@ -192,7 +198,7 @@ app.post(
         },
       };
 
-      console.log("Creating transaction with data:", transactionData);
+      // console.log("Creating transaction with data:", transactionData);
 
       const transaction = await createTransaction(
         pool,
@@ -289,10 +295,10 @@ app.patch(
       if (req.body.amount !== undefined) updates.amount = req.body.amount;
       if (req.body.date !== undefined) updates.date = req.body.date;
       if (req.body.sender !== undefined) updates.sender = req.body.sender;
-      if (req.body.recipient !== undefined)
-        updates.recipient = req.body.recipient;
+      if (req.body.recipient !== undefined) updates.recipient = req.body.recipient;
+      if (req.body.financialAccount_id !== undefined) updates.financialAccount_id = req.body.financialAccount_id;
 
-      console.log("Updating transaction with the following updates:", updates);
+      // console.log("Updating transaction with the following updates:", updates);
 
       const transaction = await updateTransactionQuery(
         pool,
@@ -303,6 +309,8 @@ app.patch(
       if (!transaction) {
         return res.status(404).json({ error: "Transaction not found" });
       }
+
+      res.json(transaction);
     } catch (error) {
       console.error("Error updating transaction:", error);
       if (error instanceof Error && error.message.includes("Authorization")) {

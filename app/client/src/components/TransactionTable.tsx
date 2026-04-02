@@ -23,30 +23,26 @@ interface TransactionTableProps {
   loadMoreIncrement?: number;
 }
 
-interface EditableTransaction extends Transaction {
-  isExpanded?: boolean;
-}
+// interface EditableTransaction extends Transaction {
+// }
 
 function TransactionTable({
   initialLimit = 100,
   loadMoreIncrement = 50,
 }: TransactionTableProps) {
-  const [allTransactions, setAllTransactions] = useState<EditableTransaction[]>(
+  const [allTransactions, setAllTransactions] = useState<Transaction[]>(
     [],
   );
   const [displayLimit, setDisplayLimit] = useState(initialLimit);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
-  const [editingValues, setEditingValues] = useState<{
-    [key: number]: Partial<Transaction>;
-  }>({});
+  const [editingValues, setEditingValues] = useState<{[key: number]: Partial<Transaction>;}>({});
   const [userAccounts, setUserAccounts] = useState<MinimizedAccount[]>([]);
   const [selectedAccountId, setSelectedAccountId] = useState<number | "">("");
   const [showImportModal, setShowImportModal] = useState(false);
-  const [selectedAccountForImport, setSelectedAccountForImport] = useState<
-    number | null
-  >(null);
+  const [selectedAccountForImport, setSelectedAccountForImport] = useState<number | null>(null);
+  const [expandedRowId, setExpandedRowId] = useState<number | null>(null); 
 
   // Fetch all transactions on component load
   useEffect(() => {
@@ -54,9 +50,7 @@ function TransactionTable({
       try {
         setIsLoading(true);
         const txs = await getTransactions();
-        setAllTransactions(
-          (txs || []).map((tx) => ({ ...tx, isExpanded: false })),
-        );
+        setAllTransactions(txs || []);
       } catch (error) {
         console.error("Error fetching transactions:", error);
       } finally {
@@ -73,7 +67,6 @@ function TransactionTable({
         const accounts = await getAccountIdsForUser();
         if (accounts && accounts.length > 0) {
           setUserAccounts(accounts);
-          console.log("Fetched accounts:", accounts);
           setSelectedAccountId(accounts[0].id);
         }
       } catch (error) {
@@ -83,16 +76,50 @@ function TransactionTable({
     fetchAccounts();
   }, []);
 
+
   const handleImportSuccess = (newTransactions: Transaction[]) => {
     setAllTransactions((prev) => [
-      ...newTransactions.map((tx) => ({ ...tx, isExpanded: false })),
+      ...newTransactions,
       ...prev,
     ]);
     setShowImportModal(false);
     setSelectedAccountForImport(null);
   };
 
-  // Client-side search
+  //helper function for date formatting
+  const formatDateForInput = (dateStr: string): string => {
+    if (!dateStr) return "";
+    // If it's already YYYY-MM-DD, return as is
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+    // Otherwise parse and format
+    return new Date(dateStr).toISOString().split('T')[0];
+  };
+
+  const handleRowClick = (transactionId: number) => {
+    const isExpanding = expandedRowId !== transactionId;
+    setExpandedRowId(isExpanding ? transactionId : null);
+    
+    // Initialize editing values when expanding
+    if (isExpanding) {
+      const tx = allTransactions.find((t) => t.id === transactionId);
+      if (tx && !editingValues[transactionId]) {
+        setEditingValues((prev) => ({
+          ...prev,
+          [transactionId]: {
+            date: tx.date,
+            description: tx.description || "",
+            category: tx.category,
+            amount: tx.amount,
+            account_name: tx.account_name,
+            sender: tx.sender || "",
+            recipient: tx.recipient || "",
+          },
+        }));
+      }
+    }
+  };
+
+  // client-side search
   const filteredTransactions = useMemo(() => {
     if (!searchTerm.trim()) return allTransactions;
 
@@ -126,34 +153,8 @@ function TransactionTable({
       .join(" ");
   };
 
-  //expand/collapse row
-  const toggleExpand = (transactionId: number) => {
-    setAllTransactions((prev) =>
-      prev.map((tx) =>
-        tx.id === transactionId ? { ...tx, isExpanded: !tx.isExpanded } : tx,
-      ),
-    );
 
-    //initialize editing values when expanding
-    const tx = allTransactions.find((t) => t.id === transactionId);
-    if (tx && !editingValues[transactionId]) {
-      console.log("transaciton date is", tx.date);
-      setEditingValues((prev) => ({
-        ...prev,
-        [transactionId]: {
-          date: tx.date,
-          description: tx.description || "",
-          category: tx.category,
-          amount: tx.amount,
-          account_name: tx.account_name,
-          sender: tx.sender || "",
-          recipient: tx.recipient || "",
-        },
-      }));
-    }
-  };
-
-  // Handle field changes in expanded edit form
+  // handle field changes in expanded edit form
   const handleFieldChange = (
     transactionId: number,
     field: string,
@@ -168,7 +169,7 @@ function TransactionTable({
     }));
   };
 
-  // Save edited transaction
+  // save edited transaction
   const handleSaveEdit = async (transactionId: number) => {
     const updates = editingValues[transactionId];
     if (!updates) return;
@@ -181,25 +182,28 @@ function TransactionTable({
 
       if (!success) throw new Error("Update failed");
 
-      //fetch the updated transaction to get fresh data
-      const updatedTxs = await getTransactions();
-      // console.log("Updated transactions after edit:", updatedTxs);
-      setAllTransactions(
-        (updatedTxs || []).map((tx) => ({ ...tx, isExpanded: false })),
-      );
+      const isExpanding = expandedRowId !== transactionId;
+      setExpandedRowId(isExpanding ? transactionId : null);
+
+      const freshTransactions = await getTransactions();
+      setAllTransactions(freshTransactions || []);
 
       setEditingValues((prev) => {
         const newState = { ...prev };
         delete newState[transactionId];
         return newState;
       });
+
+      // close the expanded row
+      setExpandedRowId(null);
+      
     } catch (error) {
       console.error("Failed to update transaction:", error);
       alert("Failed to update transaction");
     }
   };
 
-  // Delete transaction
+  // delete transaction
   const handleDelete = async (transactionId: number) => {
     if (!confirm("Are you sure you want to delete this transaction?")) return;
 
@@ -214,7 +218,7 @@ function TransactionTable({
     }
   };
 
-  // Add new transaction state
+  //add new transaction state
   const [newTransaction, setNewTransaction] = useState<Partial<Transaction>>({
     date: new Date().toISOString().split("T")[0],
     description: "",
@@ -225,45 +229,54 @@ function TransactionTable({
   });
 
   const handleAddTransaction = async () => {
-    if (
-      !newTransaction.date ||
-      !newTransaction.category ||
-      newTransaction.amount === undefined
-    ) {
-      alert("Please fill in required fields (date, category, amount)");
-      return;
-    }
+  if (
+    !newTransaction.date ||
+    !newTransaction.category ||
+    newTransaction.amount === undefined
+  ) {
+    alert("Please fill in required fields (date, category, amount)");
+    return;
+  }
 
-    if (!selectedAccountId) {
-      alert("Please select an account");
-      return;
-    }
+  if (!selectedAccountId) {
+    alert("Please select an account");
+    return;
+  }
 
-    try {
-      const created = await createTransaction({
-        ...newTransaction,
-        financialAccount_id: selectedAccountId as number,
-      } as Transaction);
+  try {
+    const created = await createTransaction({
+      ...newTransaction,
+      financialAccount_id: selectedAccountId as number,
+    } as Transaction);
 
-      setAllTransactions((prev) => [
-        { ...created, isExpanded: false },
-        ...prev,
-      ]);
-      setNewTransaction({
-        date: new Date().toISOString().split("T")[0],
-        description: "",
-        category: "",
-        amount: 0,
-        sender: "",
-        recipient: "",
-      });
-      setSelectedAccountId(userAccounts[0]?.id || "");
-      setShowAddForm(false);
-    } catch (error) {
-      console.error("Failed to create transaction:", error);
-      alert("Failed to create transaction");
+    const selectedAccount = userAccounts.find(acc => acc.id === selectedAccountId);
+
+    const transactionWithAccountName = {
+      ...created,
+      account_name: selectedAccount?.name || "Unknown",
+    };
+    
+    setAllTransactions((prev) => [transactionWithAccountName, ...prev]);
+    setNewTransaction({
+      date: new Date().toISOString().split("T")[0],
+      description: "",
+      category: "",
+      amount: 0,
+      sender: "",
+      recipient: ""
+    });
+    setSelectedAccountId(userAccounts[0]?.id || "");
+    setShowAddForm(false);
+
+    if (expandedRowId !== null) {
+      setExpandedRowId(null);
     }
-  };
+    
+  } catch (error) {
+    console.error("Failed to create transaction:", error);
+    alert("Failed to create transaction");
+  }
+};
 
   if (isLoading) {
     return (
@@ -450,7 +463,7 @@ function TransactionTable({
       {/* Transactions Table */}
       <div className="bg-black rounded-[20px] border border-green-500/15 shadow-[0_0_40px_rgba(34,197,94,0.12)] overflow-hidden max-h-[600px] flex flex-col">
         {/* Header */}
-        <div className="grid grid-cols-[0.8fr_1.5fr_1fr_1fr_1.2fr_1fr_0.5fr] bg-gray-900/70 px-6 py-4 text-xs font-semibold text-green-400 uppercase tracking-wider border-b border-green-500/10 gap-x-2 flex-shrink-0">
+        <div className="grid grid-cols-[0.8fr_1.5fr_1fr_1fr_1.2fr_1fr_1fr_0.5fr] bg-gray-900/70 px-6 py-4 text-xs font-semibold text-green-400 uppercase tracking-wider border-b border-green-500/10 gap-x-2 flex-shrink-0">
           <div>Date</div>
           <div>Description</div>
           <div>Category</div>
@@ -465,7 +478,7 @@ function TransactionTable({
         <div className="overflow-y-auto flex-grow dash-hover-scrollbar">
           <div className="divide-y divide-green-500/10">
             {displayedTransactions.map((tx, index) => {
-              const isExpanded = tx.isExpanded;
+              const isExpanded = expandedRowId === tx.id;
               const editValues = editingValues[tx.id] || {};
               const currentAccountId =
                 editValues.financialAccount_id ||
@@ -479,43 +492,29 @@ function TransactionTable({
                     className={`grid grid-cols-[0.8fr_1.5fr_1fr_1fr_1.2fr_1fr_1fr_0.5fr] px-6 py-4 items-center text-sm transition duration-200 cursor-pointer
                       ${index % 2 === 0 ? "bg-black" : "bg-gray-900/40"}
                       hover:bg-green-500/20 gap-x-2`}
-                    onClick={() => toggleExpand(tx.id)}
+                    onClick={() => handleRowClick(tx.id)}
                   >
-                    <div className="text-gray-400">{tx.date}</div>
-                    <div
-                      className="font-medium text-white truncate"
-                      title={tx.description}
-                    >
+                    <div className="text-gray-400">{formatDateForInput(tx.date)}</div>
+                    <div className="font-medium text-white truncate" title={tx.description}>
                       {tx.description || "N/A"}
                     </div>
                     <div className="text-gray-300">
                       {formatCategoryLabel(tx.category)}
                     </div>
-                    <div
-                      className={`font-semibold ${tx.amount < 0 ? "text-red-400" : "text-green-400"}`}
-                    >
+                    <div className={`font-semibold ${tx.amount < 0 ? "text-red-400" : "text-green-400"}`}>
                       {formatAmount(tx.amount)}
                     </div>
-                    <div
-                      className="text-gray-400 truncate"
-                      title={tx.account_name}
-                    >
-                      {tx.account_name || "N/A"}
+                    <div className="text-gray-400 truncate" title={tx.account_name}>
+                      {tx.account_name || "Unknown Account"}
                     </div>
                     <div className="text-gray-400 truncate" title={tx.sender}>
                       {tx.sender || "-"}
                     </div>
-                    <div
-                      className="text-gray-400 truncate"
-                      title={tx.recipient}
-                    >
+                    <div className="text-gray-400 truncate" title={tx.recipient}>
                       {tx.recipient || "-"}
                     </div>
                     <div className="flex gap-1">
-                      <FiEdit2
-                        className="text-gray-500 hover:text-green-400"
-                        size={14}
-                      />
+                      <FiEdit2 className="text-gray-500 hover:text-green-400" size={14} />
                     </div>
                   </div>
 

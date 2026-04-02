@@ -38,7 +38,6 @@ async function getTransactions(): Promise<Transaction[] | null> {
       });
     }
 
-    // console.log("Fetched transactions:", output);
     return output;
   } catch (error) {
     console.error("Error fetching transactions data:", error);
@@ -74,10 +73,12 @@ export async function updateTransaction(
       `/table/transactions?tid=${transaction.id}`,
       transaction,
     );
+    
     if (response.status !== 200) {
       console.error("Failed to update transaction", response.status);
       return false;
     }
+    
     return true;
   } catch (error) {
     console.error("Error updating transaction:", error);
@@ -129,7 +130,6 @@ export async function getAccountIdsForUser(): Promise<
       }),
     );
 
-    console.log("Fetched account IDs:", output);
     return output;
   } catch (error) {
     console.error("Error fetching account IDs for user:", error);
@@ -237,7 +237,6 @@ async function getSavingsContribChartData(
       );
     }
     const response = await instance.get(`/charts/savings?period=${period}`);
-    // console.log("received savings data", response);
     if (response.status !== 200) {
       throw new Error(
         `Failed to fetch savings contribution chart data: ${response.statusText}`,
@@ -302,7 +301,6 @@ export async function getUserAccounts(): Promise<Account[] | null> {
       return null;
     }
 
-    console.log("Fetched accounts:", response.data);
     const output: Account[] = [];
     for (let i = 0; i < response.data.length; i++) {
       output.push({
