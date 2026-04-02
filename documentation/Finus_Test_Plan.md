@@ -130,7 +130,21 @@ We attempted to run stryker with vitest in node, but this results in a lot of li
 
 3. ## **Load Testing**
 
-*Skip for Sprint 3\.*
+We use a `k6` load test located at `app/server/load-tests/api-gateway-capacity.js` to validate the course capacity requirement:
+
+- **20 concurrent users**
+- **200 total requests per minute**
+
+The script enforces this by running **20 virtual users** concurrently and having each one issue **10 authenticated requests per minute** after signing up, logging in, and creating a test account. This exercises the gateway, auth service, user service, and database together under sustained load.
+
+This load test is **not required to be part of the CI/CD pipeline** and can be run manually with Docker when needed.
+
+```bash
+cd app/server
+docker compose -f docker-compose.yml -f docker-compose.test.yml up load-test --abort-on-container-failure
+```
+
+The test fails if request failures rise above 1% or if fewer than 99% of checks pass.
 
 3. # **Terms/Acronyms**
 
