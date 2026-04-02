@@ -10,16 +10,16 @@ import { parseCsvFile } from "../../utils/ParseCsv";
 import type { TransactionDraft } from "../../utils/ConvertTransaction";
 import SuccessScreen from "./csvSuccess";
 import { uploadCsvTransactions } from "@/api/Transaction";
-import type { AuthSession } from "@/types/authTypes";
+// import type { AuthSession } from "@/types/authTypes";
 import type { Transaction } from "@/types/Transaction";
 
 export default function CsvUpload({
   accountId,
-  session,
+  // session,
   onImported,
 }: {
   accountId: number;
-  session: AuthSession;
+  // session: AuthSession;
   onImported: (txs: Transaction[]) => void;
 }) {
   const [file, setFile] = useState<File | null>(null); // selected CSV file
@@ -104,7 +104,7 @@ export default function CsvUpload({
 
     try {
       const response = await uploadCsvTransactions(
-        session,
+        // session,
         accountId,
         parsedData,
       );
@@ -129,7 +129,7 @@ export default function CsvUpload({
   };
 
   return (
-    <div style={{ marginTop: "1rem" }}>
+    <div style={{ marginTop: "1rem", color: "#888" }}>
       {importResult && (
         <SuccessScreen
           inserted={importResult.inserted}
@@ -165,7 +165,7 @@ export default function CsvUpload({
               <CsvPreviewTable rows={parsedData} />
 
               <button
-                style={{ marginTop: "1rem" }}
+                style={{ marginTop: "1rem", color: "#077d42" }}
                 onClick={() => setShowConfirmation(true)}
               >
                 Continue

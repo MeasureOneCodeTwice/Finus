@@ -199,7 +199,6 @@ function App() {
             }
           />
 
-
           {session && (
             <Route element={<AppLayout onLogout={handleLogout} />}>
               <Route
@@ -221,7 +220,7 @@ function App() {
               />
             </Route>
           )}
-          
+
           <Route path="*" element={<Navigate to="/" replace />} />
 
           {/**Code below is only used for dashboard development purposes */}

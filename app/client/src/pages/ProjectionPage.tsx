@@ -22,7 +22,7 @@ import {
   type projectedDataResponse,
 } from "@/types/responseTypes";
 import ProjectionGraph from "@/components/ProjectionGraph";
-import { TbGraph } from "react-icons/tb";
+import { TbGraph, TbCalculator, TbRefresh } from "react-icons/tb";
 import NoItemState from "@/components/NoItemState";
 import {
   handleCurrencyChange,
@@ -65,33 +65,30 @@ function ProjectionPage({ session }: ProjectionProp) {
   const [amount, setAmount] = useState<string>("");
   const [period, setPeriod] = useState<string>("");
   const [minPay, setMinPay] = useState<string>("");
-
   const [selectedType, setSelectedType] = useState<"Saving" | "Debt">("Saving");
-
   const [savingData, setSavingData] = useState<
     projectedDataResponse | undefined
   >(undefined);
   const [debtData, setDebtData] = useState<projectedDataResponse | undefined>(
     undefined,
   );
-
   const [debtRequest, setDebtRequest] = useState<
     projectionDebtRequest | undefined
   >(undefined);
   const [savingRequest, setSavingRequest] = useState<
     projectionSavingRequest | undefined
   >(undefined);
-
-  //Total amount of interest generated
   const [totalInterest, setTotalInterest] = useState<number>(0);
-  //Total amoutn of pay
   const [totalPay, setTotalPay] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const calculateProjection = () => {
+  const calculateProjection = async () => {
     const inputAmount = Number(amount);
     const inputMinPay = Number(minPay);
     const inputInterest = Number(interest);
     const inputPeriod = Number(period);
+
+    setIsLoading(true);
 
     switch (selectedType) {
       case "Debt":
@@ -117,37 +114,35 @@ function ProjectionPage({ session }: ProjectionProp) {
 
           setDebtRequest(newDebtRequest);
 
-          getDebtProjection(session, newDebtRequest)
-            .then((data) => {
+          try {
+            const data = await getDebtProjection(newDebtRequest);
+            if (data) {
               let dataTotalInterest = 0;
               let dataTotalPay = 0;
               const debtLineData: LineInfo = {
                 name: "Remaining Debt",
                 data: [],
               };
-              console.log(data);
-              if (data) {
-                const graphData: projectedDataResponse = {
-                  lineInfo: [],
-                  dateLabel: [],
-                };
-                data.debtStages.map((stage) => {
-                  debtLineData.data.push(stage.remainingDebt);
-                  graphData.dateLabel.push(stage.installmentDate);
-                  dataTotalInterest += stage.interestAmount;
-                  dataTotalPay += stage.principalAmount;
-                });
+              const graphData: projectedDataResponse = {
+                lineInfo: [],
+                dateLabel: [],
+              };
 
-                graphData.lineInfo = [debtLineData];
+              data.debtStages.map((stage) => {
+                debtLineData.data.push(stage.remainingDebt);
+                graphData.dateLabel.push(stage.installmentDate);
+                dataTotalInterest += stage.interestAmount;
+                dataTotalPay += stage.principalAmount;
+              });
 
-                setDebtData(graphData);
-                setTotalPay(dataTotalPay);
-                setTotalInterest(dataTotalInterest);
-              }
-            })
-            .catch((error) => {
-              alert(error);
-            });
+              graphData.lineInfo = [debtLineData];
+              setDebtData(graphData);
+              setTotalPay(dataTotalPay);
+              setTotalInterest(dataTotalInterest);
+            }
+          } catch {
+            alert("Failed to get debt projection");
+          }
         } else {
           alert("Please enter all fields");
         }
@@ -173,52 +168,55 @@ function ProjectionPage({ session }: ProjectionProp) {
 
           setSavingRequest(newSavingRequest);
 
-          getSavingProjection(session, newSavingRequest)
-            .then((data) => {
-              console.log(data);
+          try {
+            const data = await getSavingProjection(newSavingRequest);
+            if (data) {
               const graphData: projectedDataResponse = {
                 dateLabel: [],
                 lineInfo: [],
               };
-              const bestCase: LineInfo = { name: "Best Case", data: [] };
+              const bestCase: LineInfo = {
+                name: "Best Case (Optimistic)",
+                data: [],
+              };
               const expectedCase: LineInfo = {
                 name: "Expected Case",
                 data: [],
               };
-              const worstCase: LineInfo = { name: "Worst Case", data: [] };
+              const worstCase: LineInfo = {
+                name: "Worst Case (Conservative)",
+                data: [],
+              };
 
-              if (data) {
-                //Extract all the data from the response
-                data.map((datapoint) => {
-                  graphData.dateLabel.push(datapoint.date);
-                  bestCase.data.push(datapoint.accumulative_best_balance);
-                  expectedCase.data.push(
-                    datapoint.accumulative_expected_balance,
-                  );
-                  worstCase.data.push(datapoint.accumulative_worst_balance);
-                });
+              data.map((datapoint) => {
+                graphData.dateLabel.push(datapoint.date);
+                bestCase.data.push(datapoint.accumulative_best_balance);
+                expectedCase.data.push(datapoint.accumulative_expected_balance);
+                worstCase.data.push(datapoint.accumulative_worst_balance);
+              });
 
-                graphData.lineInfo = [bestCase, expectedCase, worstCase];
-                setSavingData(graphData);
-              } else {
-                alert("Failed to get the projection ");
-              }
-            })
-            .catch(() => {
-              alert("Failed to get the projection");
-            });
+              graphData.lineInfo = [bestCase, expectedCase, worstCase];
+              setSavingData(graphData);
+            }
+          } catch {
+            alert("Failed to get saving projection");
+          }
         } else {
           alert("Please enter all fields");
         }
+        break;
     }
+
+    setIsLoading(false);
   };
 
   const handleTypeChange = (typeChange: "Saving" | "Debt") => {
     setSelectedType(typeChange);
+    setSavingData(undefined);
+    setDebtData(undefined);
 
-    if (selectedType === "Debt") {
+    if (typeChange === "Debt") {
       if (debtRequest) {
-        //Set the fields to what was used in the debt projection graph
         setSelectedAccount(Number(debtRequest.id));
         setAmount(debtRequest.remainingAmount.toFixed(2));
         setInterest(debtRequest.interestRate.toString());
@@ -233,16 +231,14 @@ function ProjectionPage({ session }: ProjectionProp) {
         setPeriod("");
         setNextDueDate("");
       }
-    } else if (selectedType === "Saving") {
+    } else if (typeChange === "Saving") {
       if (savingRequest) {
-        //Assigns the fields to what the projection of the saving account used
         setSelectedAccount(savingRequest.financial_account_id);
-        setAmount((savingRequest.balance * 100).toFixed(2));
+        setAmount(savingRequest.balance.toFixed(2));
         setInterest(savingRequest.annual_interest_rate.toString());
         setMinPay(savingRequest.monthly_deposit.toFixed(2));
         setPeriod(savingRequest.time_frame.toString());
       } else {
-        //Resets the fields
         setSelectedAccount(0);
         setAmount("");
         setInterest("");
@@ -252,256 +248,275 @@ function ProjectionPage({ session }: ProjectionProp) {
     }
   };
 
-  //Onchange handler for the select accounts
   const handleSelectAccount = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    let target;
     const id = Number(event.target.value);
 
     if (selectedType === "Debt") {
       setSelectedDebt(id);
-
-      target = debts.find((account) => account.id === id)?.balance;
+      const target = debts.find((account) => account.id === id)?.balance;
+      setAmount(target ? target.toFixed(2) : "0");
     } else if (selectedType === "Saving") {
       setSelectedAccount(id);
-
-      target = accounts.find((account) => account.id === id)?.balance;
-    }
-
-    if (target) {
-      setAmount(target.toFixed(2));
-    } else {
-      setAmount("0");
+      const target = accounts.find((account) => account.id === id)?.balance;
+      setAmount(target ? target.toFixed(2) : "0");
     }
   };
 
-  //Get the saving accounts
   useEffect(() => {
     if (selectedType === "Saving") {
-      getSaving(session)
-        .then((userAccounts) => {
-          console.log(userAccounts);
-
-          //Detemrine accounts exist
-          if (userAccounts) {
-            setAccounts(userAccounts);
-          }
-        })
-        .catch(() => {
-          //alert("Failed to get accounts");
-        });
+      getSaving(session).then((userAccounts) => {
+        if (userAccounts) setAccounts(userAccounts);
+      });
     }
   }, [session, selectedType]);
 
-  //Gets the debt accounts
   useEffect(() => {
     if (selectedType === "Debt") {
-      getDebt(session)
-        .then((userDebts) => {
-          console.log(userDebts);
-
-          //Detemrine if there are any debts
-          if (userDebts) {
-            setDebts(userDebts);
-          }
-        })
-        .catch(() => {});
+      getDebt().then((userDebts) => {
+        if (userDebts) setDebts(userDebts);
+      });
     }
   }, [session, selectedType]);
 
-  const typeButton = [
-    { key: "Saving", label: "Saving" },
-    { key: "Debt", label: "Debt" },
-  ].map(({ key, label }) => (
-    <button
-      key={key}
-      onClick={() => handleTypeChange(key as "Saving" | "Debt")}
-      className={`px-4 py-1.5 text-sm rounded-md transition-all outline-1
-        ${selectedType === key ? "bg-green-500 text-green-400 outline-2 outline-green-400" : "text-gray-300"}
-      `}
-    >
-      {label}
-    </button>
-  ));
+  const typeButtons = [
+    { key: "Saving", label: "Savings Projection" },
+    { key: "Debt", label: "Debt Payoff Projection" },
+  ];
 
   const glowLeft = (
-    <div
-      className="
-      fixed
-      w-[28rem] h-[28rem]
-      rounded-full
-      opacity-25
-      blur-[90px]
-      pointer-events-none
-      animate-[float_9s_ease-in-out_infinite]
-      bg-[radial-gradient(circle,_#18cc5f_0%,_#0d4d26_70%,_transparent_100%)]
-      -top-32 -left-32
-    "
-    />
+    <div className="fixed w-[28rem] h-[28rem] rounded-full opacity-25 blur-[90px] pointer-events-none animate-[float_9s_ease-in-out_infinite] bg-[radial-gradient(circle,_#18cc5f_0%,_#0d4d26_70%,_transparent_100%)] -top-32 -left-32" />
   );
 
   const glowRight = (
     <div
-      className="
-      fixed
-      w-[28rem] h-[28rem]
-      rounded-full
-      opacity-25
-      blur-[90px]
-      pointer-events-none
-      animate-[float_9s_ease-in-out_infinite]
-      bg-[radial-gradient(circle,_#27a552_0%,_#0f411d_65%,_transparent_100%)]
-      -right-32 -bottom-32
-    "
-      style={{ animationDelay: "1.2s" }} // animation delay still inline
+      className="fixed w-[28rem] h-[28rem] rounded-full opacity-25 blur-[90px] pointer-events-none animate-[float_9s_ease-in-out_infinite] bg-[radial-gradient(circle,_#27a552_0%,_#0f411d_65%,_transparent_100%)] -right-32 -bottom-32"
+      style={{ animationDelay: "1.2s" }}
     />
   );
+
   return (
-    <section className="relative px-16 py-19 bg-[#030805]">
+    <section className="relative min-h-screen px-16 py-19 bg-[#030805]">
       {glowLeft}
       {glowRight}
-      <h1 className="text-4xl font-bold mb-4">Projection</h1>
-      <p className="text-lg text-green-500">
-        Here you can view a projection of you're saving's or debt
-      </p>
 
-      <h2 className="text-2xl font-bold mb-4">Select Saving Account or Debt</h2>
+      <div className="relative z-10">
+        <h1 className="text-4xl font-bold mb-2">Financial Projections</h1>
+        <p className="text-lg text-green-500 mb-8">
+          Plan your financial future with savings growth and debt payoff
+          simulations
+        </p>
 
-      <div className="max-w-min flex gap-2 bg-black/50 p-1 rounded-lg border border-green-500/20">
-        {typeButton}
-      </div>
-
-      <div className="space-y-2">
-        {selectedType === "Saving" ? (
-          <SelectAccount
-            accounts={accounts}
-            selectedAccount={selectedAccount}
-            handleSelectAccount={handleSelectAccount}
-          />
-        ) : (
-          <SelectAccount
-            accounts={debts}
-            selectedAccount={selectedDebt}
-            handleSelectAccount={handleSelectAccount}
-          />
-        )}
-        <div className="space-x-2 gap-2 bg-black/50 p-1 rounded-lg border border-green-500/20">
-          <>
-            <label htmlFor="amount">
-              {selectedType === "Debt" ? "Remaining Amount:$" : "Balance:$"}
-            </label>
-            <input
-              name="amount"
-              id="amount"
-              type="string"
-              value={amount}
-              className="w-20 bg-black/50 p-1 rounded-lg border border-green-500/20"
-              onChange={(event) => handleCurrencyChange(event, setAmount)}
-              onBlur={(event) => handleCurrencyBlur(event, amount, setAmount)}
-            />
-
-            <label htmlFor="min">
-              {selectedType === "Debt"
-                ? "Minimum Payment:$"
-                : "Minimum Monthly Deposits: $"}
-            </label>
-            <input
-              name="min"
-              id="min"
-              type="string"
-              value={minPay}
-              className="w-20 bg-black/50 p-1 rounded-lg border border-green-500/20"
-              onChange={(event) => handleCurrencyChange(event, setMinPay)}
-              onBlur={(event) => handleCurrencyBlur(event, minPay, setMinPay)}
-            />
-
-            <label htmlFor="period">
-              {selectedType === "Debt"
-                ? "Days between payment"
-                : "Number of years:"}
-            </label>
-            <input
-              name="period"
-              value={period}
-              type="string"
-              className="w-20 bg-black/50 p-1 rounded-lg border border-green-500/20"
-              onChange={(event) => {
-                handleNumberChange(event, setPeriod, 0, 100);
-              }}
-            />
-          </>
-
-          <label htmlFor="interest">Interest:% </label>
-          <input
-            id="interest"
-            name="interest"
-            value={interest}
-            className="w-20 bg-black/50 p-1 rounded-lg border border-green-500/20 "
-            onChange={(event) => {
-              handleNumberChange(event, setInterest, 0, 100);
-            }}
-          />
-
-          {selectedType === "Debt" && (
-            <>
-              <br></br>
-              <label htmlFor="dueDate">Next due date:</label>
-              <input
-                id="dueDate"
-                name="dueDate"
-                type="date"
-                className="bg-black/50 p-1 rounded-lg border border-green-500/20"
-                onChange={(event) => setNextDueDate(event.target.value)}
-              />
-            </>
-          )}
+        {/* Type Selector */}
+        <div className="flex gap-4 mb-8">
+          {typeButtons.map(({ key, label }) => (
+            <button
+              key={key}
+              onClick={() => handleTypeChange(key as "Saving" | "Debt")}
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-200 ${
+                selectedType === key
+                  ? "bg-green-500/20 border border-green-500/50 text-green-400 shadow-[0_0_20px_rgba(34,197,94,0.2)]"
+                  : "bg-black/50 border border-green-500/20 text-gray-400 hover:text-white hover:border-green-500/40"
+              }`}
+            >
+              {/* <span className="text-xl">{icon}</span> */}
+              <span className="font-medium">{label}</span>
+            </button>
+          ))}
         </div>
 
-        <button
-          onClick={calculateProjection}
-          className="px-4 py-1.5 text-sm rounded-md transition-all outline-1 text-gray-300"
-        >
-          Calculate
-        </button>
-      </div>
+        {/* Main Card */}
+        <div className="bg-black/40 backdrop-blur-sm rounded-2xl border border-green-500/20 p-6 mb-8">
+          <h2 className="text-xl font-semibold text-green-400 mb-4">
+            {selectedType === "Saving"
+              ? "Savings Account Details"
+              : "Debt Details"}
+          </h2>
 
-      <div>
-        {selectedType === "Saving" ? (
-          savingData ? (
-            <>
-              <ProjectionGraph data={savingData} name="Total Money Saved" />
-            </>
-          ) : (
-            <>
-              <NoItemState
-                title="No Projection Available"
-                description="Currenlty there is no saving account selected to have it's data projected"
-                icon={<TbGraph className="w-10 h-10 text-green-400" />}
-              />
-            </>
-          )
-        ) : null}
+          {/* Account Selector */}
+          <div className="mb-6">
+            <label className="block text-sm text-gray-400 mb-2">
+              {selectedType === "Saving"
+                ? "Select Savings Account"
+                : "Select Debt Account"}
+            </label>
+            <div className="bg-black/50 px-3 py-2 text-gray-400">
+              {selectedType === "Saving" ? (
+                <SelectAccount
+                  accounts={accounts}
+                  selectedAccount={selectedAccount}
+                  handleSelectAccount={handleSelectAccount}
+                />
+              ) : (
+                <SelectAccount
+                  accounts={debts}
+                  selectedAccount={selectedDebt}
+                  handleSelectAccount={handleSelectAccount}
+                />
+              )}
+            </div>
+          </div>
 
-        {selectedType === "Debt" ? (
-          debtData ? (
-            <>
-              <ProjectionGraph data={debtData} name="Debt Payoff Prediction" />
-              <div className="space-x-2 gap-2 bg-black/50 p-1 rounded-lg border border-green-500/20">
-                {"Total Amount Paid:$" +
-                  totalPay.toFixed(2) +
-                  "    Total Interest Paid:$" +
-                  totalInterest.toFixed(2)}
+          {/* Input Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">
+                {selectedType === "Debt"
+                  ? "Remaining Amount"
+                  : "Current Balance"}
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-green-400">
+                  $
+                </span>
+                <input
+                  type="text"
+                  value={amount}
+                  onChange={(e) => handleCurrencyChange(e, setAmount)}
+                  onBlur={(e) => handleCurrencyBlur(e, amount, setAmount)}
+                  className="w-full pl-8 pr-4 py-2 bg-black/50 border border-green-500/30 rounded-lg text-white focus:outline-none focus:border-green-500"
+                  placeholder="0.00"
+                />
               </div>
-            </>
-          ) : (
-            <>
+            </div>
+
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">
+                {selectedType === "Debt"
+                  ? "Minimum Payment"
+                  : "Monthly Deposit"}
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-green-400">
+                  $
+                </span>
+                <input
+                  type="text"
+                  value={minPay}
+                  onChange={(e) => handleCurrencyChange(e, setMinPay)}
+                  onBlur={(e) => handleCurrencyBlur(e, minPay, setMinPay)}
+                  className="w-full pl-8 pr-4 py-2 bg-black/50 border border-green-500/30 rounded-lg text-white focus:outline-none focus:border-green-500"
+                  placeholder="0.00"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">
+                Interest Rate (%)
+              </label>
+              <input
+                type="text"
+                value={interest}
+                onChange={(e) => handleNumberChange(e, setInterest, 0, 100)}
+                className="w-full px-4 py-2 bg-black/50 border border-green-500/30 rounded-lg text-white focus:outline-none focus:border-green-500"
+                placeholder="0.00"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">
+                {selectedType === "Debt"
+                  ? "Payment Frequency (days)"
+                  : "Time Frame (years)"}
+              </label>
+              <input
+                type="text"
+                value={period}
+                onChange={(e) => handleNumberChange(e, setPeriod, 0, 100)}
+                className="w-full px-4 py-2 bg-black/50 border border-green-500/30 rounded-lg text-white focus:outline-none focus:border-green-500"
+                placeholder={selectedType === "Debt" ? "30" : "5"}
+              />
+            </div>
+
+            {selectedType === "Debt" && (
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">
+                  Next Due Date
+                </label>
+                <input
+                  type="date"
+                  value={nextDueDate}
+                  onChange={(e) => setNextDueDate(e.target.value)}
+                  className="w-full px-4 py-2 bg-black/50 border border-green-500/30 rounded-lg text-white focus:outline-none focus:border-green-500"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Calculate Button */}
+          <div className="mt-6 flex justify-end">
+            <button
+              onClick={calculateProjection}
+              disabled={isLoading}
+              className="flex items-center gap-2 px-6 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-500/50 rounded-lg text-green-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? (
+                <TbRefresh className="animate-spin" size={18} />
+              ) : (
+                <TbCalculator size={18} />
+              )}
+              Calculate Projection
+            </button>
+          </div>
+        </div>
+
+        {/* Results Section */}
+        <div className="bg-black/40 backdrop-blur-sm rounded-2xl border border-green-500/20 p-6">
+          <h2 className="text-xl font-semibold text-green-400 mb-4">
+            {selectedType === "Saving"
+              ? "Savings Growth Projection"
+              : "Debt Payoff Schedule"}
+          </h2>
+
+          {selectedType === "Saving" ? (
+            savingData ? (
+              <>
+                <ProjectionGraph data={savingData} name="Total Money Saved" />
+              </>
+            ) : (
               <NoItemState
                 title="No Projection Available"
-                description="Currently there is not debt selected to have it's data projected"
+                description="Select a savings account and enter projection parameters to see your savings growth over time."
                 icon={<TbGraph className="w-10 h-10 text-green-400" />}
               />
-            </>
-          )
-        ) : null}
+            )
+          ) : null}
+
+          {selectedType === "Debt" ? (
+            debtData ? (
+              <>
+                <ProjectionGraph
+                  data={debtData}
+                  name="Debt Payoff Prediction"
+                />
+                <div className="mt-4 p-4 bg-black/50 rounded-xl border border-green-500/20">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-400">Total Amount Paid</p>
+                      <p className="text-xl font-semibold text-green-400">
+                        ${totalPay.toFixed(2)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-400">
+                        Total Interest Paid
+                      </p>
+                      <p className="text-xl font-semibold text-yellow-400">
+                        ${totalInterest.toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <NoItemState
+                title="No Projection Available"
+                description="Select a debt account and enter projection parameters to see your payoff timeline."
+                icon={<TbGraph className="w-10 h-10 text-green-400" />}
+              />
+            )
+          ) : null}
+        </div>
       </div>
     </section>
   );

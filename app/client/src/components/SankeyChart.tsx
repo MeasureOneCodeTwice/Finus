@@ -68,7 +68,7 @@ function CustomNode({ x, y, width, height, index, payload }: SankeyNodeProps) {
         fontSize="14"
         fill="#ffffff"
       >
-        {payload.name}
+        {formatCategoryLabel(payload.name)}
       </text>
       <text
         textAnchor={isOut ? "end" : "start"}
@@ -82,6 +82,13 @@ function CustomNode({ x, y, width, height, index, payload }: SankeyNodeProps) {
       </text>
     </Layer>
   );
+}
+
+function formatCategoryLabel(category: string): string {
+  return category
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
 }
 
 export default SankeyChart;

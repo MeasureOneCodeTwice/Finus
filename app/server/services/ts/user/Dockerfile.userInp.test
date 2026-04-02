@@ -1,0 +1,11 @@
+FROM measureonecodetwice/finus-user:local 
+
+COPY user/userInput ./test
+
+WORKDIR /project
+
+COPY vitest.config.ts .
+
+ENV CI=true
+
+CMD [ "bun", "run", "vitest", "--run"]

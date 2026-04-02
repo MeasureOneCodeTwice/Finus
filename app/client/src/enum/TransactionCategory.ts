@@ -3,6 +3,6 @@ export const transactionCategory = {
   HOUSING: "Housing",
   UTIL: "Utilzities",
   TRANSPORTATION: "Transportation",
-  INCOME: "INCOME",
+  INCOME: "Income",
   OTHER: "Other",
 };

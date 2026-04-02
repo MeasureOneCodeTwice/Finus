@@ -9,7 +9,7 @@ import type {
   RowDataPacket,
 } from "mysql2/promise";
 import type { financialAccount } from "@/types.js";
-import { authenticateJWT } from "../handleJWT.js";
+import { authenticateJWT } from "../utils/auth.ts"; //this used to be ../handleJWT.ts but that does not work right
 import { checkUserId } from "../CheckUser.ts";
 import { pool } from "../db.ts";
 
@@ -125,7 +125,7 @@ accountsRouter.get("/", async (req: Request, res: Response) => {
         [profileId],
       );
 
-      console.log(rows);
+      // console.log(rows);
 
       return res.status(200).json(rows);
     } catch (err) {
@@ -173,6 +173,10 @@ accountsRouter.put("/", async (req: Request, res: Response) => {
     }
 
     const { id, name, type, balance, value, subtype } = req.body;
+    let valueUpdate = value;
+    if (!value) {
+      valueUpdate = balance;
+    }
 
     const last_updated = new Date();
 
@@ -180,10 +184,10 @@ accountsRouter.put("/", async (req: Request, res: Response) => {
       `UPDATE financialAccount 
       SET name = ?, type = ?, balance = ?, value = ?, last_updated = ?, subtype = ?
       WHERE id= ?`,
-      [name, type, balance, value, last_updated, subtype ?? null, id],
+      [name, type, balance, valueUpdate, last_updated, subtype ?? null, id],
     );
 
-    console.log("Updated Account " + name);
+    // console.log("Updated Account " + name);
     return res.status(200).json({
       message: "Account successfully updated",
       lastUpdated: last_updated,
@@ -201,7 +205,8 @@ accountsRouter.put("/", async (req: Request, res: Response) => {
 accountsRouter.delete("/", async (req: Request, res: Response) => {
   let userId;
   let connection: PoolConnection | undefined;
-  const { id } = req.body;
+
+  const id = req.query.id ? Number(req.query.id) : null;
 
   try {
     userId = authenticateJWT(req);
