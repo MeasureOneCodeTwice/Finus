@@ -1,7 +1,9 @@
 import type { updateResponse } from "../types/responseTypes";
 import type { Account } from "../types/AccountType";
+
 import { instance } from "./config";
 // import { data } from "react-router-dom";
+
 //Sends a request to get different accounts the user has
 export async function getUserAccounts(type?: string): Promise<Account[]> {
   try {
