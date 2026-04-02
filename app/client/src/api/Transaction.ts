@@ -2,8 +2,9 @@ import type { AuthSession } from "@/types/authTypes";
 import type { updateResponse } from "../types/responseTypes";
 import type { Transaction } from "../types/Transaction";
 import type { TransactionDraft } from "@/utils/ConvertTransaction";
+import { BASE_URL } from "@/utils/constants";
 
-const requestUrl = "http://localhost:3000/api/transactions";
+const requestUrl = `${BASE_URL}/api/transactions`;
 
 //Sends a GET request to get the list of user transactions for the account
 export async function getTransactions(

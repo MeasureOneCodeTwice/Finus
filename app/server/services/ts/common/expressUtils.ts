@@ -1,13 +1,16 @@
 import cors from "cors";
 
-const defaultMethods = ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"];
-const defaultOrigins = ["http://localhost", "http://localhost:8080"];
-export function buildCorsConfig(opts?: {
-  origins?: string | string[];
-  methods?: string[];
-}) {
+const defaultMethods = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"];
+const origins = [
+  "http://localhost",
+  "http://localhost:8080",
+  "http://18.190.215.135", //prod webserver
+  "http://3.142.125.202", //dev webserver
+];
+
+export function buildCorsConfig(opts?: { methods?: string[] }) {
   return cors({
-    origin: opts?.origin ?? defaultOrigins,
+    origin: origins,
     methods: opts?.methods ?? defaultMethods,
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -21,7 +24,7 @@ export async function handleServerError(
 ) {
   await func().catch((e) =>
     res.status(500).json({
-      message: message ?? e.message,
+      message: e.message ?? message,
     }),
   );
 }

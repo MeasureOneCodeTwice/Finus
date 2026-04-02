@@ -1,0 +1,36 @@
+services:
+    api-gateway:
+      image: $DOCKER_HUB_USERNAME/finus-api-gateway:$RELEASE_VERSION
+      env_file: 
+      - path: ./default_container.env
+      ports:
+        - "3000:8000"
+      depends_on:
+        - auth
+        - user
+        - analytics
+        - market
+  
+    auth:
+      image: $DOCKER_HUB_USERNAME/finus-auth:$RELEASE_VERSION
+      env_file: 
+      - path: ./default_container.env
+      - path: ./secrets.env
+
+        
+    user:
+      image: $DOCKER_HUB_USERNAME/finus-user:$RELEASE_VERSION
+      env_file: 
+      - path: ./default_container.env
+      - path: ./secrets.env
+    
+    analytics:
+      image: $DOCKER_HUB_USERNAME/finus-analytics:$RELEASE_VERSION
+      env_file: 
+      - path: ./default_container.env
+      - path: ./secrets.env
+      
+    market:
+      image: $DOCKER_HUB_USERNAME/finus-market:$RELEASE_VERSION
+      env_file: 
+      - path: ./default_container.env

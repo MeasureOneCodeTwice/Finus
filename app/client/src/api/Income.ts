@@ -1,8 +1,9 @@
 import type { updateResponse } from "../types/responseTypes";
 import { type Income } from "../types/IncomeType";
 import type { AuthSession } from "@/types/authTypes";
+import { BASE_URL } from "@/utils/constants";
 
-const requestUrl = "http://localhost:3000/api/income";
+const requestUrl = `${BASE_URL}/api/income`;
 
 export async function getIncome(session: AuthSession): Promise<Income[]> {
   try {
