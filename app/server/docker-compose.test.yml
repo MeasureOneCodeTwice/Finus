@@ -1,9 +1,6 @@
-#This compose file runs all the tests. 
-#It depends on the main compose file being built
-#as all the test images inherit from the regular images.
-#you can use the following command to run the tests
-#docker compose build -q && docker compose -f docker-compose.yml -f docker-compose.test.yml build -q && docker compose -f docker-compose.yml -f docker-compose.test.yml up --abort-on-container-failure
+#Run with ./run-tests.sh
 services:
+    # ------ UNIT TESTS ------ 
     auth-test:
       build: 
         context: services/ts
@@ -19,61 +16,39 @@ services:
         context: services/python/analytics
         dockerfile: Dockerfile.test
 
-    userinp-test:
-      build: 
-        context: services/ts
-        dockerfile: user/Dockerfile.userInp.test
-
-    # user-integration-test:#uncomment to run integration tests locally as it likely does not work properly in CI/CD
-    #   build:
-    #     context: ./services/ts
-    #     dockerfile: user/Dockerfile.integration.test
-    #   env_file:
-    #     - ./default_container.env
-    #   environment:
-    #     - JWT_SECRET
-         
-    #   depends_on:
-    #     database:
-    #       condition: service_healthy
-    #     api-gateway: 
-    #       condition: service_started
-
-    # user-mutation-test:
-    #   build:
-    #     context: ./services/ts
-    #     dockerfile: user/Dockerfile.mutation.test
     market-test:
       build:
         context: services/python/market
         dockerfile: Dockerfile.test
+
+    # # ------ MUTATION TESTS ------ 
+    # user-mutation-test:
+    #   build:
+    #     context: ./services/ts
+    #     dockerfile: user/Dockerfile.mutation.test
 
     market-mutation-test:
       build:
         context: services/python/market
         dockerfile: Dockerfile.mutation.test
 
+    # MISSING
+    #  ANALYTICS
+    #  AUTH
+
+    # ------ INTEGRATION TESTS ------ 
     market-integration-test:
       build:
         context: services/python/market
         dockerfile: Dockerfile.integration.test
       env_file:
         - ./default_container.env
-      depends_on:
-        market:
-          condition: service_started
 
-    # user-integration-test:
-    #   build:
-    #     context: ./services/ts
-    #     dockerfile: user/Dockerfile.integration.test
-    #   env_file:
-    #     - ./default_container.env
-    #   environment:
-    #     - JWT_SECRET
-         
-    #   depends_on:
-    #     database:
-    #       condition: service_healthy
-    #     api-gateway: 
-    #       condition: service_started
+    user-integration-test:
+      build:
+        context: ./services/ts
+        dockerfile: user/Dockerfile.integration.test
+      env_file:
+        - ./default_container.env
+      environment:
+        - JWT_SECRET

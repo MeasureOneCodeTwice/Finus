@@ -105,7 +105,7 @@ export async function createGoal(
   goalData: GoalData,
 ) {
   const response = await request(baseUrl)
-    .post("/goals")
+    .post("/api/goals")
     .set("Authorization", `Bearer ${token}`)
     .send(goalData);
 
