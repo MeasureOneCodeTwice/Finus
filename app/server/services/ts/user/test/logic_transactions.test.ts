@@ -17,6 +17,7 @@ const mockPool = {
 
 vi.mock("../src/queries/transactions", () => ({
   getAllTransactionsQuery: vi.fn(),
+  getTransactionAccountNames: vi.fn()
 }));
 
 describe("getTransactionsData", () => {
