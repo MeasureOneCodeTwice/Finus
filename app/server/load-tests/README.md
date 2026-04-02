@@ -20,5 +20,6 @@ How to run it:
 
 ```bash
 cd app/server
-docker compose -f docker-compose.yml -f docker-compose.test.yml up load-test --abort-on-container-failure
+docker compose up -d
+docker compose -f docker-compose.test.yml up load-test --abort-on-container-failure
 ```

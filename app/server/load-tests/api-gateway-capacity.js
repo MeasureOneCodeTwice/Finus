@@ -2,7 +2,8 @@
   Load testing script
 
   It is designed to be run either:
-  1. through Docker using the command from app/server: 
+  1. through Docker using the command from app/server:
+      docker compose up -d 
       docker compose -f docker-compose.yml -f docker-compose.test.yml up load-test --abort-on-container-failure.
   2. Using k6 which needs to be installed first then run with from app/server/load-tests:
       k6.exe run api-gateway-capacity.js

@@ -65,9 +65,4 @@ services:
         - REQUESTS_PER_USER_PER_MINUTE=10
         - LOAD_TEST_DURATION=2m
       command: run /scripts/api-gateway-capacity.js
-      depends_on:
-        database:
-          condition: service_healthy
-        api-gateway:
-          condition: service_started
 
