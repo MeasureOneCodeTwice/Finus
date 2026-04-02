@@ -73,12 +73,12 @@ export async function updateTransaction(
       `/table/transactions?tid=${transaction.id}`,
       transaction,
     );
-    
+
     if (response.status !== 200) {
       console.error("Failed to update transaction", response.status);
       return false;
     }
-    
+
     return true;
   } catch (error) {
     console.error("Error updating transaction:", error);

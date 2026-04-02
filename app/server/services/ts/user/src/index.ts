@@ -295,8 +295,10 @@ app.patch(
       if (req.body.amount !== undefined) updates.amount = req.body.amount;
       if (req.body.date !== undefined) updates.date = req.body.date;
       if (req.body.sender !== undefined) updates.sender = req.body.sender;
-      if (req.body.recipient !== undefined) updates.recipient = req.body.recipient;
-      if (req.body.financialAccount_id !== undefined) updates.financialAccount_id = req.body.financialAccount_id;
+      if (req.body.recipient !== undefined)
+        updates.recipient = req.body.recipient;
+      if (req.body.financialAccount_id !== undefined)
+        updates.financialAccount_id = req.body.financialAccount_id;
 
       // console.log("Updating transaction with the following updates:", updates);
 

@@ -30,19 +30,21 @@ function TransactionTable({
   initialLimit = 100,
   loadMoreIncrement = 50,
 }: TransactionTableProps) {
-  const [allTransactions, setAllTransactions] = useState<Transaction[]>(
-    [],
-  );
+  const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
   const [displayLimit, setDisplayLimit] = useState(initialLimit);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
-  const [editingValues, setEditingValues] = useState<{[key: number]: Partial<Transaction>;}>({});
+  const [editingValues, setEditingValues] = useState<{
+    [key: number]: Partial<Transaction>;
+  }>({});
   const [userAccounts, setUserAccounts] = useState<MinimizedAccount[]>([]);
   const [selectedAccountId, setSelectedAccountId] = useState<number | "">("");
   const [showImportModal, setShowImportModal] = useState(false);
-  const [selectedAccountForImport, setSelectedAccountForImport] = useState<number | null>(null);
-  const [expandedRowId, setExpandedRowId] = useState<number | null>(null); 
+  const [selectedAccountForImport, setSelectedAccountForImport] = useState<
+    number | null
+  >(null);
+  const [expandedRowId, setExpandedRowId] = useState<number | null>(null);
 
   // Fetch all transactions on component load
   useEffect(() => {
@@ -76,12 +78,8 @@ function TransactionTable({
     fetchAccounts();
   }, []);
 
-
   const handleImportSuccess = (newTransactions: Transaction[]) => {
-    setAllTransactions((prev) => [
-      ...newTransactions,
-      ...prev,
-    ]);
+    setAllTransactions((prev) => [...newTransactions, ...prev]);
     setShowImportModal(false);
     setSelectedAccountForImport(null);
   };
@@ -92,13 +90,13 @@ function TransactionTable({
     // If it's already YYYY-MM-DD, return as is
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
     // Otherwise parse and format
-    return new Date(dateStr).toISOString().split('T')[0];
+    return new Date(dateStr).toISOString().split("T")[0];
   };
 
   const handleRowClick = (transactionId: number) => {
     const isExpanding = expandedRowId !== transactionId;
     setExpandedRowId(isExpanding ? transactionId : null);
-    
+
     // Initialize editing values when expanding
     if (isExpanding) {
       const tx = allTransactions.find((t) => t.id === transactionId);
@@ -153,7 +151,6 @@ function TransactionTable({
       .join(" ");
   };
 
-
   // handle field changes in expanded edit form
   const handleFieldChange = (
     transactionId: number,
@@ -196,7 +193,6 @@ function TransactionTable({
 
       // close the expanded row
       setExpandedRowId(null);
-      
     } catch (error) {
       console.error("Failed to update transaction:", error);
       alert("Failed to update transaction");
@@ -229,54 +225,55 @@ function TransactionTable({
   });
 
   const handleAddTransaction = async () => {
-  if (
-    !newTransaction.date ||
-    !newTransaction.category ||
-    newTransaction.amount === undefined
-  ) {
-    alert("Please fill in required fields (date, category, amount)");
-    return;
-  }
-
-  if (!selectedAccountId) {
-    alert("Please select an account");
-    return;
-  }
-
-  try {
-    const created = await createTransaction({
-      ...newTransaction,
-      financialAccount_id: selectedAccountId as number,
-    } as Transaction);
-
-    const selectedAccount = userAccounts.find(acc => acc.id === selectedAccountId);
-
-    const transactionWithAccountName = {
-      ...created,
-      account_name: selectedAccount?.name || "Unknown",
-    };
-    
-    setAllTransactions((prev) => [transactionWithAccountName, ...prev]);
-    setNewTransaction({
-      date: new Date().toISOString().split("T")[0],
-      description: "",
-      category: "",
-      amount: 0,
-      sender: "",
-      recipient: ""
-    });
-    setSelectedAccountId(userAccounts[0]?.id || "");
-    setShowAddForm(false);
-
-    if (expandedRowId !== null) {
-      setExpandedRowId(null);
+    if (
+      !newTransaction.date ||
+      !newTransaction.category ||
+      newTransaction.amount === undefined
+    ) {
+      alert("Please fill in required fields (date, category, amount)");
+      return;
     }
-    
-  } catch (error) {
-    console.error("Failed to create transaction:", error);
-    alert("Failed to create transaction");
-  }
-};
+
+    if (!selectedAccountId) {
+      alert("Please select an account");
+      return;
+    }
+
+    try {
+      const created = await createTransaction({
+        ...newTransaction,
+        financialAccount_id: selectedAccountId as number,
+      } as Transaction);
+
+      const selectedAccount = userAccounts.find(
+        (acc) => acc.id === selectedAccountId,
+      );
+
+      const transactionWithAccountName = {
+        ...created,
+        account_name: selectedAccount?.name || "Unknown",
+      };
+
+      setAllTransactions((prev) => [transactionWithAccountName, ...prev]);
+      setNewTransaction({
+        date: new Date().toISOString().split("T")[0],
+        description: "",
+        category: "",
+        amount: 0,
+        sender: "",
+        recipient: "",
+      });
+      setSelectedAccountId(userAccounts[0]?.id || "");
+      setShowAddForm(false);
+
+      if (expandedRowId !== null) {
+        setExpandedRowId(null);
+      }
+    } catch (error) {
+      console.error("Failed to create transaction:", error);
+      alert("Failed to create transaction");
+    }
+  };
 
   if (isLoading) {
     return (
@@ -494,27 +491,43 @@ function TransactionTable({
                       hover:bg-green-500/20 gap-x-2`}
                     onClick={() => handleRowClick(tx.id)}
                   >
-                    <div className="text-gray-400">{formatDateForInput(tx.date)}</div>
-                    <div className="font-medium text-white truncate" title={tx.description}>
+                    <div className="text-gray-400">
+                      {formatDateForInput(tx.date)}
+                    </div>
+                    <div
+                      className="font-medium text-white truncate"
+                      title={tx.description}
+                    >
                       {tx.description || "N/A"}
                     </div>
                     <div className="text-gray-300">
                       {formatCategoryLabel(tx.category)}
                     </div>
-                    <div className={`font-semibold ${tx.amount < 0 ? "text-red-400" : "text-green-400"}`}>
+                    <div
+                      className={`font-semibold ${tx.amount < 0 ? "text-red-400" : "text-green-400"}`}
+                    >
                       {formatAmount(tx.amount)}
                     </div>
-                    <div className="text-gray-400 truncate" title={tx.account_name}>
+                    <div
+                      className="text-gray-400 truncate"
+                      title={tx.account_name}
+                    >
                       {tx.account_name || "Unknown Account"}
                     </div>
                     <div className="text-gray-400 truncate" title={tx.sender}>
                       {tx.sender || "-"}
                     </div>
-                    <div className="text-gray-400 truncate" title={tx.recipient}>
+                    <div
+                      className="text-gray-400 truncate"
+                      title={tx.recipient}
+                    >
                       {tx.recipient || "-"}
                     </div>
                     <div className="flex gap-1">
-                      <FiEdit2 className="text-gray-500 hover:text-green-400" size={14} />
+                      <FiEdit2
+                        className="text-gray-500 hover:text-green-400"
+                        size={14}
+                      />
                     </div>
                   </div>
 
