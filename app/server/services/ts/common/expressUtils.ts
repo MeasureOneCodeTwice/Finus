@@ -1,6 +1,6 @@
 import cors from "cors";
 
-const defaultMethods = ["GET", "POST", "PUT", "DELETE", "OPTIONS"];
+const defaultMethods = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"];
 const origins = [
   "http://localhost",
   "http://localhost:8080",
