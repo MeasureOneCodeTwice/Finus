@@ -10,6 +10,12 @@ import { AiOutlinePlus, AiOutlineClose, AiOutlineSearch } from "react-icons/ai";
 import { FiEdit2 } from "react-icons/fi";
 import NoItemState from "./NoItemState";
 import type { AuthSession } from "@/types/authTypes";
+import {
+  handleCurrencyBlur,
+  handleCurrencyChange,
+  handleListCurrencyChange,
+  handleListCurrencyBlur,
+} from "@/utils/handleInput";
 
 interface AccountListProps {
   session: AuthSession;
@@ -122,6 +128,7 @@ function AccountList({ session }: AccountListProps) {
     try {
       const updatedAccount = await putUserAccount({
         ...updates,
+        balance: Number(updates.balance),
         id: accountId,
       } as Account);
       if (updatedAccount) {
@@ -172,8 +179,9 @@ function AccountList({ session }: AccountListProps) {
     name: "",
     type: "",
     subtype: "",
-    balance: 0,
   });
+
+  const [newBalance, setNewBalance] = useState<string>("");
 
   const handleAddAccount = async () => {
     if (!newAccount.name || !newAccount.type) {
@@ -182,13 +190,14 @@ function AccountList({ session }: AccountListProps) {
     }
 
     try {
+      const balance = Number(newBalance);
       const created = await postUserAccount({
         id: 0,
         name: newAccount.name,
         type: newAccount.type,
         subtype: newAccount.subtype || null,
-        balance: newAccount.balance,
-        value: newAccount.balance,
+        balance: balance,
+        value: balance,
         last_updated: new Date().toISOString(),
       } as Account);
 
@@ -196,7 +205,8 @@ function AccountList({ session }: AccountListProps) {
         (prev) =>
           [{ ...created, isExpanded: false }, ...prev] as EditableAccount[],
       );
-      setNewAccount({ name: "", type: "", subtype: "", balance: 0 });
+      setNewAccount({ name: "", type: "", subtype: "" });
+      setNewBalance("");
       setShowAddForm(false);
     } catch (error) {
       console.error("Failed to create account:", error);
@@ -323,15 +333,11 @@ function AccountList({ session }: AccountListProps) {
               </select>
             )}
             <input
-              type="number"
+              type="string"
               placeholder="Balance"
-              value={newAccount.balance || ""}
-              onChange={(e) =>
-                setNewAccount({
-                  ...newAccount,
-                  balance: parseFloat(e.target.value) || 0,
-                })
-              }
+              value={newBalance || ""}
+              onChange={(e) => handleCurrencyChange(e, setNewBalance)}
+              onBlur={(e) => handleCurrencyBlur(e, newBalance, setNewBalance)}
               className="bg-black/50 border border-green-500/30 rounded px-3 py-2 text-white"
             />
           </div>
@@ -442,37 +448,69 @@ function AccountList({ session }: AccountListProps) {
                             <option value="investment">Investment</option>
                           </select>
                         </div>
-                        <div>
-                          <label className="text-xs text-gray-400 block mb-1">
-                            Subtype
-                          </label>
-                          <input
-                            type="text"
-                            value={editValues.subtype ?? account.subtype ?? ""}
-                            onChange={(e) =>
-                              handleFieldChange(
-                                account.id,
-                                "subtype",
-                                e.target.value,
-                              )
-                            }
-                            placeholder="Optional"
-                            className="w-full bg-black/50 border border-green-500/30 rounded px-3 py-2 text-white text-sm"
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                        </div>
+
+                        {account.subtype && (
+                          <div>
+                            <label className="text-xs text-gray-400 block mb-1">
+                              Subtype
+                            </label>
+                            {account.type === "savings" && (
+                              <select
+                                value={newAccount.subtype}
+                                onChange={(e) =>
+                                  setNewAccount({
+                                    ...newAccount,
+                                    subtype: e.target.value,
+                                  })
+                                }
+                                className="w-full bg-black/50 border border-green-500/30 rounded px-3 py-2 text-white text-sm"
+                              >
+                                <option value="">Subtype</option>
+                                <option value="TFSA">TFSA</option>
+                                <option value="RRSP">RRSP</option>
+                                <option value="FHSA">FHSA</option>
+                                <option value="RESP">RESP</option>
+                                <option value="RDSP">RDSP</option>
+                              </select>
+                            )}
+                            {account.type === "credit_card" && (
+                              <select
+                                value={newAccount.subtype}
+                                onChange={(e) =>
+                                  setNewAccount({
+                                    ...newAccount,
+                                    subtype: e.target.value,
+                                  })
+                                }
+                                className="w-full bg-black/50 border border-green-500/30 rounded px-3 py-2 text-white text-sm"
+                              >
+                                <option value="">Subtype</option>
+                                <option value="loan">Loan</option>
+                              </select>
+                            )}
+                          </div>
+                        )}
                         <div>
                           <label className="text-xs text-gray-400 block mb-1">
                             Balance
                           </label>
                           <input
-                            type="number"
+                            type="string"
                             value={editValues.balance ?? account.balance}
                             onChange={(e) =>
-                              handleFieldChange(
+                              handleListCurrencyChange(
+                                e,
+                                handleFieldChange,
                                 account.id,
                                 "balance",
-                                parseFloat(e.target.value),
+                              )
+                            }
+                            onBlur={(e) =>
+                              handleListCurrencyBlur(
+                                e,
+                                handleFieldChange,
+                                account.id,
+                                "balance",
                               )
                             }
                             className="w-full bg-black/50 border border-green-500/30 rounded px-3 py-2 text-white text-sm"

@@ -6,10 +6,8 @@ export const handleCurrencyChange = (
   setCurrency: React.Dispatch<React.SetStateAction<string>>,
 ): void => {
   let input = event.target.value;
-  const pattern = /^\d*\.?\d{0,2}$/;
+  const pattern = /^-?\d*\.?\d{0,2}$/;
 
-  console.log(input);
-  console.log(pattern.test(input));
   //Determine if the input follows the format/pattern
   if (pattern.test(input)) {
     input = input.replace(/^0+(?=\d)/, "");
@@ -55,5 +53,41 @@ export const handleNumberChange = (
     }
     console.log(changeNumber);
     setNumber(changeNumber.toString());
+  }
+};
+
+export const handleListCurrencyChange = (
+  event: React.ChangeEvent<HTMLInputElement>,
+  handleChange: (
+    accountId: number,
+    field: string,
+    value: string | number,
+  ) => void,
+  id: number,
+  field: string,
+) => {
+  let input = event.target.value;
+  const pattern = /^-?\d*\.?\d{0,2}$/;
+
+  console.log(pattern.test(input));
+
+  //Determine if the input follows the format/pattern
+  if (pattern.test(input)) {
+    input = input.replace(/^0+(?=\d)/, "");
+    handleChange(id, field, input);
+  }
+};
+export const handleListCurrencyBlur = (
+  event: React.ChangeEvent<HTMLInputElement>,
+  handleChange: (
+    accountId: number,
+    field: string,
+    value: string | number,
+  ) => void,
+  id: number,
+  field: string,
+) => {
+  if (event.target.value !== "") {
+    handleChange(id, field, parseFloat(event.target.value).toFixed(2));
   }
 };
