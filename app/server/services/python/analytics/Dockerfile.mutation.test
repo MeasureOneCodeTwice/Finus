@@ -1,0 +1,21 @@
+FROM measureonecodetwice/finus-analytics:local
+
+WORKDIR /app
+
+COPY src ./src
+COPY test ./test
+COPY requirements.txt .
+COPY requirements-test.txt .
+COPY pyproject.toml .
+
+RUN pip install -r requirements-test.txt
+
+RUN cp -r src analytics_src
+RUN cp -r test mutation_test
+RUN find mutation_test -type f -name "*.py" -exec perl -0pi -e "s/\\bfrom src import\\b/from analytics_src import/g; s/\\bimport src\\./import analytics_src./g; s/\\bsrc\\./analytics_src./g" {} +
+RUN rm -rf src test
+
+ENV PYTHONPATH=/app
+ENV CI=true
+
+CMD ["mutmut", "run"]

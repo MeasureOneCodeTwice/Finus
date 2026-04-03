@@ -11,7 +11,8 @@
   "scripts": {
     "dev": "bun --watch src/index.ts",
     "build": "tsc",
-    "start": "bun dist/index.js"
+    "start": "bun dist/index.js",
+    "test": "vitest run"
   },
   "devDependencies": {
     "@types/bun": "^1.3.9",
