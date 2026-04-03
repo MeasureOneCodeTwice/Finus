@@ -264,7 +264,7 @@ function ProjectionPage({ session }: ProjectionProp) {
 
   useEffect(() => {
     if (selectedType === "Saving") {
-      getSaving(session).then((userAccounts) => {
+      getSaving().then((userAccounts) => {
         if (userAccounts) setAccounts(userAccounts);
       });
     }

@@ -1,6 +1,6 @@
 services:
   webserver-base:
-    image: finus-webserver-base:local
+    image: $DOCKER_HUB_USERNAME/finus-webserver-base:$RELEASE_VERSION
     build:
       dockerfile: Dockerfile.base
 
