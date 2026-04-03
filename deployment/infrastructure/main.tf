@@ -1,3 +1,14 @@
+variable "db_username" {
+  type      = string
+  sensitive = true
+}
+variable "db_password" {
+  type      = string
+  sensitive = true
+}
+
+
+
 provider "aws" {
   region = "us-east-2"
 }
@@ -11,13 +22,15 @@ resource "aws_vpc" "finus" {
 }
 
 resource "aws_subnet" "prod" {
-  vpc_id     = aws_vpc.finus.id
-  cidr_block = "10.0.0.0/17"
+  vpc_id            = aws_vpc.finus.id
+  cidr_block        = "10.0.0.0/17"
+  availability_zone = "us-east-2c"
 }
 
-resource "aws_subnet" "dev" {
-  vpc_id     = aws_vpc.finus.id
-  cidr_block = "10.0.128.0/17"
+resource "aws_subnet" "secondary" {
+  vpc_id            = aws_vpc.finus.id
+  cidr_block        = "10.0.128.0/17"
+  availability_zone = "us-east-2a"
 }
 
 resource "aws_internet_gateway" "default" {
@@ -100,7 +113,11 @@ module "prod" {
   webserver_security_group_ids = [aws_security_group.webserver.id]
   backend_security_group_ids   = [aws_security_group.services.id]
   subnet_id                    = aws_subnet.prod.id
+  secondary_subnet_id          = aws_subnet.secondary.id
   vpc_id                       = aws_vpc.finus.id
   gateway_id                   = aws_internet_gateway.default.id
   route_table_id               = aws_route_table.route_table.id
+
+  db_username = var.db_username
+  db_password = var.db_password
 }

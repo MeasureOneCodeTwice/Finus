@@ -7,7 +7,6 @@ import {
 } from "../api/DashboardAPI.ts";
 import type { Transaction } from "../types/Transaction";
 import {
-  AiOutlineTransaction,
   AiOutlineSearch,
   AiOutlinePlus,
   AiOutlineClose,
