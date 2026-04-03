@@ -38,10 +38,10 @@ services:
         context: services/python/market
         dockerfile: Dockerfile.mutation.test
 
-    analytics-mutation-test:
-      build:
-        context: services/python/analytics
-        dockerfile: Dockerfile.mutation.test
+    # analytics-mutation-test:
+    #   build:
+    #     context: services/python/analytics
+    #     dockerfile: Dockerfile.mutation.test
 
     # MISSING
     #  AUTH
