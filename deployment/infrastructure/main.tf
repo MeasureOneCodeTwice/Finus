@@ -104,18 +104,3 @@ module "prod" {
   gateway_id                   = aws_internet_gateway.default.id
   route_table_id               = aws_route_table.route_table.id
 }
-
-
-module "dev" {
-  source = "./modules/finus"
-
-  environment_name             = "dev"
-  ssh_key_pair_name            = "finus-dev"
-  security_group_ids           = [aws_security_group.default.id]
-  webserver_security_group_ids = [aws_security_group.webserver.id]
-  backend_security_group_ids   = [aws_security_group.services.id]
-  subnet_id                    = aws_subnet.dev.id
-  vpc_id                       = aws_vpc.finus.id
-  gateway_id                   = aws_internet_gateway.default.id
-  route_table_id               = aws_route_table.route_table.id
-}
