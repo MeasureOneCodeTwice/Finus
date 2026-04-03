@@ -5,7 +5,6 @@ const origins = [
   "http://localhost",
   "http://localhost:8080",
   "http://18.190.215.135", //prod webserver
-  "http://3.142.125.202", //dev webserver
 ];
 
 export function buildCorsConfig(opts?: { methods?: string[] }) {
