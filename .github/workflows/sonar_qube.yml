@@ -1,0 +1,23 @@
+name: "Run tests"
+
+on:
+  pull_request:
+    branches: [ "*" ]
+  push:
+    branches: [ "main", "development", "release/*" ]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  sonar-scan:
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+    - name: scan
+      uses: sonarsource/sonarcloud-github-action
+      with:
+        projectKey: MeasureOneCodeTwice_Finus
+        organization: measureonecodetwice
+        projectName: Finus
+      env: 
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} 
