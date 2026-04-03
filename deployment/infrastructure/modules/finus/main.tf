@@ -16,6 +16,9 @@ variable "backend_security_group_ids" {
 variable "subnet_id" {
   type = string
 }
+variable "secondary_subnet_id" {
+  type = string
+}
 variable "vpc_id" {
   type = string
 }
@@ -24,6 +27,14 @@ variable "gateway_id" {
 }
 variable "route_table_id" {
   type = string
+}
+variable "db_username" {
+  type      = string
+  sensitive = true
+}
+variable "db_password" {
+  type      = string
+  sensitive = true
 }
 
 
@@ -80,4 +91,37 @@ resource "aws_eip" "webserver" {
   tags = {
     Name = join("", ["finus-", var.environment_name, "-webserver"])
   }
+}
+
+resource "aws_security_group" "db" {
+  name   = "backend access"
+  vpc_id = var.vpc_id
+
+  ingress {
+    cidr_blocks = [join("/", [aws_instance.backend.private_ip, "32"])]
+    from_port   = 3306
+    to_port     = 3306
+    protocol    = "tcp"
+  }
+}
+
+resource "aws_db_subnet_group" "default" {
+  name       = "finus-${var.environment_name}-db-subnet-group"
+  subnet_ids = [var.subnet_id, var.secondary_subnet_id]
+
+  tags = {
+    Name = "finus-${var.environment_name}-db-subnet-group"
+  }
+}
+resource "aws_db_instance" "default" {
+  allocated_storage = 5
+  db_name           = "finus"
+  engine            = "mysql"
+  engine_version    = "8.0"
+  instance_class    = "db.t3.micro"
+  username          = var.db_username
+  password          = var.db_password
+
+  vpc_security_group_ids = [aws_security_group.db.id]
+  db_subnet_group_name   = aws_db_subnet_group.default.name
 }
