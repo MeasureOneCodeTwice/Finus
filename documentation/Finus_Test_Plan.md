@@ -35,15 +35,33 @@ These are the features we have implemented for Sprint 2 and have created tests f
 2. Data input
 3. Validating forms and files
 
-The following are the features to be implemented in future sprints: Financial Goals, Financial Projections, Stock and FOREX Tracking, Collaborative Budgets (stretch), and ML Integration (stretch).
+4\. Financial Goals
 
-The scope includes functional verification through unit, integration, acceptance, and regression testing for the features implemented.
+1. Creating, editing, and deleting financial goals
+2. Tracking progress for savings and spending reduction goals
+3. Budget alignment and recommendations based on selected goals
+
+5\. Financial Projections
+
+1. Debt payoff projection logic
+2. Savings growth projection logic
+3. Validation of projection inputs and calculation requests
+
+6\. Stock and FOREX Tracking
+
+1. Searching for stocks and currency pairs
+2. Retrieving current quotes and historical market data
+3. Pinning and unpinning instruments with dashboard sync on login
+
+The following features were not able to be implemented and were stretch features if time permitted: Collaborative Budgets, and ML Integration.
+
+The scope includes functional verification through unit, integration, acceptance, mutation and load testing for the features implemented.
 
 The unit and integration tests will confirm code quality and can potentially evaluate some of the project requirements. A major portion of project requirements in our case must be validated through a manual walkthrough within the client.
 
-Load testing will be conducted in Sprint 4 in order to ensure that the server can support the expected usage load, specified in the course outline for the project.
+Load testing is conducted in order to ensure that the server can support the expected usage load, specified in the course outline for the project.
 
-Mutation testing will be conducted in Sprint 3 in order to expand code coverage and make the project more robust.
+Mutation testing is conducted in order to expand code coverage and make the project more robust.
 
 2. ## **Roles and Responsibilities**
 
@@ -109,8 +127,8 @@ Test levels define the Types of Testing to be executed on the Application Under 
 
 | Test Level                    | Scope & Requirement                                                                                                                                                                            | Methodology (How will you do this?)                                                                                                                                                                        |
 | :---------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Unit Testing**        | **User Authentication:** 20 tests `<br>` **User Input:** 30 tests `<br>` **Visualization Dashboard:** 50 in Python, 46 in TypeScript `<br>` **Total:** 146 tests | *We use Vitest for TS-based microservices and the client. We use PyTest for python-based microservices.*                                                                                                 |
-| **Integration Testing** | **10 tests total** covering interactions between features.                                                                                                                               | *Running tests in their environment with microservices fully operational and communicating with each other. These tests have to be executed locally as CI/CD does not have enough flexibility for this.* |
+| **Unit Testing**        | **User Authentication:** 20 tests `<br>` **User Input:** 30 tests `<br>` **Visualization Dashboard:** 50 in Python, 46 in TypeScript `<br>` **Stock Tracking:** 83 in Python `<br>` **User Goals:** 33 tests `<br>` **User Projections:** 18 tests `<br>` **Total:** 299 tests | *We use Vitest for TS-based microservices and the client. We use PyTest for python-based microservices.*                                                                                                 |
+| **Integration Testing** | **User Authentication:** 10 tests `<br>` **User Input:** 12 tests `<br>` **Visualization Dashboard:** 1 test `<br>` **Stock Tracking:** 12 tests `<br>` **User Goals:** 10 tests `<br>` **User Projections:** 7 tests `<br>` **Total:** 52 tests | *Running tests in their environment with microservices fully operational and communicating with each other. These tests have to be executed locally as CI/CD does not have enough flexibility for this.* |
 | **Acceptance Testing**  | **End-user testing** for every user story.                                                                                                                                               | *Team members/external users will perform Manual Walkthroughs based on User Story criteria. Deficiencies and potential improvements will be documented.*                                                 |
 | **Regression Testing**  | Unit\+ Integration tests executed on **every push to main branch**.                                                                                                                      | *We have configured a GitHub Actions CI pipeline to run all tests automatically.*                                                                                                                        |
 
@@ -155,3 +173,6 @@ Make a mention of any terms or acronyms used in the project
 | API          | Application Program Interface |
 | AUT          | Application Under Test        |
 | JWT          | JSON Web Token                |
+| TS           | TypeScript                    |
+| CI           | Continuous Integration        |
+| CD           | Continuous Delivery/Deployment|
