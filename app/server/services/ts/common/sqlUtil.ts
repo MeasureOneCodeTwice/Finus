@@ -16,7 +16,7 @@ export const getConnectionPool = () =>
   });
 
 export type DatabaseStatus = "unhealthy" | "ok";
-export const getDatabaseStatus = async (): DatabaseStatus => {
+export const getDatabaseStatus = async (): Promise<DatabaseStatus> => {
   let status: DatabaseStatus;
 
   try {
