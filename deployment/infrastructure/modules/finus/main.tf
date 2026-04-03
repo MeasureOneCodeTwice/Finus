@@ -7,7 +7,16 @@ variable "ssh_key_pair_name" {
 variable "security_group_ids" {
   type = list(string)
 }
+variable "webserver_security_group_ids" {
+  type = list(string)
+}
+variable "backend_security_group_ids" {
+  type = list(string)
+}
 variable "subnet_id" {
+  type = string
+}
+variable "secondary_subnet_id" {
   type = string
 }
 variable "vpc_id" {
@@ -18,6 +27,14 @@ variable "gateway_id" {
 }
 variable "route_table_id" {
   type = string
+}
+variable "db_username" {
+  type      = string
+  sensitive = true
+}
+variable "db_password" {
+  type      = string
+  sensitive = true
 }
 
 
@@ -34,7 +51,7 @@ resource "aws_instance" "backend" {
   ami                    = data.aws_ami.amazon_linux.id
   subnet_id              = var.subnet_id
   key_name               = var.ssh_key_pair_name
-  vpc_security_group_ids = var.security_group_ids
+  vpc_security_group_ids = concat(var.security_group_ids, var.backend_security_group_ids)
 
   tags = {
     Name = join("", ["finus-", var.environment_name, "-backend"])
@@ -46,7 +63,7 @@ resource "aws_instance" "webserver" {
   ami                    = data.aws_ami.amazon_linux.id
   subnet_id              = var.subnet_id
   key_name               = var.ssh_key_pair_name
-  vpc_security_group_ids = var.security_group_ids
+  vpc_security_group_ids = concat(var.security_group_ids, var.webserver_security_group_ids)
 
   tags = {
     Name = join("", ["finus-", var.environment_name, "-webserver"])
@@ -74,4 +91,37 @@ resource "aws_eip" "webserver" {
   tags = {
     Name = join("", ["finus-", var.environment_name, "-webserver"])
   }
+}
+
+resource "aws_security_group" "db" {
+  name   = "backend access"
+  vpc_id = var.vpc_id
+
+  ingress {
+    cidr_blocks = [join("/", [aws_instance.backend.private_ip, "32"])]
+    from_port   = 3306
+    to_port     = 3306
+    protocol    = "tcp"
+  }
+}
+
+resource "aws_db_subnet_group" "default" {
+  name       = "finus-${var.environment_name}-db-subnet-group"
+  subnet_ids = [var.subnet_id, var.secondary_subnet_id]
+
+  tags = {
+    Name = "finus-${var.environment_name}-db-subnet-group"
+  }
+}
+resource "aws_db_instance" "default" {
+  allocated_storage = 5
+  db_name           = "finus"
+  engine            = "mysql"
+  engine_version    = "8.0"
+  instance_class    = "db.t3.micro"
+  username          = var.db_username
+  password          = var.db_password
+
+  vpc_security_group_ids = [aws_security_group.db.id]
+  db_subnet_group_name   = aws_db_subnet_group.default.name
 }

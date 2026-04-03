@@ -81,9 +81,8 @@ describe("Accounts Integration (Docker)", () => {
 
   it("deletes an account", async () => {
     const res = await request(BASE_URL)
-      .delete("/api/accounts")
-      .set("Authorization", `Bearer ${token}`)
-      .send({ id: accountId });
+      .delete(`/api/accounts?id=${accountId}`)
+      .set("Authorization", `Bearer ${token}`);
 
     expect(res.status).toBe(200);
     expect(res.body.message).toBe("Account successfully deleted");

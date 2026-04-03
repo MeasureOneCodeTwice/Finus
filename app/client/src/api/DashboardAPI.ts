@@ -4,6 +4,7 @@ import type { Transaction } from "@/types/Transaction";
 import { instance } from "./config";
 import type { BudgetWithExpenditure } from "@/types/BudgetWithExpenditure";
 import type { SnapshotData } from "@/types/AggregatedSnapshot";
+import type { Account, MinimizedAccount } from "@/types/AccountType";
 
 async function getTransactions(): Promise<Transaction[] | null> {
   try {
@@ -19,21 +20,119 @@ async function getTransactions(): Promise<Transaction[] | null> {
     }
     const output: Transaction[] = [];
     for (let i = 0; i < response.data.length; i++) {
+      let formattedDate = response.data[i]["date"];
+      if (formattedDate) {
+        formattedDate = formattedDate.split("T")[0]; //database stores transacitons as datetime so split to get date and disregard time
+      }
+
       output.push({
         id: response.data[i]["id"],
         financialAccount_id: response.data[i]["financialAccount_id"],
         amount: response.data[i]["amount"],
         category: response.data[i]["category"],
-        date: response.data[i]["date"],
+        date: formattedDate,
         sender: response.data[i]["sender"],
         recipient: response.data[i]["recipient"],
         description: response.data[i]["description"],
+        account_name: response.data[i]["account_name"],
       });
     }
 
     return output;
   } catch (error) {
     console.error("Error fetching transactions data:", error);
+    throw error;
+  }
+}
+
+//deletes a single transaciton based on id - returns true if successful, false otherwise
+export async function deleteTransaction(
+  transactionId: number,
+): Promise<boolean> {
+  try {
+    const response = await instance.delete(
+      `/table/transactions?tid=${transactionId}`,
+    );
+    if (response.status !== 200) {
+      console.error("Failed to delete transaction", response.status);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error("Error deleting transaction:", error);
+    return false;
+  }
+}
+
+//updates a single transaciton based on id - returns true if successful, false otherwise
+export async function updateTransaction(
+  transaction: Transaction,
+): Promise<boolean> {
+  try {
+    const response = await instance.patch(
+      `/table/transactions?tid=${transaction.id}`,
+      transaction,
+    );
+
+    if (response.status !== 200) {
+      console.error("Failed to update transaction", response.status);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error updating transaction:", error);
+    return false;
+  }
+}
+
+//creates a single transaciton - returns the created transaction with id if successful, throws error otherwise
+export async function createTransaction(
+  transaction: Transaction,
+): Promise<Transaction> {
+  try {
+    const response = await instance.post(
+      `/table/transactions?fid=${transaction.financialAccount_id}`,
+      transaction,
+    );
+    if (response.status !== 200) {
+      throw new Error(`Failed to create transaction: ${response.statusText}`);
+    }
+    return response.data;
+  } catch (error) {
+    console.error("Error creating transaction:", error);
+    throw error;
+  }
+}
+
+//gets a map of account ids to account names for a user id
+export async function getAccountIdsForUser(): Promise<
+  MinimizedAccount[] | null
+> {
+  try {
+    const response = await instance.get(`/table/transactions/accounts`);
+
+    if (response.status !== 200) {
+      throw new Error(
+        `Failed to fetch account IDs for user: ${response.statusText}`,
+      );
+    }
+
+    if (!response.data || !Array.isArray(response.data)) {
+      return null;
+    }
+
+    //directly map the array
+    const output: MinimizedAccount[] = response.data.map(
+      (account: MinimizedAccount) => ({
+        id: account.id,
+        name: account.name,
+      }),
+    );
+
+    return output;
+  } catch (error) {
+    console.error("Error fetching account IDs for user:", error);
     throw error;
   }
 }
@@ -138,7 +237,6 @@ async function getSavingsContribChartData(
       );
     }
     const response = await instance.get(`/charts/savings?period=${period}`);
-    console.log("received savings data", response);
     if (response.status !== 200) {
       throw new Error(
         `Failed to fetch savings contribution chart data: ${response.statusText}`,
@@ -188,6 +286,90 @@ async function getIncomeFlowChartData(
     return response.data;
   } catch (error) {
     console.error("Error fetching income flow chart data:", error);
+    throw error;
+  }
+}
+
+export async function getUserAccounts(): Promise<Account[] | null> {
+  try {
+    const response = await instance.get(`/api/accounts`);
+
+    if (response.status !== 200) {
+      throw new Error(`Failed to fetch accounts: ${response.statusText}`);
+    }
+    if (!response.data) {
+      return null;
+    }
+
+    const output: Account[] = [];
+    for (let i = 0; i < response.data.length; i++) {
+      output.push({
+        id: response.data[i]["id"],
+        name: response.data[i]["name"],
+        type: response.data[i]["type"],
+        balance: response.data[i]["balance"],
+        value: response.data[i]["value"] || response.data[i]["balance"],
+        subtype: response.data[i]["subtype"],
+        last_updated: response.data[i]["last_updated"],
+      });
+    }
+
+    return output;
+  } catch (error) {
+    console.error("Error fetching accounts:", error);
+    throw error;
+  }
+}
+
+//create a new account
+export async function createAccount(
+  accountData: Omit<Account, "id">,
+): Promise<Account> {
+  try {
+    const response = await instance.post(`/api/accounts`, accountData);
+
+    if (response.status !== 200) {
+      throw new Error(`Failed to create account: ${response.statusText}`);
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error creating account:", error);
+    throw error;
+  }
+}
+
+//update an existing account
+export async function updateAccount(
+  accountData: Partial<Account> & { id: number },
+): Promise<Account> {
+  try {
+    const response = await instance.put(
+      `/api/accounts/${accountData.id}`,
+      accountData,
+    );
+
+    if (response.status !== 200) {
+      throw new Error(`Failed to update account: ${response.statusText}`);
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error updating account:", error);
+    throw error;
+  }
+}
+
+//delete an account
+export async function deleteAccount(accountId: number): Promise<void> {
+  try {
+    const response = await instance.delete(`/api/accounts/${accountId}`);
+
+    if (response.status !== 200) {
+      throw new Error(`Failed to delete account: ${response.statusText}`);
+    }
+  } catch (error) {
+    console.error("Error deleting account:", error);
     throw error;
   }
 }

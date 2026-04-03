@@ -99,14 +99,14 @@ export async function enrichGoalWithProgress(
     100,
   );
 
-  console.log(
-    "enriching goal with progress, cur amount:",
-    current_amount,
-    "progress percentage:",
-    progress_percentage,
-    " because target is:",
-    goal.target,
-  );
+  // console.log(
+  //   "enriching goal with progress, cur amount:",
+  //   current_amount,
+  //   "progress percentage:",
+  //   progress_percentage,
+  //   " because target is:",
+  //   goal.target,
+  // );
 
   return {
     ...goal,

@@ -19,10 +19,7 @@ type MarketHistoryResponse = {
   points: MarketHistoryPoint[];
 };
 
-function toMarketApiError(
-  error: unknown,
-  fallbackMessage: string,
-): Error {
+function toMarketApiError(error: unknown, fallbackMessage: string): Error {
   if (axios.isAxiosError(error)) {
     const detail = error.response?.data?.detail;
     if (typeof detail === "string" && detail.length > 0) {

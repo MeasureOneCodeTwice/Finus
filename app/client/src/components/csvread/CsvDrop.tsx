@@ -1,4 +1,5 @@
 //component to upload for CSV files
+// import { color } from "chart.js/helpers";
 import React, { useState } from "react";
 
 interface CsvDropProps {
@@ -31,10 +32,10 @@ export default function CsvDrop({ onFileSelect }: CsvDropProps) {
         background: isDragging ? "#eef" : "#fafafa",
         cursor: "pointer",
         marginBottom: "1rem",
+        color: "#888",
       }}
     >
-      <p>Drag & drop your CSV here, or click to select</p>
-      n
+      <p>Drag & drop your CSV here, or click to select a file</p>
       <input
         id="csv-input"
         type="file"

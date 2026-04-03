@@ -50,6 +50,10 @@ transactionsRouter.get("/", async (req: Request, res: Response) => {
   } catch (err) {
     console.error("Failed to fetch transactions", err);
     return res.status(500).json({ error: "Failed to fetch transactions" });
+  } finally {
+    if (connection) {
+      connection.release();
+    }
   }
 });
 

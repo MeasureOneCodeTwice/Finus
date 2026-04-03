@@ -1,0 +1,5 @@
+services:
+  webserver:
+    image: $DOCKER_HUB_USERNAME/finus-webserver:$RELEASE_VERSION
+    ports:
+      - "80:80"

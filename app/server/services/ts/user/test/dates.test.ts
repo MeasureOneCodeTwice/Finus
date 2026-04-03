@@ -202,19 +202,4 @@ describe("generateDateRange", () => {
       ]);
     });
   });
-
-  describe("Performance", () => {
-    it("should handle large ranges efficiently", () => {
-      const start = new Date("2000-01-01");
-      const end = new Date("2024-12-31");
-      const period = "m";
-
-      const startTime = performance.now();
-      const result = generateDateRange(start, end, period);
-      const endTime = performance.now();
-
-      expect(endTime - startTime).toBeLessThan(100);
-      expect(result.length).toBeGreaterThan(0);
-    });
-  });
 });

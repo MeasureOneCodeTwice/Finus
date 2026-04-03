@@ -1,12 +1,12 @@
 import type { AuthApiResponse } from "@/types/authTypes";
-import { API_BASE_URL } from "@/utils/constants";
+import { BASE_URL } from "@/utils/constants";
 
 export async function requestAuth(
   path: string,
   payload: Record<string, unknown>,
 ): Promise<AuthApiResponse> {
   try {
-    const response = await fetch(`${API_BASE_URL}${path}`, {
+    const response = await fetch(`${BASE_URL}${path}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

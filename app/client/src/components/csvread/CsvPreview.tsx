@@ -12,7 +12,7 @@ export default function CsvPreviewTable({ rows }: Props) {
   const invalidCount = rows.length - validCount;
 
   return (
-    <div style={{ marginTop: "1rem" }}>
+    <div style={{ marginTop: "1rem", color: "#888" }}>
       <div style={{ marginBottom: "0.5rem" }}>
         <strong>Total rows:</strong> {rows.length} <br />
         <strong>Valid rows:</strong> {validCount} <br />

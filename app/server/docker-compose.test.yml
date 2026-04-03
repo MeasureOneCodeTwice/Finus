@@ -61,6 +61,20 @@ services:
         - ./default_container.env
       environment:
         - JWT_SECRET
+
+    load-test:
+      image: grafana/k6:0.49.0
+      # Mount the k6 scripts read-only so the same load test can be run
+      # either through Docker or locally with a host-installed k6 binary.
+      volumes:
+        - ./load-tests:/scripts:ro
+      environment:
+        - LOAD_TEST_BASE_URL=http://api-gateway:8000
+        - LOAD_TEST_USERS=20
+        - REQUESTS_PER_USER_PER_MINUTE=10
+        - LOAD_TEST_DURATION=2m
+      command: run /scripts/api-gateway-capacity.js
+
     
     auth-integration-test:
       build:

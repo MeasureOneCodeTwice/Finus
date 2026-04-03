@@ -8,14 +8,20 @@ import {
   createEmptyTransactions,
   createTransactionsWithMissingFields,
 } from "./factories/transaction.factory.ts";
-import type { Transaction } from "../src/types/Transaction.ts";
+// import type { Transaction } from "../src/types/Transaction.ts";
+
+const mockQuery = vi.fn();
+const mockPool = {
+  query: mockQuery,
+} as unknown as Pool;
 
 vi.mock("../src/queries/transactions", () => ({
   getAllTransactionsQuery: vi.fn(),
+  getTransactionAccountNames: vi.fn()
 }));
 
 describe("getTransactionsData", () => {
-  const mockPool = {} as Pool;
+  // const mockPool = {} as Pool;
   const userId = "123";
 
   const mockGetAllTransactionsQuery =
@@ -28,6 +34,7 @@ describe("getTransactionsData", () => {
   describe("Happy path", () => {
     it("should return enriched transactions", async () => {
       const mockTransactions = createMockTransactions(3);
+      mockQuery.mockResolvedValue([mockTransactions]);
       mockGetAllTransactionsQuery.mockResolvedValue(mockTransactions);
 
       const result = await getTransactionsData(mockPool, userId);
@@ -49,6 +56,7 @@ describe("getTransactionsData", () => {
           constructor: { name: "RowDataPacket" },
         }),
       ];
+      mockQuery.mockResolvedValue([[]]);
       mockGetAllTransactionsQuery.mockResolvedValue(mockTransactions);
 
       const result = await getTransactionsData(mockPool, userId);
@@ -60,6 +68,7 @@ describe("getTransactionsData", () => {
 
   describe("Edge cases", () => {
     it("should handle empty transactions", async () => {
+      mockQuery.mockResolvedValue([[]]);
       mockGetAllTransactionsQuery.mockResolvedValue(createEmptyTransactions());
 
       const result = await getTransactionsData(mockPool, userId);
@@ -68,6 +77,7 @@ describe("getTransactionsData", () => {
     });
 
     it("should handle missing sender/recipient fields", async () => {
+      mockQuery.mockResolvedValue([[]]);
       const mockTransactions = createTransactionsWithMissingFields();
       mockGetAllTransactionsQuery.mockResolvedValue(mockTransactions);
 
@@ -86,4 +96,3 @@ describe("getTransactionsData", () => {
     });
   });
 });
-

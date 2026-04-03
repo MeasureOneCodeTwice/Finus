@@ -13,10 +13,7 @@ import DashboardPage from "./pages/DashboardPage.tsx";
 import MarketsPage from "./pages/MarketsPage";
 import AppLayout from "./components/AppLayout.tsx";
 import ProjectionPage from "./pages/ProjectionPage.tsx";
-
-const SESSION_STORAGE_KEY = "finus-session";
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000";
+import { BASE_URL, SESSION_STORAGE_KEY } from "@/utils/constants";
 
 function isValidAuthUser(value: unknown): value is AuthUser {
   if (!value || typeof value !== "object") {
@@ -104,7 +101,7 @@ async function requestAuth(
   payload: Record<string, unknown>,
 ): Promise<AuthApiResponse> {
   try {
-    const response = await fetch(`${API_BASE_URL}${path}`, {
+    const response = await fetch(`${BASE_URL}${path}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -202,7 +199,6 @@ function App() {
             }
           />
 
-
           {session && (
             <Route element={<AppLayout onLogout={handleLogout} />}>
               <Route
@@ -224,7 +220,7 @@ function App() {
               />
             </Route>
           )}
-          
+
           <Route path="*" element={<Navigate to="/" replace />} />
 
           {/**Code below is only used for dashboard development purposes */}
