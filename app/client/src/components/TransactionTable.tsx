@@ -15,6 +15,7 @@ import {
 import { FiEdit2 } from "react-icons/fi";
 import type { MinimizedAccount } from "@/types/AccountType.ts";
 import CSVImportModal from "./CSVImportModal";
+import { handleCurrencyBlur, handleCurrencyChange, handleListCurrencyBlur, handleListCurrencyChange } from "@/utils/handleInput.ts";
 
 interface TransactionTableProps {
   initialLimit?: number;
@@ -222,11 +223,13 @@ function TransactionTable({
     recipient: "",
   });
 
+  const [newAmount, setNewAmount] = useState<string>("")
+
   const handleAddTransaction = async () => {
     if (
       !newTransaction.date ||
       !newTransaction.category ||
-      newTransaction.amount === undefined
+      newAmount === undefined
     ) {
       alert("Please fill in required fields (date, category, amount)");
       return;
@@ -240,6 +243,7 @@ function TransactionTable({
     try {
       const created = await createTransaction({
         ...newTransaction,
+        amount: Number(newAmount),
         financialAccount_id: selectedAccountId as number,
       } as Transaction);
 
@@ -382,15 +386,13 @@ function TransactionTable({
               className="bg-black/50 border border-green-500/30 rounded px-3 py-2 text-white"
             />
             <input
-              type="number"
+              type="string"
               placeholder="Amount"
-              value={newTransaction.amount || ""}
+              value={newAmount || ""}
               onChange={(e) =>
-                setNewTransaction({
-                  ...newTransaction,
-                  amount: parseFloat(e.target.value),
-                })
+                handleCurrencyChange(e, setNewAmount)
               }
+              onBlur={(e) => handleCurrencyBlur(e, e.target.value, setNewAmount)}
               className="bg-black/50 border border-green-500/30 rounded px-3 py-2 text-white"
             />
 
@@ -580,15 +582,12 @@ function TransactionTable({
                             Amount
                           </label>
                           <input
-                            type="number"
+                            type="string"
                             value={editValues.amount ?? tx.amount}
                             onChange={(e) =>
-                              handleFieldChange(
-                                tx.id,
-                                "amount",
-                                parseFloat(e.target.value),
-                              )
+                              handleListCurrencyChange(e, handleFieldChange, tx.id, "amount")
                             }
+                            onBlur={(e) => handleListCurrencyBlur(e,handleFieldChange, tx.id, "amount")}
                             className="w-full bg-black/50 border border-green-500/30 rounded px-3 py-2 text-white text-sm"
                             onClick={(e) => e.stopPropagation()}
                           />
