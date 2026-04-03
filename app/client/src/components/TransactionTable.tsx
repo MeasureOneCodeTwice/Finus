@@ -7,11 +7,13 @@ import {
 } from "../api/DashboardAPI.ts";
 import type { Transaction } from "../types/Transaction";
 import {
+  AiOutlineTransaction,
   AiOutlineSearch,
   AiOutlinePlus,
   AiOutlineClose,
   AiOutlineUpload,
 } from "react-icons/ai";
+import NoItemState from "./NoItemState.tsx";
 import { FiEdit2 } from "react-icons/fi";
 import type { MinimizedAccount } from "@/types/AccountType.ts";
 import CSVImportModal from "./CSVImportModal";
@@ -289,6 +291,27 @@ function TransactionTable({
       </div>
     );
   }
+
+  if (allTransactions.length === 0 && !showAddForm) {
+  return (
+    <div className="my-6">
+      <NoItemState
+        title="No Transactions Found"
+        description="It looks like you haven't recorded any transactions yet. Start adding your expenses and income to see them here."
+        icon={<AiOutlineTransaction className="w-10 h-10 text-green-400" />}
+      />
+
+      <div className="flex justify-center mt-4">
+        <button
+          onClick={() => setShowAddForm(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-500/50 rounded-lg text-green-400 transition-all"
+        >
+          <AiOutlinePlus /> Add Transaction
+        </button>
+      </div>
+    </div>
+  );
+}
 
   return (
     <div className="my-10">
