@@ -11,6 +11,7 @@ import {
   AiOutlinePlus,
   AiOutlineClose,
   AiOutlineUpload,
+  AiOutlineTransaction,
 } from "react-icons/ai";
 import NoItemState from "./NoItemState.tsx";
 import { FiEdit2 } from "react-icons/fi";

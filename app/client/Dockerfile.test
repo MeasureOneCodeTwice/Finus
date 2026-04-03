@@ -1,4 +1,4 @@
-FROM finus-webserver-base:local
+FROM local/finus-webserver-base:latest
 
 COPY test ./test
 COPY vitest.config.ts .
