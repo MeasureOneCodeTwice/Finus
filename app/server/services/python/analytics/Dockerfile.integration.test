@@ -1,0 +1,13 @@
+FROM measureonecodetwice/finus-analytics:local
+
+WORKDIR /app
+
+COPY integration ./integration
+COPY requirements.txt .
+COPY requirements-test.txt .
+
+RUN pip install -r requirements-test.txt
+
+ENV CI=true
+
+CMD ["python", "-m", "pytest", "integration/", "-v"]

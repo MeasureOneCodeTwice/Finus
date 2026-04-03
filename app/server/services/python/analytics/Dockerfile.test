@@ -3,9 +3,9 @@ FROM measureonecodetwice/finus-analytics:local
 WORKDIR /app/server/services/python/analytics
 
 COPY test ./test
-COPY requirements.txt .
+COPY requirements-test.txt .
 
-RUN pip install -r requirements.txt
+RUN pip install -r requirements-test.txt
 
 ENV PYTHONPATH=/app/server/services/python/analytics
 ENV JWT_SECRET=test_secret_key_12345

@@ -1,0 +1,6 @@
+export default {
+  testRunner: "vitest",
+  vitest: {
+    configFile: "vitest.config.ts",
+  },
+};

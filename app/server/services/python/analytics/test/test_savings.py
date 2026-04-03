@@ -275,7 +275,7 @@ class TestSavingsProjection:
         test_cases = [
             (5000, 200, 3.5, 2),   # High balance, moderate deposits
             (100, 500, 7.0, 3),     # Low balance, high deposits
-            (10000, 0, 4.0, 1),     # High balance, no deposits
+            (10000, 1, 4.0, 1),     # High balance, no deposits
             (0, 1000, 6.0, 5),      # Zero balance, high deposits
         ]
         

@@ -1,0 +1,15 @@
+FROM measureonecodetwice/finus-auth:local 
+
+RUN --mount=type=cache,target=/var/cache/apt \
+    --mount=type=cache,target=/var/lib/apt/lists \
+    apt-get update && apt-get install -y nodejs npm procps \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY auth/test ./test
+
+WORKDIR /project
+COPY vitest.config.ts .
+
+ENV CI=true
+
+CMD [ "bun", "stryker", "run"]

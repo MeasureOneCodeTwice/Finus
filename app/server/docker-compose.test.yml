@@ -22,18 +22,28 @@ services:
         dockerfile: Dockerfile.test
 
     # # ------ MUTATION TESTS ------ 
+    # THIS CAN'T RUN WITH STRYKER UNLESS WE MOVE TO NODE
     # user-mutation-test:
     #   build:
     #     context: ./services/ts
     #     dockerfile: user/Dockerfile.mutation.test
+
+    # auth-mutation-test:
+    #   build:
+    #     context: ./services/ts 
+    #     dockerfile: auth/Dockerfile.mutation.test
 
     market-mutation-test:
       build:
         context: services/python/market
         dockerfile: Dockerfile.mutation.test
 
+    # analytics-mutation-test:
+    #   build:
+    #     context: services/python/analytics
+    #     dockerfile: Dockerfile.mutation.test
+
     # MISSING
-    #  ANALYTICS
     #  AUTH
 
     # ------ INTEGRATION TESTS ------ 
@@ -66,3 +76,19 @@ services:
         - LOAD_TEST_DURATION=2m
       command: run /scripts/api-gateway-capacity.js
 
+    
+    auth-integration-test:
+      build:
+        context: ./services/ts
+        dockerfile: auth/Dockerfile.integration.test
+      env_file:
+        - ./default_container.env
+
+    analytics-integration-test:
+      build:
+        context: ./services/python/analytics
+        dockerfile: Dockerfile.integration.test
+      env_file:
+        - ./default_container.env
+      environment:
+        - JWT_SECRET

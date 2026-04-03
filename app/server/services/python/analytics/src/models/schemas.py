@@ -1,5 +1,5 @@
 from numpy import number
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Literal, Optional
 from datetime import datetime
 
@@ -58,10 +58,10 @@ class DebtPayoffRequest(BaseModel):
     id: str
     category: str
     remainingAmount: float
-    minimumPayment: float
-    interestRate: Optional[float] = 0
+    minimumPayment: float = Field(..., gt=0, description="Minimum payment must be greater than 0")
+    interestRate: Optional[float] = Field(default=0, description="Interest rate in percentage")
     nextDueDate: str  # YYYY-MM-DD
-    period: int  # days
+    period: int = Field(..., gt=0, description="Period must be greater than 0") # in days
 
 class DebtPayoffStage(BaseModel):
     id: int
@@ -80,9 +80,9 @@ class DebtPayoffResponse(BaseModel):
 class ProjectedSavingsRequest(BaseModel):
     financial_account_id: int
     balance: float
-    monthly_deposit: float
-    annual_interest_rate: float | None  # annual interest rate in percentage
-    time_frame: int  # in years
+    monthly_deposit: float = Field(..., gt=0, description="Monthly deposit must be greater than 0")
+    annual_interest_rate: Optional[float] = None  # annual interest rate in percentage
+    time_frame: int = Field(..., gt=0, description="Time frame must be greater than 0") # in years
 class MonthlySavingGrowthRate(BaseModel):
     best_case: float
     expected_case: float
