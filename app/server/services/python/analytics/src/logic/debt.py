@@ -9,7 +9,7 @@ def generate_debt_payoff_stages(dbr: DebtPayoffRequest) -> DebtPayoffResponse:
     minimum_payment = dbr.minimumPayment
     interest_rate = dbr.interestRate or 0
 
-    monthly_interest_rate = round(interest_rate / 12 / 100, 5) if interest_rate else 0
+    monthly_interest_rate = round(interest_rate / 12 / 100, 4) if interest_rate else 0
 
     expected_date = datetime.strptime(dbr.nextDueDate, "%Y-%m-%d")
     stages: List[DebtPayoffStage] = []
