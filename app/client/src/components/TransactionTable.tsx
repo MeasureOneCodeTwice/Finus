@@ -7,14 +7,12 @@ import {
 } from "../api/DashboardAPI.ts";
 import type { Transaction } from "../types/Transaction";
 import {
-  AiOutlineTransaction,
   AiOutlineSearch,
   AiOutlinePlus,
   AiOutlineClose,
   AiOutlineUpload,
 } from "react-icons/ai";
 import { FiEdit2 } from "react-icons/fi";
-import NoItemState from "./NoItemState";
 import type { MinimizedAccount } from "@/types/AccountType.ts";
 import CSVImportModal from "./CSVImportModal";
 
@@ -280,16 +278,6 @@ function TransactionTable({
       <div className="my-10 flex justify-center items-center h-48">
         <div className="text-green-400">Loading transactions...</div>
       </div>
-    );
-  }
-
-  if (allTransactions.length === 0) {
-    return (
-      <NoItemState
-        title="No Transactions Found"
-        description="It looks like you haven't recorded any transactions yet. Start adding your expenses and income to see them here."
-        icon={<AiOutlineTransaction className="w-10 h-10 text-green-400" />}
-      />
     );
   }
 
