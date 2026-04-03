@@ -15,7 +15,12 @@ import {
 import { FiEdit2 } from "react-icons/fi";
 import type { MinimizedAccount } from "@/types/AccountType.ts";
 import CSVImportModal from "./CSVImportModal";
-import { handleCurrencyBlur, handleCurrencyChange, handleListCurrencyBlur, handleListCurrencyChange } from "@/utils/handleInput.ts";
+import {
+  handleCurrencyBlur,
+  handleCurrencyChange,
+  handleListCurrencyBlur,
+  handleListCurrencyChange,
+} from "@/utils/handleInput.ts";
 
 interface TransactionTableProps {
   initialLimit?: number;
@@ -223,7 +228,7 @@ function TransactionTable({
     recipient: "",
   });
 
-  const [newAmount, setNewAmount] = useState<string>("")
+  const [newAmount, setNewAmount] = useState<string>("");
 
   const handleAddTransaction = async () => {
     if (
@@ -389,10 +394,10 @@ function TransactionTable({
               type="string"
               placeholder="Amount"
               value={newAmount || ""}
-              onChange={(e) =>
-                handleCurrencyChange(e, setNewAmount)
+              onChange={(e) => handleCurrencyChange(e, setNewAmount)}
+              onBlur={(e) =>
+                handleCurrencyBlur(e, e.target.value, setNewAmount)
               }
-              onBlur={(e) => handleCurrencyBlur(e, e.target.value, setNewAmount)}
               className="bg-black/50 border border-green-500/30 rounded px-3 py-2 text-white"
             />
 
@@ -585,9 +590,21 @@ function TransactionTable({
                             type="string"
                             value={editValues.amount ?? tx.amount}
                             onChange={(e) =>
-                              handleListCurrencyChange(e, handleFieldChange, tx.id, "amount")
+                              handleListCurrencyChange(
+                                e,
+                                handleFieldChange,
+                                tx.id,
+                                "amount",
+                              )
                             }
-                            onBlur={(e) => handleListCurrencyBlur(e,handleFieldChange, tx.id, "amount")}
+                            onBlur={(e) =>
+                              handleListCurrencyBlur(
+                                e,
+                                handleFieldChange,
+                                tx.id,
+                                "amount",
+                              )
+                            }
                             className="w-full bg-black/50 border border-green-500/30 rounded px-3 py-2 text-white text-sm"
                             onClick={(e) => e.stopPropagation()}
                           />
