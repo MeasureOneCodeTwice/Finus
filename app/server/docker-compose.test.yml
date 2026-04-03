@@ -22,15 +22,16 @@ services:
         dockerfile: Dockerfile.test
 
     # # ------ MUTATION TESTS ------ 
-    user-mutation-test:
-      build:
-        context: ./services/ts
-        dockerfile: user/Dockerfile.mutation.test
+    # THIS CAN'T RUN WITH STRYKER UNLESS WE MOVE TO NODE
+    # user-mutation-test:
+    #   build:
+    #     context: ./services/ts
+    #     dockerfile: user/Dockerfile.mutation.test
 
-    auth-mutation-test:
-      build:
-        context: ./services/ts 
-        dockerfile: auth/Dockerfile.mutation.test
+    # auth-mutation-test:
+    #   build:
+    #     context: ./services/ts 
+    #     dockerfile: auth/Dockerfile.mutation.test
 
     market-mutation-test:
       build:
