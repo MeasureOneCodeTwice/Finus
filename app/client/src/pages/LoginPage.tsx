@@ -52,7 +52,7 @@ function LoginPage({ onLogin, requestAuth }: LoginPageProps) {
           <Badge variant="outline" className="auth-tag">
             Finus
           </Badge>
-          <CardTitle className="auth-title">Bye bye</CardTitle>
+          <CardTitle className="auth-title">Welcome back</CardTitle>
           <CardDescription className="auth-copy text-base">
             Log in to continue managing your finances.
           </CardDescription>
