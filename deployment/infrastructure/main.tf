@@ -104,11 +104,16 @@ resource "aws_route_table" "route_table" {
   }
 }
 
+resource "aws_key_pair" "deployer" {
+  key_name   = "prod-key"
+  public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOX3XB+BgcO5ft0OnL1uq1a3cBdHVieXviFqUgFN7p+m logan@nixos"
+}
+
 module "prod" {
   source = "./modules/finus"
 
   environment_name             = "prod"
-  ssh_key_pair_name            = "finus-dev"
+  ssh_key_pair_name            = "prod-key"
   security_group_ids           = [aws_security_group.default.id]
   webserver_security_group_ids = [aws_security_group.webserver.id]
   backend_security_group_ids   = [aws_security_group.services.id]

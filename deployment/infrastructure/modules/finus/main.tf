@@ -47,7 +47,7 @@ data "aws_ami" "amazon_linux" {
 
 
 resource "aws_instance" "backend" {
-  instance_type          = "t2.nano"
+  instance_type          = "t3.micro"
   ami                    = data.aws_ami.amazon_linux.id
   subnet_id              = var.subnet_id
   key_name               = var.ssh_key_pair_name
@@ -59,7 +59,7 @@ resource "aws_instance" "backend" {
 }
 
 resource "aws_instance" "webserver" {
-  instance_type          = "t2.nano"
+  instance_type          = "t3.micro"
   ami                    = data.aws_ami.amazon_linux.id
   subnet_id              = var.subnet_id
   key_name               = var.ssh_key_pair_name
