@@ -4,7 +4,7 @@ const defaultMethods = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"];
 const origins = [
   "http://localhost",
   "http://localhost:8080",
-  "http://18.190.215.135", //prod webserver
+  process.env.CORS_ALLOWED_ORIGIN
 ];
 
 export function buildCorsConfig(opts?: { methods?: string[] }) {
